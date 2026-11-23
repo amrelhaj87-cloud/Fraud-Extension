@@ -6,7 +6,10 @@
 
 import { analyzeDomain } from "./scoring.js";
 import { getDomainAgeDays, getRegistrableDomain } from "./rdap.js";
-import { initBlocker } from "./blocker.js";
+import { initBlocker, getSettings } from "./blocker.js";
+import "./i18n.js";
+
+const I18N = globalThis.FE_I18N;
 
 // Redirect high-risk navigations to warning.html (see blocker.js).
 initBlocker();
@@ -90,10 +93,11 @@ async function handleAnalyzeMessage(message, sender) {
     return ageLookups.get(domain);
   };
 
+  const lang = I18N.resolve((await getSettings()).lang);
   const analyzed = await mapWithConcurrency(
     targets,
     MAX_CONCURRENT_DOMAINS,
-    async (target) => analyzeTarget(target, getAge)
+    async (target) => analyzeTarget(target, getAge, lang)
   );
 
   const results = analyzed.filter(Boolean);
@@ -106,12 +110,13 @@ async function handleAnalyzeMessage(message, sender) {
   return results;
 }
 
-async function analyzeTarget(target, getAge) {
+async function analyzeTarget(target, getAge, lang) {
   const { url, parsed } = target;
   const hostname = parsed.hostname;
   const scoringOptions = {
     protocol: parsed.protocol,
-    path: `${parsed.pathname}${parsed.search}`
+    path: `${parsed.pathname}${parsed.search}`,
+    lang
   };
 
   try {
@@ -133,7 +138,7 @@ async function analyzeTarget(target, getAge) {
 
     // Sponsored result on a non-official domain: +15 after rules and RDAP.
     if (target.sponsored && scored.level !== "safe") {
-      scored = applySponsoredBoost(scored);
+      scored = applySponsoredBoost(scored, lang);
     }
 
     return {
@@ -150,7 +155,7 @@ async function analyzeTarget(target, getAge) {
       hostname,
       score: 0,
       level: "low",
-      reasons: ["تعذر تحليل الرابط"],
+      reasons: [I18N.t("analyzeFailed", lang)],
       ageDays: null
     };
   }
@@ -231,9 +236,9 @@ function withTimeout(promise, timeoutMs) {
   });
 }
 
-function applySponsoredBoost(scored) {
+function applySponsoredBoost(scored, lang) {
   const score = Math.min(100, scored.score + 15);
-  const reason = "نتيجة إعلانية مدفوعة (زيادة 15 نقطة)";
+  const reason = I18N.t("sponsored", lang);
   const reasons = scored.reasons.includes(reason)
     ? scored.reasons
     : [...scored.reasons, reason];

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>تحذير: موقع احتيالي محتمل — Fraud Extension</title>
+  <title>Fraud Extension</title>
   <link rel="stylesheet" href="warning.css">
 </head>
 <body>
@@ -14,37 +14,38 @@
       <rect x="53" y="80" width="14" height="14" rx="4" fill="var(--bg)"/>
     </svg>
 
-    <p class="lead">منعت <strong>Fraud Extension</strong> تحميل هذه الصفحة لأنها تبدو موقعًا احتياليًا:</p>
+    <p class="lead" data-i18n="wLead"></p>
     <div class="url" id="url" dir="ltr">…</div>
 
     <div class="score-row">
-      <span class="pill" id="level">خطر مرتفع</span>
+      <span class="pill" id="level" data-i18n="level_high"></span>
       <span class="score" id="score"></span>
     </div>
 
-    <h2>لماذا هذا الموقع مشبوه؟</h2>
-    <ul class="reasons" id="reasons"><li>جارٍ تحميل التفاصيل…</li></ul>
+    <h2 data-i18n="wWhy"></h2>
+    <ul class="reasons" id="reasons"><li data-i18n="wLoading"></li></ul>
 
-    <h2>الخطوات التالية</h2>
+    <h2 data-i18n="wNext"></h2>
     <ol class="steps">
-      <li>لا تُدخل بيانات بطاقتك البنكية أو كلمات المرور أو رمز التحقق (OTP) أو بيانات UAE PASS في هذا الموقع.</li>
-      <li>غادر الصفحة فورًا.</li>
-      <li>ادخل إلى الجهات الرسمية فقط عبر تطبيقاتها أو مواقعها المحفوظة لديك.</li>
-      <li>إذا أدخلت بياناتك، تواصل مع بنكك فورًا وأبلغ شرطة أبوظبي عبر خدمة «أمان» 8002626.</li>
+      <li data-i18n="wStep1"></li>
+      <li data-i18n="wStep2"></li>
+      <li data-i18n="wStep3"></li>
+      <li data-i18n="wStep4"></li>
     </ol>
 
     <label class="check">
       <input type="checkbox" id="always">
-      لا تحذّرني مجددًا من هذا الموقع
+      <span data-i18n="wAlways"></span>
     </label>
 
     <div class="actions">
-      <button type="button" class="primary" id="back">العودة بأمان</button>
-      <button type="button" class="secondary" id="proceed">المتابعة رغم الخطر</button>
+      <button type="button" class="primary" id="back" data-i18n="wBack"></button>
+      <button type="button" class="secondary" id="proceed" data-i18n="wProceed"></button>
     </div>
 
-    <p class="foot">Fraud Extension — فحص محلي لحماية المستخدمين في الإمارات</p>
+    <p class="foot" data-i18n="wFoot"></p>
   </main>
+  <script src="i18n.js"></script>
   <script src="warning.js"></script>
 </body>
 </html>

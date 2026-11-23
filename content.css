@@ -394,3 +394,9 @@
     animation: none;
   }
 }
+
+/* English UI: the hover card switches to left-to-right. */
+#fe-hover-card.fe-card[dir="ltr"] {
+  direction: ltr !important;
+  text-align: left !important;
+}

@@ -12,7 +12,7 @@
   color: #1f2430;
   box-shadow: 0 8px 28px rgba(0, 0, 0, .22);
   font: 13px/1.55 "Segoe UI", Tahoma, "Noto Sans Arabic", sans-serif;
-  text-align: right;
+  text-align: start;
 }
 .fe-maps-banner.fe-maps-medium { border-color: #f79009; background: #fffaeb; }
 .fe-maps-banner.fe-maps-high { border-color: #f04438; background: #fef3f2; }
@@ -30,7 +30,7 @@
   padding: 0 4px;
 }
 .fe-maps-place { font-weight: 600; margin-top: 6px; }
-.fe-maps-site { color: #475467; word-break: break-all; text-align: right; }
+.fe-maps-site { color: #475467; word-break: break-all; text-align: start; }
 .fe-maps-banner ul { margin: 6px 0 0; padding-inline-start: 18px; }
 .fe-maps-banner li { margin: 2px 0; }
 .fe-maps-brand { margin-top: 8px; color: #667085; font-size: 11px; }

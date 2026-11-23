@@ -7,6 +7,9 @@
   const params = new URLSearchParams(location.search);
   const target = params.get("u") || "";
   const $ = (id) => document.getElementById(id);
+  const I18N = globalThis.FE_I18N;
+  let LANG = I18N.DEFAULT_LANG;
+  const T = (key, params) => I18N.t(key, LANG, params);
 
   let parsed = null;
   try {
@@ -16,7 +19,6 @@
     parsed = null;
   }
 
-  $("url").textContent = parsed ? parsed.href : "رابط غير صالح";
   if (!parsed) $("proceed").disabled = true;
 
   function send(message) {
@@ -39,21 +41,21 @@
 
     if (!result) {
       const li = document.createElement("li");
-      li.textContent = "تعذر تحميل التفاصيل.";
+      li.textContent = T("wLoadFail");
       list.appendChild(li);
       return;
     }
 
     $("score").textContent = `${result.score}/100`;
     for (const reason of result.reasons || []) {
-      if (reason === "عمر الدومين غير معروف") continue;
+      if (I18N.isReason(reason, "ageUnknown")) continue;
       const li = document.createElement("li");
       li.textContent = reason;
       list.appendChild(li);
     }
     if (Number.isFinite(result.ageDays)) {
       const li = document.createElement("li");
-      li.textContent = `عمر الدومين: ${Math.floor(result.ageDays)} يومًا`;
+      li.textContent = T("ageDays", { days: Math.floor(result.ageDays) });
       list.appendChild(li);
     }
   }
@@ -76,5 +78,11 @@
     location.replace(parsed.href);
   });
 
-  void loadDetails();
+  I18N.loadLang().then((lang) => {
+    LANG = lang;
+    I18N.applyDom(document, LANG);
+    document.title = T("wTitle");
+    $("url").textContent = parsed ? parsed.href : T("wInvalid");
+    void loadDetails();
+  });
 })();

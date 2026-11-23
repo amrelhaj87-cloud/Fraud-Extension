@@ -117,3 +117,19 @@ body {
 .results .r-score { font-variant-numeric: tabular-nums; font-weight: 600; }
 
 .foot { color: var(--muted); font-size: 11px; margin-top: 10px; }
+
+.top-text { flex: 1; }
+.lang { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.lang button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 600;
+  padding: 3px 9px;
+  cursor: pointer;
+}
+.lang button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.hint { margin-top: 8px; color: var(--medium); }
+[dir="ltr"] .results .r-host { direction: ltr; text-align: left; }
+[dir="ltr"] .host { text-align: left; }

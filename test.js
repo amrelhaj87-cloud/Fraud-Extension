@@ -128,6 +128,27 @@ check(
 expectOfficial("www.bankfab.com");
 expectOfficial("etihad.com");
 
+// 8b) Bilingual reasons with UAE sector labels.
+const en = analyzeDomain("bankfab.com.wallet-studio.icu", { lang: "en" });
+check(
+  "English reasons name the impersonated UAE bank",
+  en.level === "high" &&
+    en.reasons.some((r) => r.includes("First Abu Dhabi Bank (UAE bank)")) &&
+    en.reasons.every((r) => !/[؀-ۿ]/.test(r)),
+  en
+);
+const ar = analyzeDomain("uaepass-verify.com", { lang: "ar" });
+check(
+  "Arabic reasons name the sector (digital identity)",
+  ar.reasons.some((r) => r.includes("UAE PASS (الهوية الرقمية)")),
+  ar
+);
+check(
+  "English official reason",
+  analyzeDomain("adcb.com", { lang: "en" }).reasons[0] === "Verified official domain",
+  analyzeDomain("adcb.com", { lang: "en" })
+);
+
 // 9) False positives: common legitimate domains must never be medium/high.
 const LEGIT = [
   "dewalt.com", "stammer.com", "amazon.ae", "noon.com", "careem.com",

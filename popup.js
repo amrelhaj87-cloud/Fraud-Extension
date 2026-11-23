@@ -4,12 +4,10 @@
  * links already analyzed on the current page (from the background worker).
  */
 
-const LEVEL_LABELS = {
-  safe: "آمن — موقع رسمي",
-  low: "منخفض الخطورة",
-  medium: "متوسط الخطورة",
-  high: "خطر مرتفع"
-};
+const I18N = globalThis.FE_I18N;
+let LANG = I18N.DEFAULT_LANG;
+const T = (key, params) => I18N.t(key, LANG, params);
+const levelLabel = (level) => (level === "safe" ? T("popupSafe") : T(`level_${level}`));
 
 const LEVEL_COLORS = {
   safe: "var(--safe)",
@@ -47,12 +45,12 @@ async function analyzeUrl(url) {
 // Rendering
 // ---------------------------------------------------------------------------
 
-function renderVerdict(result, { title } = {}) {
+function renderVerdict(result, { titleKey } = {}) {
   const card = $("current");
   const verdict = $("current-verdict");
   const note = $("current-note");
 
-  if (title) card.querySelector(".card-label").textContent = title;
+  $("current-title").textContent = T(titleKey || "current");
   $("current-host").textContent = result.hostname || result.url || "";
 
   const level = result.level || "low";
@@ -61,7 +59,7 @@ function renderVerdict(result, { title } = {}) {
   card.className = `card level-${level}`;
   const pill = $("current-level");
   pill.className = `pill ${level}`;
-  pill.textContent = LEVEL_LABELS[level] || level;
+  pill.textContent = levelLabel(level);
 
   $("current-score").textContent = `${score}/100`;
   const bar = $("current-bar");
@@ -71,21 +69,23 @@ function renderVerdict(result, { title } = {}) {
   const list = $("current-reasons");
   list.replaceChildren();
   for (const reason of result.reasons || []) {
-    if (reason === "عمر الدومين غير معروف") continue; // shown in the age line
+    if (I18N.isReason(reason, "ageUnknown")) continue; // shown in the age line
     const li = document.createElement("li");
     li.textContent = reason;
     list.appendChild(li);
   }
 
   $("current-age").textContent = Number.isFinite(result.ageDays)
-    ? `عمر الدومين: ${Math.floor(result.ageDays)} يومًا`
-    : "عمر الدومين: غير معروف";
+    ? T("ageDays", { days: Math.floor(result.ageDays) })
+    : T("ageUnknownLine");
 
   verdict.hidden = false;
   note.hidden = true;
 }
 
-function renderNote(host, text) {
+function renderNote(host, key) {
+  const text = T(key);
+  $("current-title").textContent = T("current");
   $("current-host").textContent = host;
   $("current-verdict").hidden = true;
   const note = $("current-note");
@@ -120,7 +120,7 @@ function renderPageResults(results) {
 
     li.append(dot, host, score);
     li.addEventListener("click", () =>
-      renderVerdict(result, { title: "تفاصيل الرابط" })
+      renderVerdict(result, { titleKey: "linkDetails" })
     );
     list.appendChild(li);
   }
@@ -139,7 +139,7 @@ async function loadActiveTab() {
   }
 
   if (!tab || !tab.url) {
-    renderNote("—", "تعذر قراءة الصفحة الحالية.");
+    renderNote("—", "cantReadTab");
     return;
   }
 
@@ -147,17 +147,17 @@ async function loadActiveTab() {
   try {
     parsed = new URL(tab.url);
   } catch {
-    renderNote("—", "تعذر قراءة الصفحة الحالية.");
+    renderNote("—", "cantReadTab");
     return;
   }
 
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-    renderNote(parsed.protocol, "هذه الصفحة لا تحتاج إلى فحص.");
+    renderNote(parsed.protocol, "noCheckNeeded");
   } else {
-    renderNote(parsed.hostname, "جارٍ الفحص…");
+    renderNote(parsed.hostname, "checking");
     const result = await analyzeUrl(tab.url);
     if (result) renderVerdict(result);
-    else renderNote(parsed.hostname, "تعذر فحص هذه الصفحة.");
+    else renderNote(parsed.hostname, "cantCheckPage");
   }
 
   const page = await send({ type: "GET_TAB_RESULTS", tabId: tab.id });
@@ -182,31 +182,50 @@ $("check-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const url = normalizeInput($("check-input").value);
   if (!url) {
-    renderNote($("check-input").value, "الرابط غير صالح. مثال: adcb.com");
+    renderNote($("check-input").value, "invalidUrl");
     return;
   }
 
   const button = $("check-btn");
   button.disabled = true;
   button.textContent = "…";
-  renderNote(new URL(url).hostname, "جارٍ الفحص…");
+  renderNote(new URL(url).hostname, "checking");
 
   const result = await analyzeUrl(url);
-  if (result) renderVerdict(result, { title: "نتيجة الفحص اليدوي" });
-  else renderNote(new URL(url).hostname, "تعذر فحص الرابط.");
+  if (result) renderVerdict(result, { titleKey: "manualResult" });
+  else renderNote(new URL(url).hostname, "cantCheckLink");
 
   button.disabled = false;
-  button.textContent = "افحص";
+  button.textContent = T("checkBtn");
 });
+
+function applyLang(lang) {
+  LANG = I18N.resolve(lang);
+  I18N.applyDom(document, LANG);
+  for (const button of document.querySelectorAll("[data-lang]")) {
+    button.setAttribute("aria-pressed", String(button.dataset.lang === LANG));
+  }
+}
 
 async function loadSettings() {
   const toggle = $("block-toggle");
   const settings = await send({ type: "GET_SETTINGS" });
+  applyLang(settings && settings.lang);
   toggle.checked = !settings || settings.blockHigh !== false;
+
+  for (const button of document.querySelectorAll("[data-lang]")) {
+    button.addEventListener("click", async () => {
+      if (button.dataset.lang === LANG) return;
+      applyLang(button.dataset.lang);
+      await send({ type: "SET_SETTINGS", lang: LANG });
+      $("reload-hint").hidden = false;
+      // Reasons are produced in the chosen language, so check again.
+      void loadActiveTab();
+    });
+  }
   toggle.addEventListener("change", () => {
     void send({ type: "SET_SETTINGS", blockHigh: toggle.checked });
   });
 }
 
-void loadSettings();
-void loadActiveTab();
+loadSettings().then(() => loadActiveTab());

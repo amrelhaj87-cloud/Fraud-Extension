@@ -8,14 +8,18 @@
 <body>
   <header class="top">
     <img src="icons/icon48.png" alt="" width="24" height="24">
-    <div>
+    <div class="top-text">
       <h1>Fraud Extension</h1>
-      <p class="tagline">نحمي نتائج البحث قبل ما تضغط</p>
+      <p class="tagline" data-i18n="tagline"></p>
+    </div>
+    <div class="lang" role="group" aria-label="Language / اللغة">
+      <button type="button" data-lang="ar" lang="ar">ع</button>
+      <button type="button" data-lang="en" lang="en">EN</button>
     </div>
   </header>
 
   <section class="card" id="current" aria-live="polite">
-    <div class="card-label">الصفحة الحالية</div>
+    <div class="card-label" id="current-title" data-i18n="current"></div>
     <div class="host" id="current-host" dir="ltr">…</div>
     <div class="verdict" id="current-verdict" hidden>
       <div class="verdict-row">
@@ -31,25 +35,28 @@
 
   <label class="toggle">
     <input type="checkbox" id="block-toggle" checked>
-    <span>حظر المواقع عالية الخطورة تلقائيًا قبل فتحها</span>
+    <span data-i18n="blockToggle"></span>
   </label>
 
   <form class="check" id="check-form" autocomplete="off">
-    <label for="check-input" class="card-label">افحص رابط</label>
+    <label for="check-input" class="card-label" data-i18n="checkLabel"></label>
     <div class="check-row">
-      <input id="check-input" type="text" dir="ltr" placeholder="example.com أو https://…" spellcheck="false">
-      <button type="submit" id="check-btn">افحص</button>
+      <input id="check-input" type="text" dir="ltr" data-i18n-placeholder="checkPlaceholder" spellcheck="false">
+      <button type="submit" id="check-btn" data-i18n="checkBtn"></button>
     </div>
   </form>
 
   <section class="page-results">
-    <div class="card-label">نتائج هذه الصفحة <span id="results-count"></span></div>
+    <div class="card-label"><span data-i18n="pageResults"></span> <span id="results-count"></span></div>
     <ul class="results" id="results"></ul>
-    <div class="note" id="results-empty">افتح صفحة بحث Google لرؤية نتائج الفحص هنا.</div>
+    <div class="note" id="results-empty" data-i18n="emptyResults"></div>
   </section>
 
-  <footer class="foot">فحص محلي بالكامل — لا تُرسل بياناتك لأي خادم خارجي سوى استعلام عمر الدومين (RDAP).</footer>
+  <div class="note hint" id="reload-hint" data-i18n="reloadHint" hidden></div>
 
+  <footer class="foot" data-i18n="footer"></footer>
+
+  <script src="i18n.js"></script>
   <script type="module" src="popup.js"></script>
 </body>
 </html>

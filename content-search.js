@@ -18,14 +18,11 @@
     label.toLowerCase()
   );
 
-  const LEVEL_LABELS = {
-    safe: "آمن",
-    low: "منخفض الخطورة",
-    medium: "متوسط الخطورة",
-    high: "خطر مرتفع",
-    loading: "جارٍ الفحص",
-    error: "تعذر الفحص"
-  };
+  // UI language (ar/en), loaded from settings before the first scan.
+  const I18N = globalThis.FE_I18N;
+  let LANG = I18N.DEFAULT_LANG;
+  const T = (key, params) => I18N.t(key, LANG, params);
+  const levelLabel = (level) => T(`level_${level || "result"}`);
 
   const LEVEL_EMOJI = {
     safe: "🟢",
@@ -165,7 +162,7 @@
       try {
         response = await requestAnalysis(urls, sponsoredUrls, meta);
       } catch (error) {
-        markGroupsError(groups, "تعذر الاتصال بخدمة الفحص المحلية.");
+        markGroupsError(groups, T("errConnect"));
         warn("ANALYZE message failed", error);
         return;
       }
@@ -305,7 +302,7 @@
       const rawResult = byUrl.get(group.key);
 
       if (!rawResult) {
-        markGroupError(group, "لم تصل نتيجة لهذا الرابط.");
+        markGroupError(group, T("errNoResult"));
         continue;
       }
 
@@ -314,7 +311,7 @@
           const result = normalizeResult(rawResult, target);
           applyResult(target, result);
         } catch {
-          markGroupError({ targets: [target] }, "تعذر عرض نتيجة الفحص.");
+          markGroupError({ targets: [target] }, T("errRender"));
         }
       }
     }
@@ -491,7 +488,7 @@
     badge.setAttribute("role", "button");
     badge.setAttribute("tabindex", "0");
     badge.setAttribute("aria-expanded", "false");
-    badge.setAttribute("aria-label", "جارٍ فحص الرابط");
+    badge.setAttribute("aria-label", T("checkingAria"));
 
     const spinner = document.createElement("span");
     spinner.className = "fe-spinner";
@@ -499,7 +496,7 @@
 
     const text = document.createElement("span");
     text.className = "fe-badge-text";
-    text.textContent = "جارٍ الفحص…";
+    text.textContent = T("checking");
 
     badge.append(spinner, text);
     if (sponsored) badge.append(createAdTag());
@@ -538,7 +535,7 @@
     badge.removeAttribute("title");
     badge.setAttribute(
       "aria-label",
-      `${LEVEL_LABELS[level] || "نتيجة"}، ${score} من 100. ${result.reasons.join("، ")}`
+      T("ariaResult", { level: levelLabel(level), score, reasons: result.reasons })
     );
     badge.dataset.feLevel = level;
 
@@ -570,7 +567,7 @@
     const badge = target.badge;
     if (!badge || !badge.isConnected) return;
 
-    target.error = reason || "تعذر إكمال الفحص.";
+    target.error = reason || T("errGeneric");
     target.result = null;
 
     badge.className = "fe-badge fe-badge-error";
@@ -583,12 +580,12 @@
 
     const text = document.createElement("span");
     text.className = "fe-badge-score";
-    text.textContent = "تعذر";
+    text.textContent = T("errShort");
 
     badge.append(emoji, text);
     if (target.sponsored) badge.append(createAdTag());
 
-    badge.setAttribute("aria-label", `تعذر فحص الرابط. ${target.error}`);
+    badge.setAttribute("aria-label", T("errAria", { reason: target.error }));
     badge.dataset.feLevel = "error";
 
     refreshActiveCard(target);
@@ -597,8 +594,8 @@
   function createAdTag() {
     const tag = document.createElement("span");
     tag.className = "fe-ad-tag";
-    tag.textContent = "إعلان";
-    tag.setAttribute("dir", "rtl");
+    tag.textContent = T("adTag");
+    tag.setAttribute("dir", I18N.dir(LANG));
     return tag;
   }
 
@@ -659,10 +656,7 @@
       const boosted = Math.min(100, result.score + 15);
       result.score = boosted;
       result.level = levelForScore(boosted);
-      result.reasons = [
-        ...result.reasons,
-        "نتيجة إعلانية مدفوعة (زيادة 15 نقطة)"
-      ];
+      result.reasons = [...result.reasons, T("sponsored")];
     }
 
     return result;
@@ -671,7 +665,7 @@
   function isSponsoredReason(reason) {
     return (
       typeof reason === "string" &&
-      (reason.includes("إعلانية") || reason.includes("مدفوعة"))
+      I18N.isReason(reason, "sponsored")
     );
   }
 
@@ -704,8 +698,8 @@
     card.id = CARD_ID;
     card.className = "fe-card";
     card.dataset.open = "0";
-    card.setAttribute("dir", "rtl");
-    card.setAttribute("lang", "ar");
+    card.setAttribute("dir", I18N.dir(LANG));
+    card.setAttribute("lang", LANG);
     card.setAttribute("role", "tooltip");
     card.style.visibility = "hidden";
 
@@ -796,7 +790,7 @@
     dot.setAttribute("aria-hidden", "true");
 
     const label = document.createElement("span");
-    label.textContent = LEVEL_LABELS[level] || "نتيجة";
+    label.textContent = levelLabel(level);
 
     levelGroup.append(dot, label);
     head.appendChild(levelGroup);
@@ -813,7 +807,7 @@
     if (target.sponsored) {
       const ad = document.createElement("span");
       ad.className = "fe-card-ad";
-      ad.textContent = "نتيجة إعلانية مدفوعة";
+      ad.textContent = T("sponsoredLabel");
       card.appendChild(ad);
     }
 
@@ -821,29 +815,29 @@
     host.className = "fe-card-host";
     host.dir = "ltr";
     host.textContent =
-      (result && result.hostname) || hostnameFrom(target.url) || "رابط غير معروف";
+      (result && result.hostname) || hostnameFrom(target.url) || T("unknownLink");
     card.appendChild(host);
 
     if (level === "loading") {
       const note = document.createElement("div");
       note.className = "fe-card-note";
-      note.textContent = "يتم تحليل الدومين والتحقق من عمر التسجيل…";
+      note.textContent = T("cardLoading");
       card.appendChild(note);
     } else if (level === "error") {
       const note = document.createElement("div");
       note.className = "fe-card-note fe-card-note-error";
-      note.textContent = target.error || "تعذر إكمال الفحص.";
+      note.textContent = target.error || T("errGeneric");
       card.appendChild(note);
     } else {
       // Age is shown in the footer; drop the duplicate "unknown age" bullet.
       const reasons = (result.reasons || []).filter(
-        (reason) => reason !== "عمر الدومين غير معروف"
+        (reason) => !I18N.isReason(reason, "ageUnknown")
       );
 
       if (reasons.length === 0) {
         const note = document.createElement("div");
         note.className = "fe-card-note";
-        note.textContent = "لا توجد مؤشرات خطر معروفة.";
+        note.textContent = T("noSignals");
         card.appendChild(note);
       } else {
         const list = document.createElement("ul");
@@ -863,11 +857,11 @@
 
       if (Number.isFinite(result.ageDays)) {
         const age = document.createElement("span");
-        age.textContent = `عمر الدومين: ${Math.max(0, Math.floor(result.ageDays))} يومًا`;
+        age.textContent = T("ageDays", { days: Math.max(0, Math.floor(result.ageDays)) });
         meta.appendChild(age);
       } else {
         const age = document.createElement("span");
-        age.textContent = "عمر الدومين: غير معروف";
+        age.textContent = T("ageUnknownLine");
         meta.appendChild(age);
       }
 
@@ -876,7 +870,7 @@
 
     const brand = document.createElement("div");
     brand.className = "fe-card-brand";
-    brand.textContent = "Fraud Extension — فحص محلي";
+    brand.textContent = T("brandSearch");
     card.appendChild(brand);
   }
 
@@ -893,11 +887,17 @@
   }
 
   // Start after the document exists; document_idle usually guarantees it.
+  const start = () =>
+    I18N.loadLang().then((lang) => {
+      LANG = lang;
+      boot();
+    });
+
   try {
     if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", boot, { once: true });
+      document.addEventListener("DOMContentLoaded", start, { once: true });
     } else {
-      boot();
+      start();
     }
   } catch (error) {
     warn("Content script initialization failed", error);

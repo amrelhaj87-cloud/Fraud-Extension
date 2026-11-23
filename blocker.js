@@ -12,7 +12,7 @@ import { getDomainAgeDays, getRegistrableDomain } from "./rdap.js";
 const SETTINGS_KEY = "fe:settings";
 const ALLOW_ALWAYS_KEY = "fe:allow-always";
 const ALLOW_SESSION_KEY = "fe:allow-session";
-const DEFAULT_SETTINGS = { blockHigh: true };
+const DEFAULT_SETTINGS = { blockHigh: true, lang: "ar" };
 const RECENT_MS = 3000;
 
 // tabId -> { url, at } so onBeforeNavigate + onCommitted don't double-handle.
@@ -79,7 +79,8 @@ function normalizeHost(hostname) {
 
 export async function analyzeForBlock(url) {
   const parsed = new URL(url);
-  const opts = { protocol: parsed.protocol, path: parsed.pathname };
+  const { lang } = await getSettings();
+  const opts = { protocol: parsed.protocol, path: parsed.pathname, lang };
   let result = analyzeDomain(parsed.hostname, opts);
   let ageDays = null;
 
@@ -114,6 +115,13 @@ async function maybeBlock(tabId, url) {
   } catch (error) {
     console.warn("[Fraud Extension] Block check failed:", error);
   }
+}
+
+function pickSettings(message) {
+  const patch = {};
+  if (typeof message.blockHigh === "boolean") patch.blockHigh = message.blockHigh;
+  if (message.lang === "ar" || message.lang === "en") patch.lang = message.lang;
+  return patch;
 }
 
 // ---------------------------------------------------------------------------
@@ -156,7 +164,7 @@ export function initBlocker() {
       case "GET_SETTINGS":
         return reply(getSettings());
       case "SET_SETTINGS":
-        return reply(setSettings({ blockHigh: Boolean(message.blockHigh) }));
+        return reply(setSettings(pickSettings(message)));
       default:
         return false;
     }

@@ -6,6 +6,24 @@ Built for the **ScamShield AI** hackathon (42 Abu Dhabi × Abu Dhabi Police).
 
 Everything runs locally: no server and no API key. The only outbound request is a public RDAP lookup to get a domain's registration date.
 
+## Built for the UAE
+
+Fraud Extension is not a generic link checker. Its rules and wording are built around the scams that target people in the UAE:
+
+| Sector | Entities it knows (official domains are trusted, look-alikes are flagged) |
+|---|---|
+| Digital identity | UAE PASS, ICP / Emirates ID |
+| Government services | TAMM, all `*.gov.ae` domains |
+| Law enforcement | Abu Dhabi Police, Dubai Police, Ministry of Interior |
+| UAE banks | ADCB, FAB, Emirates NBD, Mashreq, RAKBANK, ADIB, DIB, Emirates Islamic, CBD, NBF |
+| Telecom | e& (Etisalat), du |
+| Post & courier | Emirates Post, Aramex |
+| Utilities & transport | DEWA, ADDC, Salik, RTA |
+
+Every warning names **who** is being impersonated and **which sector** they belong to, for example *"Impersonates UAE PASS (digital identity) but is not its official site"*. The warning page also points victims to Abu Dhabi Police's Aman service (8002626).
+
+**Bilingual:** the whole interface works in Arabic (RTL) or English (LTR): badges, hover cards, the Maps banner, the popup and the warning page. Switch between them with the **ع / EN** button in the popup. Arabic is the default.
+
 ## What it does
 
 | Where | What you see |
@@ -60,7 +78,7 @@ After the demo pages, show the same extension on real Google Search and Maps.
 ## Tests
 
 ```powershell
-node test.js        # 74 scoring tests, including 38 false-positive guards
+node test.js        # 77 scoring tests, including 38 false-positive guards
 node test-rdap.js   # live RDAP lookup (needs internet)
 ```
 
@@ -95,6 +113,7 @@ Keep API keys in the team's server, never in the extension.
 |---|---|
 | `manifest.json` | MV3 config |
 | `background.js` | Service worker: scoring, RDAP, per-tab results, LLM hook |
+| `i18n.js` | Arabic / English strings, UAE brand names and sectors |
 | `scoring.js` | Rules engine (pure ES module, also runs in Node) |
 | `rdap.js` | Domain age via the IANA RDAP bootstrap, cached for 7 days |
 | `content-search.js`, `content.css` | Google Search badges |

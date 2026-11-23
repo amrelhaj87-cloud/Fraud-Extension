@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Fraud Extension",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "كشف الروابط والمواقع الاحتيالية في بحث Google وخرائط Google داخل الإمارات — يعمل محليًا بالكامل.",
   "permissions": [
     "storage",
@@ -27,6 +27,7 @@
         "http://localhost/*test.html"
       ],
       "js": [
+        "i18n.js",
         "content-search.js"
       ],
       "css": [
@@ -43,6 +44,7 @@
         "http://localhost/*maps-mock.html"
       ],
       "js": [
+        "i18n.js",
         "content-maps.js"
       ],
       "run_at": "document_idle",

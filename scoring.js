@@ -4,6 +4,10 @@
  * No network calls and no browser APIs are used here.
  */
 
+import "./i18n.js";
+
+const I18N = globalThis.FE_I18N;
+
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
@@ -71,7 +75,9 @@ const BRANDS = [
   "fab",
   "adib",
   "emiratesislamic",
-  "etihad"
+  "etihad",
+  "icp",
+  "emiratesid"
 ];
 
 // Labels that make a subdomain look like a complete domain (bankfab.com.evil.icu).
@@ -183,6 +189,9 @@ const CONFUSABLES = Object.freeze({
  * @returns {{score: number, level: "safe"|"low"|"medium"|"high", reasons: string[]}}
  */
 export function analyzeDomain(hostname, opts = {}) {
+  const lang = I18N.resolve(opts.lang);
+  const t = (key, params) => I18N.t(key, lang, params);
+  const brandName = (brand) => I18N.brandLabel(brand, lang);
   const reasons = [];
   let score = 0;
 
@@ -196,7 +205,7 @@ export function analyzeDomain(hostname, opts = {}) {
     return {
       score: 0,
       level: "low",
-      reasons: ["تعذر قراءة اسم النطاق"]
+      reasons: [t("unreadable")]
     };
   }
 
@@ -205,7 +214,7 @@ export function analyzeDomain(hostname, opts = {}) {
     return {
       score: 0,
       level: "safe",
-      reasons: ["دومين رسمي موثّق"]
+      reasons: [t("official")]
     };
   }
 
@@ -215,9 +224,9 @@ export function analyzeDomain(hostname, opts = {}) {
 
   const hasNonLatin = /[\u0080-\u{10FFFF}]/u.test(host);
   if (hasNonLatin) {
-    add(40, "اسم النطاق يستخدم حروفًا غير لاتينية (احتمال تصيّد بصري)");
+    add(40, t("homograph"));
   } else if (decoded.failed) {
-    add(40, "اسم النطاق يستخدم ترميز Punycode مشبوهًا");
+    add(40, t("punycodeBad"));
   }
 
   const domain = splitRegistrableDomain(host);
@@ -230,13 +239,13 @@ export function analyzeDomain(hostname, opts = {}) {
   if (typo) {
     add(
       50,
-      `تشابه كبير مع اسم جهة موثوقة (${typo.brand})${typo.distance > 0 ? " — خطأ إملائي محتمل" : ""}`
+      t("typo", { brand: brandName(typo.brand), misspell: typo.distance > 0 })
     );
   }
 
   const containedBrand = BRANDS.find((brand) => containsBrand(visualHost, brand));
   if (containedBrand) {
-    add(45, `اسم النطاق يحتوي على اسم جهة موثوقة (${containedBrand}) دون أن يكون موقعها الرسمي`);
+    add(45, t("contains", { brand: brandName(containedBrand) }));
   }
 
   // 3b) A real domain used as a subdomain of another site:
@@ -245,10 +254,10 @@ export function analyzeDomain(hostname, opts = {}) {
   if (mimicked) {
     add(
       50,
-      `النطاق الفرعي يقلّد دومينًا رسميًا (${mimicked}) لكن الموقع الحقيقي هو ${domain.base}.${domain.tld}`
+      t("mimic", { official: mimicked, real: `${domain.base}.${domain.tld}` })
     );
   } else if (!domain.isIp && hasDomainLikeSubdomain(host, domain)) {
-    add(30, "النطاق الفرعي مصمَّم ليبدو كدومين كامل (مثل .com. في منتصف الرابط)");
+    add(30, t("domainLike"));
   }
 
   const brandSignal = Boolean(typo || containedBrand || mimicked);
@@ -256,15 +265,15 @@ export function analyzeDomain(hostname, opts = {}) {
   // 4) Risk words, with an extra penalty when a brand is also present.
   const riskMatches = findRiskWords(host);
   if (riskMatches.length > 0) {
-    add(15, `كلمة خطرة في النطاق: ${riskMatches.join("، ")}`);
+    add(15, t("riskWords", { words: riskMatches }));
     if (brandSignal) {
-      add(20, "اسم جهة موثوقة مقترن بكلمة خطرة (نمط تصيّد شائع)");
+      add(20, t("brandRisk"));
     }
   }
 
   // 5) Cheap / frequently abused TLD.
   if (domain.tld && SUSPICIOUS_TLDS.includes(domain.tld)) {
-    add(20, `امتداد النطاق غير موثوق أو كثير الاستخدام في الحملات الاحتيالية (.${domain.tld})`);
+    add(20, t("tld", { tld: domain.tld }));
   }
 
   // 6) Free hosting or site builders pretending to represent a brand.
@@ -275,41 +284,41 @@ export function analyzeDomain(hostname, opts = {}) {
     const path = typeof opts.path === "string" ? opts.path : "";
     const freeText = foldConfusables(normalizeLookalikes(`${host} ${path}`));
     if (BRANDS.some((brand) => containsBrand(freeText, brand))) {
-      add(40, `استضافة مجانية أو منشئ مواقع (${freeHost}) مع اسم جهة موثوقة`);
+      add(40, t("freeHost", { host: freeHost }));
     }
   }
 
   // 7) Structural red flags.
   if (!domain.isIp && domain.subdomainCount > 3) {
-    add(10, "عدد كبير من النطاقات الفرعية (أكثر من 3)");
+    add(10, t("manySubs"));
   }
   const hyphenCount = (host.match(/-/g) || []).length;
   if (hyphenCount > 2) {
-    add(10, "عدد كبير من الشُرط في اسم النطاق (أكثر من 2)");
+    add(10, t("manyHyphens"));
   }
   if (domain.isIp) {
-    add(10, "الرابط يستخدم عنوان IP بدلًا من اسم نطاق");
+    add(10, t("ip"));
   }
   if (host.length > 30) {
-    add(10, "اسم النطاق طويل بشكل غير معتاد (أكثر من 30 حرفًا)");
+    add(10, t("long"));
   }
 
   // 8) Unencrypted HTTP.
   if (String(opts.protocol || "").toLowerCase() === "http:") {
-    add(15, "الرابط يستخدم HTTP غير المشفّر");
+    add(15, t("http"));
   }
 
   // 9) Domain age (RDAP). Unknown age is reported but adds no points.
   if (opts.ageDays === null || opts.ageDays === undefined || opts.ageDays === "") {
-    reasons.push("عمر الدومين غير معروف");
+    reasons.push(t("ageUnknown"));
   } else {
     const ageDays = Number(opts.ageDays);
     if (!Number.isFinite(ageDays)) {
-      reasons.push("عمر الدومين غير معروف");
+      reasons.push(t("ageUnknown"));
     } else if (ageDays < 30) {
-      add(35, `عمر الدومين أقل من 30 يومًا (${formatDays(ageDays)} يوم)`);
+      add(35, t("age30", { days: formatDays(ageDays) }));
     } else if (ageDays < 180) {
-      add(15, `عمر الدومين أقل من 180 يومًا (${formatDays(ageDays)} يوم)`);
+      add(15, t("age180", { days: formatDays(ageDays) }));
     }
   }
 
