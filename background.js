@@ -68,7 +68,7 @@ if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage)
 
 async function handleAnalyzeMessage(message, sender) {
   const rawUrls = Array.isArray(message.urls) ? message.urls : [];
-  const targets = prepareTargets(rawUrls, message.sponsoredUrls);
+  const targets = prepareTargets(rawUrls, message.sponsoredUrls, message.meta);
   if (targets.length === 0) return [];
 
   // One RDAP lookup per registrable domain, shared by all of its URLs.
@@ -120,7 +120,11 @@ async function analyzeTarget(target, getAge) {
 
     // Only gray-zone results are eligible for the optional LLM hook.
     if (scored.level === "medium") {
-      scored = await blendWithLlm(scored, url);
+      scored = await blendWithLlm(scored, {
+        url,
+        title: target.title || "",
+        snippet: target.snippet || ""
+      });
     }
 
     // Sponsored result on a non-official domain: +15 after rules and RDAP.
@@ -156,6 +160,9 @@ async function analyzeTarget(target, getAge) {
  * return shape: { score: number, reasons: string[] } or null. The caller
  * enforces a 6-second timeout and never lets this hook break an analysis.
  *
+ * Input comes from the page: Search sends the result title + visible snippet,
+ * Maps sends the place name + "category | phone | source: Google Maps".
+ *
  * @param {{url: string, title: string, snippet: string}} input
  * @returns {Promise<{score: number, reasons: string[]}|null>}
  */
@@ -166,12 +173,12 @@ export async function llmAnalyze({ url, title, snippet }) {
   return null;
 }
 
-async function blendWithLlm(scored, url) {
+async function blendWithLlm(scored, input) {
   let llmResult = null;
 
   try {
     llmResult = await withTimeout(
-      llmAnalyze({ url, title: "", snippet: "" }),
+      llmAnalyze(input),
       LLM_TIMEOUT_MS
     );
   } catch {
@@ -238,7 +245,8 @@ function applySponsoredBoost(scored) {
 // Input preparation and bounded concurrency
 // ---------------------------------------------------------------------------
 
-function prepareTargets(rawUrls, sponsoredUrls) {
+function prepareTargets(rawUrls, sponsoredUrls, meta) {
+  const metaByUrl = meta && typeof meta === "object" ? meta : {};
   const seen = new Set();
   const targets = [];
   const sponsoredKeys = new Set();
@@ -274,10 +282,13 @@ function prepareTargets(rawUrls, sponsoredUrls) {
     if (seen.has(key)) continue;
 
     seen.add(key);
+    const info = metaByUrl[rawUrl] || metaByUrl[rawUrl.trim()] || metaByUrl[key] || {};
     targets.push({
       url: rawUrl.trim(),
       parsed,
-      sponsored: sponsoredKeys.has(key)
+      sponsored: sponsoredKeys.has(key),
+      title: typeof info.title === "string" ? info.title.slice(0, 200) : "",
+      snippet: typeof info.snippet === "string" ? info.snippet.slice(0, 400) : ""
     });
   }
 

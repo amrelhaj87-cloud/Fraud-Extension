@@ -65,9 +65,26 @@ node test-rdap.js   # live RDAP lookup (needs internet)
 
 `background.js` exports `llmAnalyze({ url, title, snippet })`. Gray-zone results (`medium`) are sent there with a 6-second timeout.
 
-Return `{ score, reasons }` or `null`. The final score is `max(rulesScore, llmScore)`.
+What the hook receives:
+- **Search:** the result title and its visible snippet (up to 400 characters)
+- **Maps:** the place name as `title`, and `"category | phone: … | source: Google Maps"` as `snippet`
 
-Note: the content script currently sends URLs only, so `title` and `snippet` arrive empty.
+Return `{ score, reasons }` or `null`. The final score is `max(rulesScore, llmScore)`, and any reasons you return are appended to the rule-based ones.
+
+Example:
+
+```js
+export async function llmAnalyze({ url, title, snippet }) {
+  const res = await fetch("http://127.0.0.1:8000/analyze", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url, title, snippet })
+  });
+  return res.ok ? res.json() : null; // { score: 0-100, reasons: ["…"] }
+}
+```
+
+Keep API keys in the team's server, never in the extension.
 
 ## Files
 

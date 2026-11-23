@@ -238,10 +238,18 @@
   // Main loop
   // -------------------------------------------------------------------------
 
-  function analyze(url) {
+  function analyze(url, place) {
+    const meta = {
+      [url]: {
+        title: place.name || "",
+        snippet: [place.category, place.phone && `phone: ${place.phone}`, "source: Google Maps"]
+          .filter(Boolean)
+          .join(" | ")
+      }
+    };
     return new Promise((resolve) => {
       try {
-        chrome.runtime.sendMessage({ type: "ANALYZE", urls: [url] }, (res) => {
+        chrome.runtime.sendMessage({ type: "ANALYZE", urls: [url], meta }, (res) => {
           if (chrome.runtime.lastError) resolve(null);
           else resolve(Array.isArray(res) && res[0] ? res[0] : null);
         });
@@ -266,7 +274,7 @@
       if (key === lastKey) return;
       lastKey = key;
 
-      const base = place.website ? await analyze(place.website.href) : null;
+      const base = place.website ? await analyze(place.website.href, place) : null;
       const result = applyMapsRules(place, base);
 
       // Stay quiet on ordinary places: only official (✅) or risky results show.

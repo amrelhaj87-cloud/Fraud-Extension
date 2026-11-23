@@ -155,9 +155,15 @@
         .filter((group) => group.sponsored)
         .map((group) => group.url);
 
+      // Title/snippet per URL, forwarded to the team LLM hook.
+      const meta = {};
+      for (const group of groups.values()) {
+        meta[group.url] = { title: group.title || "", snippet: group.snippet || "" };
+      }
+
       let response;
       try {
-        response = await requestAnalysis(urls, sponsoredUrls);
+        response = await requestAnalysis(urls, sponsoredUrls, meta);
       } catch (error) {
         markGroupsError(groups, "تعذر الاتصال بخدمة الفحص المحلية.");
         warn("ANALYZE message failed", error);
@@ -195,6 +201,8 @@
 
         const block = findResultBlock(h3, anchor);
         const sponsored = detectSponsored(anchor, block);
+        // Read the title before the badge is appended into the h3.
+        const titleText = (h3.textContent || "").trim().slice(0, 200);
         const badge = createLoadingBadge(sponsored);
 
         h3.appendChild(badge);
@@ -231,6 +239,10 @@
         }
 
         group.sponsored = group.sponsored || sponsored;
+        if (!group.title) {
+          group.title = titleText;
+          group.snippet = extractSnippet(block, h3);
+        }
         group.targets.push(target);
       } catch {
         // A single malformed result must not block the rest.
@@ -240,7 +252,7 @@
     return groups;
   }
 
-  function requestAnalysis(urls, sponsoredUrls) {
+  function requestAnalysis(urls, sponsoredUrls, meta) {
     return new Promise((resolve, reject) => {
       try {
         if (
@@ -256,7 +268,8 @@
           {
             type: "ANALYZE",
             urls,
-            sponsoredUrls
+            sponsoredUrls,
+            meta
           },
           (response) => {
             try {
@@ -417,6 +430,24 @@
     }
 
     return block;
+  }
+
+  // Visible result text without the title and our badge, capped for the LLM.
+  function extractSnippet(block, h3) {
+    try {
+      if (!block) return "";
+      const clone = block.cloneNode(true);
+      for (const el of clone.querySelectorAll("h3, .fe-badge, cite, script, style")) {
+        el.remove();
+      }
+      return (clone.textContent || "")
+        .replace(/\s+/g, " ")
+        .replace((h3.textContent || "").trim(), "")
+        .trim()
+        .slice(0, 400);
+    } catch {
+      return "";
+    }
   }
 
   function detectSponsored(anchor, block) {
