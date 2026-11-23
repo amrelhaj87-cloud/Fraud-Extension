@@ -14,7 +14,7 @@
       <rect x="53" y="80" width="14" height="14" rx="4" fill="var(--bg)"/>
     </svg>
 
-    <p class="lead" data-i18n="wLead"></p>
+    <p class="lead" id="lead" data-i18n="wLead"></p>
     <div class="url" id="url" dir="ltr">…</div>
 
     <div class="score-row">
@@ -26,14 +26,14 @@
     <ul class="reasons" id="reasons"><li data-i18n="wLoading"></li></ul>
 
     <h2 data-i18n="wNext"></h2>
-    <ol class="steps">
+    <ol class="steps" id="steps">
       <li data-i18n="wStep1"></li>
       <li data-i18n="wStep2"></li>
       <li data-i18n="wStep3"></li>
       <li data-i18n="wStep4"></li>
     </ol>
 
-    <label class="check">
+    <label class="check" id="always-row">
       <input type="checkbox" id="always">
       <span data-i18n="wAlways"></span>
     </label>
@@ -42,6 +42,8 @@
       <button type="button" class="primary" id="back" data-i18n="wBack"></button>
       <button type="button" class="secondary" id="proceed" data-i18n="wProceed"></button>
     </div>
+
+    <p class="done" id="done" role="status" hidden></p>
 
     <p class="foot" data-i18n="wFoot"></p>
   </main>

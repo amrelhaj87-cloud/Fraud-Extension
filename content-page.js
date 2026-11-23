@@ -6,6 +6,10 @@
  *   - clickFix:     "Win+R → cmd → Ctrl+V" instructions (ClickFix malware)
  * Sends the signals to the background, which combines them with the domain
  * score, colors the toolbar icon, and blocks the page if it becomes high risk.
+ *   - behaviors from page-hooks.js: clipboard commands, scareware
+ *     (fullscreen + locks), traps, notification requests, popup spam
+ * Also tells the background when the user clicks or types, so the download
+ * guard can tell a requested download from an automatic one.
  * Reads the page only; never changes it.
  */
 (() => {
@@ -61,8 +65,90 @@
       ((CTRL_V.test(text) && RUN_CMD.test(text)) ||
         (WIN_R.test(text) && (CTRL_V.test(text) || RUN_CMD.test(text))));
 
-    return { phoneCapture, cardForm, clickFix };
+    // Behaviors reported by page-hooks.js (MAIN world).
+    const now = Date.now();
+    const recentCount = (list, ms) => list.filter((t) => now - t < ms).length;
+    const hasVideo = [...document.querySelectorAll("video")].some((v) => v.offsetWidth > 200);
+    const alertLoop = recentCount(behavior.dialogs, 15000) >= 3;
+    const historyFlood = recentCount(behavior.pushes, 3000) >= 10;
+    const lock = behavior.keyboardLock || behavior.pointerLock;
+
+    // Tech-support scareware: fullscreen + (locked input or dialog loop), not a video player.
+    const scareware = behavior.fullscreen && (lock || alertLoop) && !hasVideo;
+    // Trapping the user: any two of dialog loop / leave-page prompt / Back-button flooding.
+    const trap = [alertLoop, behavior.beforeUnload, historyFlood].filter(Boolean).length >= 2;
+    const popupSpam = behavior.silentPopups >= 2;
+
+    return {
+      phoneCapture,
+      cardForm,
+      clickFix,
+      clipboardCommand: behavior.clipboardCommand,
+      scareware,
+      trap,
+      notifications: behavior.notifications,
+      popupSpam
+    };
   }
+
+  // ---- Behavior events from page-hooks.js --------------------------------
+  const behavior = {
+    fullscreen: false,
+    keyboardLock: false,
+    pointerLock: false,
+    beforeUnload: false,
+    notifications: false,
+    clipboardCommand: false,
+    dialogs: [],
+    pushes: [],
+    silentPopups: 0
+  };
+  const seenIds = new Set();
+  const CRITICAL = new Set(["clipboardCommand", "fullscreen", "keyboardLock", "pointerLock", "dialog"]);
+
+  window.addEventListener("message", (event) => {
+    const data = event.data;
+    if (event.source !== window || !data || data.source !== "fraud-extension-hooks") return;
+    // An event can arrive twice (queued original + replay); count it once.
+    if (seenIds.has(data.id)) return;
+    seenIds.add(data.id);
+    switch (data.name) {
+      case "dialog":
+        behavior.dialogs.push(Date.now());
+        break;
+      case "pushState":
+        behavior.pushes.push(Date.now());
+        break;
+      case "popup":
+        if (!(data.detail && data.detail.userActive)) behavior.silentPopups += 1;
+        break;
+      default:
+        if (data.name in behavior) behavior[data.name] = true;
+    }
+    // Dangerous behavior is reported at once; the rest is debounced.
+    if (CRITICAL.has(data.name)) report();
+    else scheduleAlways();
+  });
+
+  // ---- User activity: tells the download guard a click came first ----------
+  let lastActivitySent = 0;
+  const onActivity = () => {
+    const now = Date.now();
+    if (now - lastActivitySent < 1000) return;
+    lastActivitySent = now;
+    try {
+      chrome.runtime.sendMessage({ type: "USER_ACTIVITY", url: location.href }, () => {
+        void chrome.runtime.lastError;
+      });
+    } catch {
+      // Ignore.
+    }
+  };
+  // Ask page-hooks.js to replay anything that happened before this script loaded.
+  window.postMessage({ source: "fraud-extension-page", name: "ready" }, "*");
+
+  window.addEventListener("pointerdown", onActivity, true);
+  window.addEventListener("keydown", onActivity, true);
 
   function report() {
     try {
@@ -81,6 +167,10 @@
 
   function schedule() {
     if (Date.now() - started > WATCH_MS) return;
+    scheduleAlways();
+  }
+
+  function scheduleAlways() {
     clearTimeout(timer);
     timer = setTimeout(report, DEBOUNCE_MS);
   }

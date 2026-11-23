@@ -5,6 +5,23 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - **Minor** (1.2.0 → 1.3.0): a new feature or a new detection rule.
 - **Patch** (1.2.0 → 1.2.1): a fix or small tweak.
 
+## [1.5.0] - 2026-11-23
+
+### Added
+- **Download guard** (`downloads.js`): dangerous file types (`.exe`, `.msi`, `.scr`, `.bat`, `.ps1`, `.hta`, `.apk`, `.iso`…) are paused the moment they start.
+  - They stay paused when the page or file host is medium/high risk, or when the download **started by itself** with no click first (drive-by).
+  - Archives from high-risk sites are paused too.
+  - If the file already finished, it is deleted from disk.
+  - A warning tab explains why and offers **Delete the file** or **Keep it anyway**.
+- **Clipboard guard (ClickFix):** a page that silently copies a command (PowerShell, `cmd /c`, mshta, `curl | sh`…) to the clipboard is stopped. The copy is dropped, so nothing harmful can be pasted, and the page is scored high (+80) and blocked. Normal copying is untouched.
+- **Scareware detection:** fullscreen together with keyboard/mouse lock or a loop of pop-up messages, on a page without a video player (fake "tech support" pages), adds +70.
+- **Trap detection:** any two of a pop-up message loop, a "leave this page?" prompt, or Back-button flooding adds +60.
+- Popups opened without a click (+10/+20) and notification-permission requests on suspicious sites (+15).
+- Demo pages: `demo/scareware-mock.html` (fullscreen fake alert) and `demo/download-mock.html` (automatic harmless "exe").
+
+### Notes
+- The ClickFix demo page does not copy anything. A version that copied a harmless command was flagged by Windows Defender as ClickFix malware, so it was removed rather than disguised.
+
 ## [1.4.0] - 2026-11-23
 
 ### Added
@@ -55,6 +72,7 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - Offline demo pages and 38 false-positive guard tests.
 - An LLM hook for the team that receives the result title and snippet.
 
+[1.5.0]: https://github.com/amrelhaj87-cloud/Fraud-Extension/releases/tag/v1.5.0
 [1.4.0]: https://github.com/amrelhaj87-cloud/Fraud-Extension/releases/tag/v1.4.0
 [1.3.0]: https://github.com/amrelhaj87-cloud/Fraud-Extension/releases/tag/v1.3.0
 [1.2.0]: https://github.com/amrelhaj87-cloud/Fraud-Extension/releases/tag/v1.2.0

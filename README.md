@@ -32,6 +32,8 @@ Every warning names **who** is being impersonated and **which sector** they belo
 | Google Maps | A floating banner on the open place: official ✅, warning 🟡, or danger 🔴. |
 | Any page | **Blocking:** a high-risk site never loads. It's replaced by a warning page (like uBlock's) with the reasons and next steps, plus "go back safely" and "proceed anyway". Proceed allows the site for this session, and the checkbox allows it permanently. This can be turned off in the popup. |
 | Every page | **Page scanner:** detects phone-number capture (subscription / OTP scams), card forms on suspicious sites, and ClickFix "Win+R, Ctrl+V" pages. These signals add to the score and can block the page. |
+| Downloads | Dangerous files (`.exe`, `.msi`, `.apk`…) are paused when they come from a risky site or start by themselves. A warning tab offers **Delete** or **Keep**. |
+| Clipboard | A page that copies a hidden command to your clipboard (ClickFix) is stopped: the copy is dropped and the page is blocked. |
 | Toolbar icon | 🟡 yellow with the score when caution is needed, 🔴 red when the page is high risk or blocked, normal otherwise. |
 | Popup | The verdict for the current tab, a manual "check a link" box, and every link analyzed on the page, sorted by risk. |
 
@@ -56,6 +58,11 @@ Every warning names **who** is being impersonated and **which sector** they belo
 | Page: ClickFix instructions | +70 |
 | Page: phone capture with bait | +40 (+20 on an otherwise clean domain) |
 | Page: card form on a suspicious domain | +25 |
+| Page: copies a command to the clipboard (blocked) | +80 |
+| Page: fullscreen + keyboard/mouse lock (scareware) | +70 |
+| Page: traps the user (2 of: message loop, leave prompt, Back flooding) | +60 |
+| Page: popups without a click | +10 / +20 |
+| Page: notification request on a suspicious site | +15 |
 | HTTP, IP host, many hyphens or subdomains, very long name | +10 to +15 each |
 
 Levels: `low` < 30 ≤ `medium` < 60 ≤ `high`.
@@ -125,6 +132,8 @@ Keep API keys in the team's server, never in the extension.
 | `i18n.js` | Arabic / English strings, UAE brand names and sectors |
 | `scoring.js` | Rules engine (pure ES module, also runs in Node) |
 | `rdap.js` | Domain age via the IANA RDAP bootstrap, cached for 7 days |
+| `page-hooks.js` | In-page hooks: clipboard guard, fullscreen/locks, traps, popups |
+| `downloads.js` | Download guard |
 | `content-page.js` | Page scanner (phone / card / ClickFix) |
 | `content-search.js`, `content.css` | Google Search badges |
 | `content-maps.js`, `content-maps.css` | Google Maps banner |

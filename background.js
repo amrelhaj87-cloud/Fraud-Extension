@@ -7,12 +7,15 @@
 import { analyzeDomain } from "./scoring.js";
 import { getDomainAgeDays, getRegistrableDomain } from "./rdap.js";
 import { initBlocker, getSettings } from "./blocker.js";
+import { initDownloadGuard } from "./downloads.js";
 import "./i18n.js";
 
 const I18N = globalThis.FE_I18N;
 
 // Redirect high-risk navigations to warning.html (see blocker.js).
 initBlocker();
+// Pause and check dangerous downloads (see downloads.js).
+initDownloadGuard();
 
 const MAX_CONCURRENT_DOMAINS = 5;
 const MAX_TAB_RESULTS = 250;

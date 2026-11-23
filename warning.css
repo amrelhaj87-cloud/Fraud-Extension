@@ -79,3 +79,8 @@ h2 { font-size: 20px; margin: 28px 0 8px; }
 .secondary { background: transparent; color: var(--muted); border-color: var(--muted) !important; }
 
 .foot { color: var(--muted); font-size: 13px; margin-top: 36px; }
+
+.url .source { font: 13px/1.5 "Segoe UI", Tahoma, sans-serif; color: var(--muted); margin-top: 4px; }
+.done { margin-top: 16px; padding: 10px 14px; border-radius: 8px; background: var(--panel); font-weight: 600; }
+.check[hidden] { display: none; }
+.actions button:disabled { opacity: .55; cursor: default; }

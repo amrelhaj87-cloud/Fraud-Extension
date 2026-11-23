@@ -1,15 +1,20 @@
 /**
- * Fraud Extension — warning page shown instead of a blocked high-risk site.
+ * Fraud Extension — warning page.
+ * Two modes:
+ *   ?u=<url>[&s=signals]   a high-risk page was blocked before it loaded
+ *   ?d=<downloadId>&u=...  a dangerous download was paused (or deleted)
  */
 (() => {
   "use strict";
 
   const params = new URLSearchParams(location.search);
   const target = params.get("u") || "";
+  const downloadId = params.has("d") ? Number(params.get("d")) : null;
+  const isDownload = Number.isInteger(downloadId);
   const $ = (id) => document.getElementById(id);
   const I18N = globalThis.FE_I18N;
   let LANG = I18N.DEFAULT_LANG;
-  const T = (key, params) => I18N.t(key, LANG, params);
+  const T = (key, p) => I18N.t(key, LANG, p);
 
   let parsed = null;
   try {
@@ -18,8 +23,6 @@
   } catch {
     parsed = null;
   }
-
-  if (!parsed) $("proceed").disabled = true;
 
   function send(message) {
     return new Promise((resolve) => {
@@ -33,35 +36,29 @@
     });
   }
 
-  async function loadDetails() {
-    if (!parsed) return;
-    const result = await send({ type: "GET_WARNING", url: parsed.href, signals: params.get("s") || "" });
+  function fillReasons(reasons, ageDays) {
     const list = $("reasons");
     list.replaceChildren();
-
-    if (!result) {
-      const li = document.createElement("li");
-      li.textContent = T("wLoadFail");
-      list.appendChild(li);
-      return;
-    }
-
-    $("score").textContent = `${result.score}/100`;
-    void send({ type: "MARK_BLOCKED", score: result.score });
-    for (const reason of result.reasons || []) {
+    for (const reason of reasons || []) {
       if (I18N.isReason(reason, "ageUnknown")) continue;
       const li = document.createElement("li");
       li.textContent = reason;
       list.appendChild(li);
     }
-    if (Number.isFinite(result.ageDays)) {
+    if (Number.isFinite(ageDays)) {
       const li = document.createElement("li");
-      li.textContent = T("ageDays", { days: Math.floor(result.ageDays) });
+      li.textContent = T("ageDays", { days: Math.floor(ageDays) });
       list.appendChild(li);
     }
   }
 
-  $("back").addEventListener("click", () => {
+  function failReasons() {
+    const li = document.createElement("li");
+    li.textContent = T("wLoadFail");
+    $("reasons").replaceChildren(li);
+  }
+
+  function goSafe() {
     // Leave to a known-safe page; history may point back at the bad site.
     chrome.tabs.getCurrent((tab) => {
       if (tab && Number.isInteger(tab.id)) {
@@ -70,11 +67,87 @@
         location.replace("about:blank");
       }
     });
+  }
+
+  // ---- Blocked page --------------------------------------------------------
+
+  async function loadPage() {
+    $("url").textContent = parsed ? parsed.href : T("wInvalid");
+    if (!parsed) {
+      $("proceed").disabled = true;
+      return;
+    }
+    const result = await send({ type: "GET_WARNING", url: parsed.href, signals: params.get("s") || "" });
+    if (!result) return failReasons();
+    $("score").textContent = `${result.score}/100`;
+    void send({ type: "MARK_BLOCKED", score: result.score });
+    fillReasons(result.reasons, result.ageDays);
+  }
+
+  // ---- Paused download -----------------------------------------------------
+
+  function setupDownloadTexts() {
+    $("lead").textContent = T("dLead");
+    const steps = $("steps");
+    steps.replaceChildren();
+    for (const key of ["dStep1", "dStep2", "dStep3", "wStep4"]) {
+      const li = document.createElement("li");
+      li.textContent = T(key);
+      steps.appendChild(li);
+    }
+    $("always-row").hidden = true;
+    $("back").textContent = T("dDelete");
+    $("proceed").textContent = T("dKeep");
+  }
+
+  async function loadDownload() {
+    setupDownloadTexts();
+    const info = await send({ type: "GET_DOWNLOAD", id: downloadId });
+    if (!info) {
+      $("url").textContent = parsed ? parsed.href : "—";
+      return failReasons();
+    }
+
+    $("url").textContent = info.filename;
+    const source = document.createElement("div");
+    source.className = "source";
+    source.textContent = `${T("dSource")} ${info.source || "—"}`;
+    $("url").appendChild(source);
+
+    $("score").textContent = `${info.score}/100`;
+    void send({ type: "MARK_BLOCKED", score: info.score });
+    fillReasons(info.reasons, null);
+
+    if (info.removed) {
+      showDone("dRemoved");
+      $("proceed").disabled = true;
+    }
+  }
+
+  function showDone(key) {
+    $("done").textContent = T(key);
+    $("done").hidden = false;
+  }
+
+  // ---- Buttons -------------------------------------------------------------
+
+  $("back").addEventListener("click", async () => {
+    if (!isDownload) return goSafe();
+    $("back").disabled = true;
+    $("proceed").disabled = true;
+    await send({ type: "DOWNLOAD_DECISION", id: downloadId, action: "delete" });
+    showDone("dDeleted");
   });
 
   $("proceed").addEventListener("click", async () => {
-    if (!parsed) return;
     $("proceed").disabled = true;
+    if (isDownload) {
+      $("back").disabled = true;
+      await send({ type: "DOWNLOAD_DECISION", id: downloadId, action: "keep" });
+      showDone("dKept");
+      return;
+    }
+    if (!parsed) return;
     await send({ type: "ALLOW_SITE", url: parsed.href, permanent: $("always").checked });
     location.replace(parsed.href);
   });
@@ -83,7 +156,6 @@
     LANG = lang;
     I18N.applyDom(document, LANG);
     document.title = T("wTitle");
-    $("url").textContent = parsed ? parsed.href : T("wInvalid");
-    void loadDetails();
+    void (isDownload ? loadDownload() : loadPage());
   });
 })();

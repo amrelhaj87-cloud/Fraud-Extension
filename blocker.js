@@ -53,7 +53,7 @@ async function readList(area, key) {
   }
 }
 
-async function isAllowed(hostname) {
+export async function isAllowed(hostname) {
   const host = normalizeHost(hostname);
   const [always, session] = await Promise.all([
     readList(chrome.storage.local, ALLOW_ALWAYS_KEY),
@@ -111,17 +111,18 @@ function remember(map, key, value) {
   if (map.size > MAX_REMEMBERED) map.delete(map.keys().next().value);
 }
 
+const SIGNAL_NAMES = [
+  "phoneCapture", "cardForm", "clickFix", "clipboardCommand",
+  "scareware", "trap", "notifications", "popupSpam"
+];
+
 function signalsFromList(list) {
   const names = String(list || "").split(",");
-  return {
-    phoneCapture: names.includes("phoneCapture"),
-    cardForm: names.includes("cardForm"),
-    clickFix: names.includes("clickFix")
-  };
+  return Object.fromEntries(SIGNAL_NAMES.map((k) => [k, names.includes(k)]));
 }
 
 function signalsToList(signals) {
-  return ["phoneCapture", "cardForm", "clickFix"].filter((k) => signals && signals[k]).join(",");
+  return SIGNAL_NAMES.filter((k) => signals && signals[k]).join(",");
 }
 
 export function combineWithPage(base, signals, lang) {
@@ -135,8 +136,18 @@ export function combineWithPage(base, signals, lang) {
     reasons.push(t(key));
   };
 
+  // A page that silently copies a command to the clipboard (we blocked the copy).
+  if (signals.clipboardCommand) add(80, "pageClipboard");
   // ClickFix ("Win+R, Ctrl+V" with a fake verification) is never legitimate.
   if (signals.clickFix) add(70, "pageClickFix");
+  // Tech-support scareware: fullscreen + locked keyboard/mouse or dialog loop.
+  if (signals.scareware) add(70, "pageScareware");
+  // Trapping the user on the page (dialog loop, leave-page prompt, Back flooding).
+  if (signals.trap) add(60, "pageTrap");
+  // Popups opened without a click.
+  if (signals.popupSpam) add(base.score >= 15 ? 20 : 10, "pagePopups");
+  // Push-notification permission is a common scam/ad channel on shady sites.
+  if (signals.notifications && base.score >= 30) add(15, "pageNotifications");
   // A phone field with bait text: strong on a suspicious domain, mild otherwise
   // (normal sites also verify phone numbers at login).
   if (signals.phoneCapture) add(base.score >= 15 ? 40 : 20, "pagePhone");

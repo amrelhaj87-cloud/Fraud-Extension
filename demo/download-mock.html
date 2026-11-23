@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>عرض المخالفة (عرض تجريبي)</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #f8fafc; color: #1f2430; font: 16px/1.7 Tahoma, "Noto Sans Arabic", sans-serif; }
+    .demo-tag { position: fixed; top: 10px; right: 10px; background: #fef3c7; color: #92400e; padding: 2px 10px; border-radius: 6px; font-size: 12px; }
+    .card { width: min(520px, 92vw); background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; text-align: center; }
+    h1 { font-size: 22px; margin: 0 0 8px; }
+  </style>
+</head>
+<body>
+  <span class="demo-tag">صفحة عرض تجريبية — الملف وهمي وغير ضار</span>
+  <div class="card">
+    <h1>لديك مخالفة مرورية غير مدفوعة</h1>
+    <p>يتم الآن تنزيل «برنامج عرض المخالفة» تلقائيًا… افتحه لمعرفة قيمة المخالفة.</p>
+    <p id="status">جارٍ التنزيل…</p>
+  </div>
+  <script>
+    // Starts a download with no click, like a drive-by download page.
+    // The "exe" is a harmless text file used only to show the download guard.
+    setTimeout(() => {
+      const blob = new Blob(["Fraud Extension demo file. Harmless. Not a real program."], { type: "application/octet-stream" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "AbuDhabi-Fine-Viewer.exe";
+      document.body.appendChild(a);
+      a.click();
+      document.getElementById("status").textContent = "تم بدء التنزيل.";
+    }, 1500);
+  </script>
+</body>
+</html>
