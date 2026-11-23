@@ -307,6 +307,18 @@ export function analyzeDomain(hostname, opts = {}) {
     add(10, t("long"));
   }
 
+  // 7b) Mobile-billing scams put the target carrier in the link
+  //     (?op=ae-etisalat, /du/, carrier=eand).
+  const carrier = findCarrierTarget(typeof opts.path === "string" ? opts.path : "");
+  if (carrier) {
+    add(30, t("carrier", { carrier }));
+  }
+
+  // 7c) Throw-away random subdomains (96dknvhyhd73dazre.fantex.online).
+  if (!domain.isIp && domain.subdomainCount >= 1 && looksRandom(host.split(".")[0])) {
+    add(15, t("randomSub"));
+  }
+
   // 8) Unencrypted HTTP.
   if (String(opts.protocol || "").toLowerCase() === "http:") {
     add(15, t("http"));
@@ -390,6 +402,30 @@ function hasDomainLikeSubdomain(host, domain) {
   const suffixLabels = domain.tld ? labels.length - domain.subdomainCount - 1 : labels.length;
   const subLabels = labels.slice(0, Math.max(0, labels.length - suffixLabels - 1));
   return subLabels.slice(1).some((label) => DOMAIN_LIKE_LABELS.has(label));
+}
+
+const CARRIERS = { etisalat: "Etisalat / e&", eand: "Etisalat / e&", du: "du" };
+
+function findCarrierTarget(path) {
+  let text = path.toLowerCase();
+  try {
+    text = decodeURIComponent(text);
+  } catch {
+    // Keep the raw text.
+  }
+  const match =
+    text.match(/(?:^|[?&])(?:op|operator|carrier|telco|mno|network)=(?:ae[-_]?)?(etisalat|eand|du)(?=$|[&#_-])/) ||
+    text.match(/(?:^|[^a-z])ae[-_](etisalat|eand|du)(?=$|[^a-z])/);
+  return match ? CARRIERS[match[1]] : null;
+}
+
+function looksRandom(label) {
+  if (!label || label.length < 10) return false;
+  const letters = label.replace(/[^a-z]/g, "");
+  const digits = label.replace(/[^0-9]/g, "");
+  if (letters.length < 4 || digits.length < 2) return false;
+  const vowels = letters.replace(/[^aeiou]/g, "").length;
+  return vowels / letters.length < 0.3;
 }
 
 function splitRegistrableDomain(host) {

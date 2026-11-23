@@ -35,6 +35,12 @@ function send(message) {
   });
 }
 
+// Verdict for the open tab: domain + what the page asks for (phone, card...).
+async function verdictFor(url) {
+  const verdict = await send({ type: "GET_VERDICT", url });
+  return verdict && verdict.level ? verdict : analyzeUrl(url);
+}
+
 async function analyzeUrl(url) {
   // No tabId: manual checks must not pollute the page's result list.
   const response = await send({ type: "ANALYZE", urls: [url] });
@@ -155,7 +161,7 @@ async function loadActiveTab() {
     renderNote(parsed.protocol, "noCheckNeeded");
   } else {
     renderNote(parsed.hostname, "checking");
-    const result = await analyzeUrl(tab.url);
+    const result = await verdictFor(tab.url);
     if (result) renderVerdict(result);
     else renderNote(parsed.hostname, "cantCheckPage");
   }

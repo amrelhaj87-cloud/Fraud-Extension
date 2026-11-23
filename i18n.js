@@ -84,6 +84,12 @@
       mapsBrand: (p) => `اسم المكان يدّعي أنه جهة معروفة لكن الموقع المرتبط ليس موقعها الرسمي (${p.domain})`,
       mapsPhone: (p) => `رقم الهاتف رقم جوال شخصي (${p.phone}) لجهة تبدو رسمية`,
       mapsNoSite: "لا يوجد موقع إلكتروني مرتبط بهذا المكان",
+      carrier: (p) => `الرابط يستهدف مشتركي ${p.carrier} (نمط احتيال الاشتراكات عبر فاتورة الجوال)`,
+      randomSub: "نطاق فرعي بأحرف عشوائية (يُستخدم لتفادي الحظر في الحملات الاحتيالية)",
+      pagePhone: "الصفحة تطلب رقم جوالك بحجة التحقق أو جائزة (نمط احتيال الاشتراكات وسرقة رمز OTP)",
+      pageCard: "الصفحة تطلب بيانات بطاقة بنكية على موقع غير رسمي",
+      pageClickFix: "الصفحة تطلب تشغيل أوامر على جهازك (Win+R ثم Ctrl+V) — هجوم ClickFix لتثبيت برامج خبيثة",
+      blockedBadge: "تم حظر هذه الصفحة",
 
       // ---- Levels ----
       level_safe: "آمن",
@@ -188,6 +194,12 @@
       mapsBrand: (p) => `Place claims to be a known entity but links to a site that is not its official one (${p.domain})`,
       mapsPhone: (p) => `Phone is a personal mobile number (${p.phone}) for what looks like an official body`,
       mapsNoSite: "No website linked to this place",
+      carrier: (p) => `Link targets ${p.carrier} subscribers (mobile-billing subscription scam pattern)`,
+      randomSub: "Random-looking subdomain (used by scam campaigns to dodge blocklists)",
+      pagePhone: "Page asks for your mobile number as a fake verification or prize (subscription / OTP-theft scam)",
+      pageCard: "Page asks for bank card details on a non-official site",
+      pageClickFix: "Page asks you to run commands on your computer (Win+R, then Ctrl+V) — a ClickFix malware attack",
+      blockedBadge: "This page was blocked",
 
       level_safe: "Safe",
       level_low: "Low risk",

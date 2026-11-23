@@ -8,6 +8,9 @@
 
 import { analyzeDomain } from "./scoring.js";
 import { getDomainAgeDays, getRegistrableDomain } from "./rdap.js";
+import "./i18n.js";
+
+const I18N = globalThis.FE_I18N;
 
 const SETTINGS_KEY = "fe:settings";
 const ALLOW_ALWAYS_KEY = "fe:allow-always";
@@ -81,7 +84,7 @@ function normalizeHost(hostname) {
 export async function analyzeForBlock(url) {
   const parsed = new URL(url);
   const { lang } = await getSettings();
-  const opts = { protocol: parsed.protocol, path: parsed.pathname, lang };
+  const opts = { protocol: parsed.protocol, path: `${parsed.pathname}${parsed.search}`, lang };
   let result = analyzeDomain(parsed.hostname, opts);
   let ageDays = null;
 
@@ -94,28 +97,167 @@ export async function analyzeForBlock(url) {
   return { url, hostname: parsed.hostname, ageDays, ...result };
 }
 
-async function maybeBlock(tabId, url) {
+// ---------------------------------------------------------------------------
+// Page signals (content-page.js) combined with the domain score
+// ---------------------------------------------------------------------------
+
+const verdicts = new Map(); // url -> last combined verdict
+const pageSignals = new Map(); // url -> { phoneCapture, cardForm, clickFix }
+const MAX_REMEMBERED = 100;
+
+function remember(map, key, value) {
+  map.delete(key);
+  map.set(key, value);
+  if (map.size > MAX_REMEMBERED) map.delete(map.keys().next().value);
+}
+
+function signalsFromList(list) {
+  const names = String(list || "").split(",");
+  return {
+    phoneCapture: names.includes("phoneCapture"),
+    cardForm: names.includes("cardForm"),
+    clickFix: names.includes("clickFix")
+  };
+}
+
+function signalsToList(signals) {
+  return ["phoneCapture", "cardForm", "clickFix"].filter((k) => signals && signals[k]).join(",");
+}
+
+export function combineWithPage(base, signals, lang) {
+  if (!signals || base.level === "safe") return base;
+
+  const t = (key) => I18N.t(key, lang);
+  let score = base.score;
+  const reasons = [...base.reasons];
+  const add = (points, key) => {
+    score += points;
+    reasons.push(t(key));
+  };
+
+  // ClickFix ("Win+R, Ctrl+V" with a fake verification) is never legitimate.
+  if (signals.clickFix) add(70, "pageClickFix");
+  // A phone field with bait text: strong on a suspicious domain, mild otherwise
+  // (normal sites also verify phone numbers at login).
+  if (signals.phoneCapture) add(base.score >= 15 ? 40 : 20, "pagePhone");
+  // Card fields only matter on a domain that is already suspicious.
+  if (signals.cardForm && base.score >= 30) add(25, "pageCard");
+
+  score = Math.min(100, score);
+  const level = score >= 60 ? "high" : score >= 30 ? "medium" : "low";
+  return { ...base, score, level, reasons, signals };
+}
+
+// ---------------------------------------------------------------------------
+// Toolbar icon: yellow = be careful, red = high risk / blocked, normal otherwise
+// ---------------------------------------------------------------------------
+
+const COLORS = { medium: "#F79009", high: "#D92D20" };
+const iconCache = new Map();
+let baseBitmap = null;
+
+async function tintedIcon(color) {
+  if (iconCache.has(color)) return iconCache.get(color);
+  if (typeof OffscreenCanvas === "undefined" || typeof createImageBitmap === "undefined") return null;
+
+  if (!baseBitmap) {
+    const blob = await (await fetch(chrome.runtime.getURL("icons/icon48.png"))).blob();
+    baseBitmap = await createImageBitmap(blob);
+  }
+
+  const images = {};
+  for (const size of [16, 32]) {
+    const canvas = new OffscreenCanvas(size, size);
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.roundRect(0, 0, size, size, size * 0.22);
+    ctx.fill();
+    const inset = Math.round(size * 0.14);
+    ctx.drawImage(baseBitmap, inset, inset, size - inset * 2, size - inset * 2);
+    images[size] = ctx.getImageData(0, 0, size, size);
+  }
+  iconCache.set(color, images);
+  return images;
+}
+
+async function setTabIndicator(tabId, verdict, lang, blocked = false) {
+  if (!Number.isInteger(tabId) || tabId < 0 || !chrome.action) return;
+  const level = verdict ? verdict.level : "low";
+  const color = COLORS[level];
+
+  try {
+    if (!color) {
+      await chrome.action.setBadgeText({ tabId, text: "" });
+      await chrome.action.setIcon({
+        tabId,
+        path: { 16: "icons/icon16.png", 48: "icons/icon48.png", 128: "icons/icon128.png" }
+      });
+      await chrome.action.setTitle({ tabId, title: "Fraud Extension" });
+      return;
+    }
+
+    const text = blocked ? "!" : String(verdict.score);
+    await chrome.action.setBadgeText({ tabId, text });
+    await chrome.action.setBadgeBackgroundColor({ tabId, color });
+    if (chrome.action.setBadgeTextColor) {
+      await chrome.action.setBadgeTextColor({ tabId, color: level === "medium" ? "#1F2430" : "#FFFFFF" });
+    }
+    const label = blocked ? I18N.t("blockedBadge", lang) : I18N.t(`level_${level}`, lang);
+    await chrome.action.setTitle({ tabId, title: `Fraud Extension — ${label} (${verdict.score}/100)` });
+
+    const images = await tintedIcon(color).catch(() => null);
+    if (images) await chrome.action.setIcon({ tabId, imageData: images });
+  } catch {
+    // Tab closed or navigated away; nothing to update.
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Evaluate a top-level page: score, color the icon, block if high
+// ---------------------------------------------------------------------------
+
+async function evaluate(tabId, url, signals) {
+  if (!/^https?:/i.test(url)) return null;
+
+  const settings = await getSettings();
+  const lang = I18N.resolve(settings.lang);
+  const verdict = combineWithPage(await analyzeForBlock(url), signals, lang);
+  remember(verdicts, url, verdict);
+
+  await setTabIndicator(tabId, verdict, lang);
+
+  if (verdict.level === "high" && settings.blockHigh) {
+    const parsed = new URL(url);
+    if (!(await isAllowed(parsed.hostname))) {
+      const list = signalsToList(signals);
+      const warning =
+        `${chrome.runtime.getURL("warning.html")}?u=${encodeURIComponent(url)}` +
+        (list ? `&s=${list}` : "");
+      await chrome.tabs.update(tabId, { url: warning });
+    }
+  }
+  return verdict;
+}
+
+async function onNavigation(tabId, url) {
   try {
     if (!/^https?:/i.test(url)) return;
-
     const last = recent.get(tabId);
     if (last && last.url === url && Date.now() - last.at < RECENT_MS) return;
     recent.set(tabId, { url, at: Date.now() });
-
-    const settings = await getSettings();
-    if (!settings.blockHigh) return;
-
-    const parsed = new URL(url);
-    if (await isAllowed(parsed.hostname)) return;
-
-    const result = await analyzeForBlock(url);
-    if (result.level !== "high") return;
-
-    const warning = `${chrome.runtime.getURL("warning.html")}?u=${encodeURIComponent(url)}`;
-    await chrome.tabs.update(tabId, { url: warning });
+    await evaluate(tabId, url, pageSignals.get(url));
   } catch (error) {
-    console.warn("[Fraud Extension] Block check failed:", error);
+    console.warn("[Fraud Extension] Navigation check failed:", error);
   }
+}
+
+async function getVerdict(url, signalList) {
+  const known = verdicts.get(url);
+  if (known) return known;
+  const { lang } = await getSettings();
+  const signals = signalList ? signalsFromList(signalList) : pageSignals.get(url);
+  return combineWithPage(await analyzeForBlock(url), signals, I18N.resolve(lang));
 }
 
 function pickSettings(message) {
@@ -134,12 +276,12 @@ export function initBlocker() {
 
   // Early: before the request is sent.
   chrome.webNavigation.onBeforeNavigate.addListener((details) => {
-    if (details.frameId === 0) void maybeBlock(details.tabId, details.url);
+    if (details.frameId === 0) void onNavigation(details.tabId, details.url);
   });
 
   // Late: catches server-side redirects (e.g. short links) to a bad domain.
   chrome.webNavigation.onCommitted.addListener((details) => {
-    if (details.frameId === 0) void maybeBlock(details.tabId, details.url);
+    if (details.frameId === 0) void onNavigation(details.tabId, details.url);
   });
 
   chrome.tabs.onRemoved.addListener((tabId) => recent.delete(tabId));
@@ -156,7 +298,23 @@ export function initBlocker() {
 
     switch (message.type) {
       case "GET_WARNING":
-        return reply(analyzeForBlock(String(message.url)));
+      case "GET_VERDICT":
+        return reply(getVerdict(String(message.url), message.signals));
+      case "PAGE_SIGNALS": {
+        const tabId = sender && sender.tab ? sender.tab.id : null;
+        const url = String(message.url || (sender && sender.tab && sender.tab.url) || "");
+        if (!Number.isInteger(tabId) || !/^https?:/i.test(url)) return false;
+        remember(pageSignals, url, message.signals || {});
+        return reply(evaluate(tabId, url, message.signals || {}));
+      }
+      case "MARK_BLOCKED": {
+        const tabId = sender && sender.tab ? sender.tab.id : null;
+        return reply(
+          getSettings().then((st) =>
+            setTabIndicator(tabId, { level: "high", score: Number(message.score) || 100 }, I18N.resolve(st.lang), true)
+          )
+        );
+      }
       case "ALLOW_SITE":
         return reply(
           allowHost(new URL(String(message.url)).hostname, Boolean(message.permanent))

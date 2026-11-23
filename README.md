@@ -31,6 +31,8 @@ Every warning names **who** is being impersonated and **which sector** they belo
 | Google Search | 🟢 / 🟡 / 🔴 badge with a 0–100 score next to each result. Hovering shows the reasons in Arabic. Sponsored results get flagged and scored higher. High-risk results get a red outline. |
 | Google Maps | A floating banner on the open place: official ✅, warning 🟡, or danger 🔴. |
 | Any page | **Blocking:** a high-risk site never loads. It's replaced by a warning page (like uBlock's) with the reasons and next steps, plus "go back safely" and "proceed anyway". Proceed allows the site for this session, and the checkbox allows it permanently. This can be turned off in the popup. |
+| Every page | **Page scanner:** detects phone-number capture (subscription / OTP scams), card forms on suspicious sites, and ClickFix "Win+R, Ctrl+V" pages. These signals add to the score and can block the page. |
+| Toolbar icon | 🟡 yellow with the score when caution is needed, 🔴 red when the page is high risk or blocked, normal otherwise. |
 | Popup | The verdict for the current tab, a manual "check a link" box, and every link analyzed on the page, sorted by risk. |
 
 ## How the score works (`scoring.js`)
@@ -49,6 +51,11 @@ Every warning names **who** is being impersonated and **which sector** they belo
 | Domain younger than 30 days (RDAP) | +35, and always **high** (at least 70) |
 | Domain younger than 180 days | +15 |
 | Sponsored search result | +15 |
+| Link targets a UAE carrier (`op=ae-etisalat`) | +30 |
+| Random-looking subdomain | +15 |
+| Page: ClickFix instructions | +70 |
+| Page: phone capture with bait | +40 (+20 on an otherwise clean domain) |
+| Page: card form on a suspicious domain | +25 |
 | HTTP, IP host, many hyphens or subdomains, very long name | +10 to +15 each |
 
 Levels: `low` < 30 ≤ `medium` < 60 ≤ `high`.
@@ -79,7 +86,7 @@ After the demo pages, show the same extension on real Google Search and Maps.
 ## Tests
 
 ```powershell
-node test.js        # 82 scoring tests, including 38 false-positive guards
+node test.js        # 86 scoring tests, including 38 false-positive guards
 node test-rdap.js   # live RDAP lookup (needs internet)
 ```
 
@@ -118,6 +125,7 @@ Keep API keys in the team's server, never in the extension.
 | `i18n.js` | Arabic / English strings, UAE brand names and sectors |
 | `scoring.js` | Rules engine (pure ES module, also runs in Node) |
 | `rdap.js` | Domain age via the IANA RDAP bootstrap, cached for 7 days |
+| `content-page.js` | Page scanner (phone / card / ClickFix) |
 | `content-search.js`, `content.css` | Google Search badges |
 | `content-maps.js`, `content-maps.css` | Google Maps banner |
 | `blocker.js` | Blocks high-risk navigations before they load |

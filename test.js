@@ -159,6 +159,21 @@ check("new domain with no other signals -> high", plainNew.level === "high", pla
 const thirtyDays = analyzeDomain("example-shop.com", { ageDays: 30 });
 check("30-day-old plain domain -> not high", thirtyDays.level !== "high", thirtyDays);
 
+// 8d) Mobile-billing subscription scams and random subdomains.
+const subscription = analyzeDomain("96dknvhyhd73dazre.fantex.online", {
+  protocol: "https:",
+  path: "/ce13l2k.php?key=e4hvmpydltlpjn4r8sb7&op=ae-etisalat&visitor_id=1148"
+});
+check("carrier-targeted link with random subdomain -> high", subscription.level === "high", subscription);
+for (const [host, path] of [
+  ["www.google.com", "/search?q=du+recharge"],
+  ["en.wikipedia.org", "/wiki/Du_(company)"],
+  ["www.etisalat.ae", "/?op=ae-etisalat"]
+]) {
+  const r = analyzeDomain(host, { protocol: "https:", path });
+  check(`${host}${path} -> no carrier false positive`, r.level === "low" || r.level === "safe", r);
+}
+
 // 9) False positives: common legitimate domains must never be medium/high.
 const LEGIT = [
   "dewalt.com", "stammer.com", "amazon.ae", "noon.com", "careem.com",

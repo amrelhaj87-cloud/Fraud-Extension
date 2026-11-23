@@ -5,6 +5,23 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - **Minor** (1.2.0 → 1.3.0): a new feature or a new detection rule.
 - **Patch** (1.2.0 → 1.2.1): a fix or small tweak.
 
+## [1.4.0] - 2026-11-23
+
+### Added
+- **Page scanner** (`content-page.js`) on every page. It looks at what the page asks for, not only its link:
+  - A phone field with "not a robot / verify / prize / OTP" bait or a +971 prefix (mobile-billing subscription and OTP-theft scams)
+  - Bank-card fields on an already suspicious domain
+  - **ClickFix** instructions (Win+R, cmd, Ctrl+V with a fake "human verification")
+
+  These signals are added to the domain score, and the page is blocked if the total reaches high.
+- **URL rules:** a link that targets a UAE carrier (`op=ae-etisalat`, `carrier=du`) adds +30. A random-looking subdomain (`96dknvhyhd73dazre.fantex.online`) adds +15.
+- **Colored toolbar icon** per tab:
+  - 🟡 Yellow with the score for medium risk (be careful)
+  - 🔴 Red for high risk, or "!" when the page was blocked
+  - Normal icon for everything else
+- The popup and the warning page show the combined verdict (domain + page).
+- Demo pages: `demo/phone-mock.html` (yellow on localhost) and `demo/clickfix-mock.html` (blocked).
+
 ## [1.3.0] - 2026-11-23
 
 ### Changed
@@ -38,6 +55,7 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - Offline demo pages and 38 false-positive guard tests.
 - An LLM hook for the team that receives the result title and snippet.
 
+[1.4.0]: https://github.com/amrelhaj87-cloud/Fraud-Extension/releases/tag/v1.4.0
 [1.3.0]: https://github.com/amrelhaj87-cloud/Fraud-Extension/releases/tag/v1.3.0
 [1.2.0]: https://github.com/amrelhaj87-cloud/Fraud-Extension/releases/tag/v1.2.0
 [1.1.0]: https://github.com/amrelhaj87-cloud/Fraud-Extension/releases/tag/v1.1.0

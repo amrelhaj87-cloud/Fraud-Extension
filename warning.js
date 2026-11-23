@@ -35,7 +35,7 @@
 
   async function loadDetails() {
     if (!parsed) return;
-    const result = await send({ type: "GET_WARNING", url: parsed.href });
+    const result = await send({ type: "GET_WARNING", url: parsed.href, signals: params.get("s") || "" });
     const list = $("reasons");
     list.replaceChildren();
 
@@ -47,6 +47,7 @@
     }
 
     $("score").textContent = `${result.score}/100`;
+    void send({ type: "MARK_BLOCKED", score: result.score });
     for (const reason of result.reasons || []) {
       if (I18N.isReason(reason, "ageUnknown")) continue;
       const li = document.createElement("li");
