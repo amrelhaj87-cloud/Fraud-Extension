@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Maps (عرض تجريبي)</title>
+  <style>
+    body { margin: 0; font: 14px/1.6 Arial, "Noto Sans Arabic", sans-serif; color: #202124; background: #fff; display: flex; min-height: 100vh; }
+    aside { width: 400px; max-width: 100%; border-left: 1px solid #e0e0e0; padding: 20px; box-sizing: border-box; }
+    .map { flex: 1; background: linear-gradient(135deg, #e8f0e3 25%, #dfe9f5 25%, #dfe9f5 50%, #e8f0e3 50%, #e8f0e3 75%, #dfe9f5 75%); background-size: 60px 60px; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+    .tabs button { border: 1px solid #dadce0; background: #fff; border-radius: 16px; padding: 4px 12px; cursor: pointer; font: inherit; font-size: 13px; }
+    .tabs button[aria-pressed="true"] { background: #e8f0fe; border-color: #1a73e8; color: #1a73e8; }
+    .demo-tag { background: #fef3c7; color: #92400e; padding: 2px 10px; border-radius: 6px; font-size: 12px; display: inline-block; margin-bottom: 10px; }
+    h1 { font-size: 22px; font-weight: 400; margin: 0 0 4px; }
+    .cat { border: 0; background: none; color: #1a73e8; padding: 0; font: inherit; cursor: pointer; }
+    .row { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid #f1f3f4; }
+    .row a, .row button.phone { color: #202124; text-decoration: none; border: 0; background: none; font: inherit; padding: 0; direction: ltr; }
+    @media (max-width: 700px) { body { flex-direction: column; } .map { min-height: 200px; } }
+  </style>
+</head>
+<body>
+  <aside>
+    <span class="demo-tag">صفحة عرض تجريبية — بيانات وهمية</span>
+    <div class="tabs" id="tabs"></div>
+    <div role="main" id="panel"></div>
+  </aside>
+  <div class="map"></div>
+
+  <script>
+    const PLACES = [
+      { label: "بنك رسمي", name: "ADCB - Abu Dhabi Commercial Bank", cat: "Bank", site: "https://www.adcb.com/", phone: "+97126210090" },
+      { label: "بنك برابط مجاني", name: "ADCB Customer Service Center", cat: "Bank", site: "https://adcb-support.linktr.ee/", phone: "+971501234567" },
+      { label: "رابط منتحل", name: "Emirates Post - Mussafah", cat: "Post office", site: "https://emiratespost-delivery.com/", phone: "+97126220000" },
+      { label: "محل عادي", name: "Al Reef Bakery", cat: "Bakery", site: "https://www.noon.com/", phone: "+97125550000" }
+    ];
+    const tabs = document.getElementById("tabs");
+    const panel = document.getElementById("panel");
+
+    function render(i) {
+      const p = PLACES[i];
+      [...tabs.children].forEach((b, j) => b.setAttribute("aria-pressed", String(i === j)));
+      panel.innerHTML = "";
+      const h1 = document.createElement("h1"); h1.textContent = p.name;
+      const cat = document.createElement("button"); cat.className = "cat"; cat.setAttribute("jsaction", "pane.rating.category"); cat.textContent = p.cat;
+      const siteRow = document.createElement("div"); siteRow.className = "row";
+      const a = document.createElement("a"); a.href = p.site; a.setAttribute("data-item-id", "authority"); a.textContent = "🌐 " + new URL(p.site).hostname;
+      siteRow.append(a);
+      const phoneRow = document.createElement("div"); phoneRow.className = "row";
+      const ph = document.createElement("button"); ph.className = "phone"; ph.setAttribute("data-item-id", "phone:tel:" + p.phone); ph.textContent = "📞 " + p.phone;
+      phoneRow.append(ph);
+      panel.append(h1, cat, siteRow, phoneRow);
+    }
+
+    PLACES.forEach((p, i) => {
+      const b = document.createElement("button");
+      b.textContent = p.label;
+      b.addEventListener("click", () => render(i));
+      tabs.append(b);
+    });
+    render(0);
+  </script>
+</body>
+</html>

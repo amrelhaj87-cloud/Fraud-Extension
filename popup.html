@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <title>Fraud Extension</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="top">
+    <img src="icons/icon48.png" alt="" width="24" height="24">
+    <div>
+      <h1>Fraud Extension</h1>
+      <p class="tagline">نحمي نتائج البحث قبل ما تضغط</p>
+    </div>
+  </header>
+
+  <section class="card" id="current" aria-live="polite">
+    <div class="card-label">الصفحة الحالية</div>
+    <div class="host" id="current-host" dir="ltr">…</div>
+    <div class="verdict" id="current-verdict" hidden>
+      <div class="verdict-row">
+        <span class="pill" id="current-level"></span>
+        <span class="score" id="current-score"></span>
+      </div>
+      <div class="bar"><div class="bar-fill" id="current-bar"></div></div>
+      <ul class="reasons" id="current-reasons"></ul>
+      <div class="age" id="current-age"></div>
+    </div>
+    <div class="note" id="current-note" hidden></div>
+  </section>
+
+  <form class="check" id="check-form" autocomplete="off">
+    <label for="check-input" class="card-label">افحص رابط</label>
+    <div class="check-row">
+      <input id="check-input" type="text" dir="ltr" placeholder="example.com أو https://…" spellcheck="false">
+      <button type="submit" id="check-btn">افحص</button>
+    </div>
+  </form>
+
+  <section class="page-results">
+    <div class="card-label">نتائج هذه الصفحة <span id="results-count"></span></div>
+    <ul class="results" id="results"></ul>
+    <div class="note" id="results-empty">افتح صفحة بحث Google لرؤية نتائج الفحص هنا.</div>
+  </section>
+
+  <footer class="foot">فحص محلي بالكامل — لا تُرسل بياناتك لأي خادم خارجي سوى استعلام عمر الدومين (RDAP).</footer>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
