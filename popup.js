@@ -199,4 +199,14 @@ $("check-form").addEventListener("submit", async (event) => {
   button.textContent = "افحص";
 });
 
+async function loadSettings() {
+  const toggle = $("block-toggle");
+  const settings = await send({ type: "GET_SETTINGS" });
+  toggle.checked = !settings || settings.blockHigh !== false;
+  toggle.addEventListener("change", () => {
+    void send({ type: "SET_SETTINGS", blockHigh: toggle.checked });
+  });
+}
+
+void loadSettings();
 void loadActiveTab();

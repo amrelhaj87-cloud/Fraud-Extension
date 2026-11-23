@@ -12,6 +12,7 @@ Everything runs locally: no server and no API key. The only outbound request is 
 |---|---|
 | Google Search | 🟢 / 🟡 / 🔴 badge with a 0–100 score next to each result. Hovering shows the reasons in Arabic. Sponsored results get flagged and scored higher. High-risk results get a red outline. |
 | Google Maps | A floating banner on the open place: official ✅, warning 🟡, or danger 🔴. |
+| Any page | **Blocking:** a high-risk site never loads. It's replaced by a warning page (like uBlock's) with the reasons and next steps, plus "go back safely" and "proceed anyway". Proceed allows the site for this session, and the checkbox allows it permanently. This can be turned off in the popup. |
 | Popup | The verdict for the current tab, a manual "check a link" box, and every link analyzed on the page, sorted by risk. |
 
 ## How the score works (`scoring.js`)
@@ -19,6 +20,8 @@ Everything runs locally: no server and no API key. The only outbound request is 
 | Signal | Points |
 |---|---|
 | Official UAE domain, or any `*.gov.ae` | safe (0), checked first |
+| Official domain hidden in a subdomain (`bankfab.com.wallet-studio.icu`) | +50 |
+| Subdomain shaped like a full domain (`x.com.evil.net`) | +30 |
 | Typosquat of a brand (`adp0lice`, `adpolce`) | +50 |
 | Brand name inside a non-official domain (`adpolice-fines`) | +45 |
 | Risk word (`pay`, `fines`, `verify`, `login`, `delivery`…) | +15, plus another +20 with a brand |
@@ -57,7 +60,7 @@ After the demo pages, show the same extension on real Google Search and Maps.
 ## Tests
 
 ```powershell
-node test.js        # 67 scoring tests, including 38 false-positive guards
+node test.js        # 74 scoring tests, including 38 false-positive guards
 node test-rdap.js   # live RDAP lookup (needs internet)
 ```
 
@@ -96,5 +99,7 @@ Keep API keys in the team's server, never in the extension.
 | `rdap.js` | Domain age via the IANA RDAP bootstrap, cached for 7 days |
 | `content-search.js`, `content.css` | Google Search badges |
 | `content-maps.js`, `content-maps.css` | Google Maps banner |
+| `blocker.js` | Blocks high-risk navigations before they load |
+| `warning.html`, `warning.js`, `warning.css` | The blocking page |
 | `popup.html`, `popup.js`, `popup.css` | Toolbar popup |
 | `demo/` | Offline demo pages |

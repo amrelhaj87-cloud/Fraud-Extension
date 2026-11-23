@@ -35,6 +35,12 @@ const OFFICIAL_DOMAINS = [
   "salik.ae",
   "rta.ae",
   "u.ae",
+  "bankfab.com",
+  "adib.ae",
+  "emiratesislamic.ae",
+  "nbf.ae",
+  "etihad.com",
+  "emirates.com",
   "tdra.gov.ae",
   "adnoc.ae"
 ];
@@ -60,8 +66,16 @@ const BRANDS = [
   "salik",
   "moi",
   "ica",
-  "dubaipolice"
+  "dubaipolice",
+  "bankfab",
+  "fab",
+  "adib",
+  "emiratesislamic",
+  "etihad"
 ];
+
+// Labels that make a subdomain look like a complete domain (bankfab.com.evil.icu).
+const DOMAIN_LIKE_LABELS = new Set(["com", "net", "org", "ae", "gov", "co"]);
 
 const RISK_WORDS = [
   "pay",
@@ -74,7 +88,18 @@ const RISK_WORDS = [
   "refund",
   "claim",
   "track",
-  "delivery"
+  "delivery",
+  "wallet",
+  "auth",
+  "otp",
+  "kyc",
+  "account",
+  "portal",
+  "recharge",
+  "reward",
+  "prize",
+  "bonus",
+  "gift"
 ];
 
 const SUSPICIOUS_TLDS = [
@@ -214,7 +239,19 @@ export function analyzeDomain(hostname, opts = {}) {
     add(45, `اسم النطاق يحتوي على اسم جهة موثوقة (${containedBrand}) دون أن يكون موقعها الرسمي`);
   }
 
-  const brandSignal = Boolean(typo || containedBrand);
+  // 3b) A real domain used as a subdomain of another site:
+  //     bankfab.com.wallet-studio.icu, www.adpolice.gov.ae.fines-pay.com
+  const mimicked = findMimickedOfficial(host);
+  if (mimicked) {
+    add(
+      50,
+      `النطاق الفرعي يقلّد دومينًا رسميًا (${mimicked}) لكن الموقع الحقيقي هو ${domain.base}.${domain.tld}`
+    );
+  } else if (!domain.isIp && hasDomainLikeSubdomain(host, domain)) {
+    add(30, "النطاق الفرعي مصمَّم ليبدو كدومين كامل (مثل .com. في منتصف الرابط)");
+  }
+
+  const brandSignal = Boolean(typo || containedBrand || mimicked);
 
   // 4) Risk words, with an extra penalty when a brand is also present.
   const riskMatches = findRiskWords(host);
@@ -317,6 +354,22 @@ function isOfficialHost(host) {
   return OFFICIAL_DOMAINS.some(
     (official) => host === official || host.endsWith(`.${official}`)
   );
+}
+
+function findMimickedOfficial(host) {
+  for (const official of OFFICIAL_DOMAINS) {
+    const index = host.indexOf(`${official}.`);
+    if (index === 0 || (index > 0 && host[index - 1] === ".")) return official;
+  }
+  return null;
+}
+
+function hasDomainLikeSubdomain(host, domain) {
+  const labels = host.split(".");
+  // Labels before the registrable domain (base + suffix).
+  const suffixLabels = domain.tld ? labels.length - domain.subdomainCount - 1 : labels.length;
+  const subLabels = labels.slice(0, Math.max(0, labels.length - suffixLabels - 1));
+  return subLabels.slice(1).some((label) => DOMAIN_LIKE_LABELS.has(label));
 }
 
 function splitRegistrableDomain(host) {

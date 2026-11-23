@@ -72,6 +72,9 @@ body {
 .age { color: var(--muted); font-size: 12px; margin-top: 6px; }
 .note { color: var(--muted); font-size: 12px; }
 
+.toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer; font-weight: 600; }
+.toggle input { width: 16px; height: 16px; accent-color: var(--high); }
+
 .check { margin-bottom: 12px; }
 .check-row { display: flex; gap: 6px; }
 .check-row input {

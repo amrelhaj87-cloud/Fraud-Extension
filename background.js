@@ -6,6 +6,10 @@
 
 import { analyzeDomain } from "./scoring.js";
 import { getDomainAgeDays, getRegistrableDomain } from "./rdap.js";
+import { initBlocker } from "./blocker.js";
+
+// Redirect high-risk navigations to warning.html (see blocker.js).
+initBlocker();
 
 const MAX_CONCURRENT_DOMAINS = 5;
 const MAX_TAB_RESULTS = 250;

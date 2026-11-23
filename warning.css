@@ -1,0 +1,80 @@
+:root {
+  --bg: #1b1c22;
+  --fg: #e9eaee;
+  --muted: #a3a7b3;
+  --panel: #2a2c35;
+  --danger: #f04438;
+  --danger-soft: #3a1f22;
+  --accent: #8aa9ff;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #fff7f6;
+    --fg: #1f2430;
+    --muted: #5b6270;
+    --panel: #ffffff;
+    --danger-soft: #fee4e2;
+    --accent: #1d4ed8;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.7 "Segoe UI", Tahoma, "Noto Sans Arabic", sans-serif;
+}
+
+.wrap { max-width: 760px; margin: 0 auto; padding: 48px 16px 40px; }
+
+.icon { width: 110px; height: 100px; color: var(--danger); display: block; margin-bottom: 24px; }
+
+.lead { font-size: 18px; margin: 0 0 10px; }
+
+.url {
+  background: var(--panel);
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font: 600 15px/1.5 Consolas, "Courier New", monospace;
+  word-break: break-all;
+  text-align: left;
+}
+
+.score-row { display: flex; align-items: center; gap: 12px; margin: 16px 0 8px; }
+.pill { background: var(--danger); color: #fff; border-radius: 999px; padding: 2px 14px; font-weight: 700; font-size: 14px; }
+.score { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+h2 { font-size: 20px; margin: 28px 0 8px; }
+
+.reasons {
+  background: var(--danger-soft);
+  border-radius: 10px;
+  padding: 12px 34px 12px 16px;
+  margin: 0;
+}
+.reasons li { margin: 4px 0; }
+
+.steps { padding-inline-start: 24px; margin: 0; }
+.steps li { margin: 6px 0; }
+
+.check { display: flex; align-items: center; gap: 10px; margin: 28px 0 20px; cursor: pointer; color: var(--muted); }
+.check input { width: 18px; height: 18px; }
+
+.actions { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.actions button {
+  font: inherit;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+.primary { background: var(--accent); color: #0b1020; }
+@media (prefers-color-scheme: light) { .primary { color: #fff; } }
+.secondary { background: transparent; color: var(--muted); border-color: var(--muted) !important; }
+
+.foot { color: var(--muted); font-size: 13px; margin-top: 36px; }

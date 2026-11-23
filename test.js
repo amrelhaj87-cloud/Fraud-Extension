@@ -125,6 +125,9 @@ check(
   analyzeDomain("example.com")
 );
 
+expectOfficial("www.bankfab.com");
+expectOfficial("etihad.com");
+
 // 9) False positives: common legitimate domains must never be medium/high.
 const LEGIT = [
   "dewalt.com", "stammer.com", "amazon.ae", "noon.com", "careem.com",
@@ -149,7 +152,10 @@ for (const hostname of LEGIT) {
 for (const hostname of [
   "tammpay.top", "adcb-login.com", "emiratespost-delivery.com",
   "aramex-track.online", "dubaipolice-fines.com", "salik-pay.com",
-  "enbd-verify.com", "moi-fines.com"
+  "enbd-verify.com", "moi-fines.com",
+  // Official domain hidden inside a subdomain of another site.
+  "bankfab.com.wallet-studio.icu", "www.adpolice.gov.ae.fines-pay.com",
+  "uaepass.ae.auth-check.site", "adib-online.xyz", "etihad-refund.com"
 ]) {
   expectHigh(hostname);
 }
