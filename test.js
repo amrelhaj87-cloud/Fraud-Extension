@@ -149,6 +149,16 @@ check(
   analyzeDomain("adcb.com", { lang: "en" })
 );
 
+// 8c) Any domain under 30 days old is high risk, even with no other signal.
+for (const days of [0, 1, 29]) {
+  const r = analyzeDomain("aidev-future.buzz", { ageDays: days });
+  check(`${days}-day-old domain -> high`, r.level === "high" && r.score >= 70, r);
+}
+const plainNew = analyzeDomain("example-shop.com", { ageDays: 5 });
+check("new domain with no other signals -> high", plainNew.level === "high", plainNew);
+const thirtyDays = analyzeDomain("example-shop.com", { ageDays: 30 });
+check("30-day-old plain domain -> not high", thirtyDays.level !== "high", thirtyDays);
+
 // 9) False positives: common legitimate domains must never be medium/high.
 const LEGIT = [
   "dewalt.com", "stammer.com", "amazon.ae", "noon.com", "careem.com",

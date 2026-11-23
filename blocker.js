@@ -73,8 +73,9 @@ function normalizeHost(hostname) {
 }
 
 // ---------------------------------------------------------------------------
-// Analysis used for blocking: rules first, RDAP only when it can change the
-// outcome (medium), so most navigations are decided instantly.
+// Analysis used for blocking: rules decide instantly; every non-official site
+// also gets a (cached) RDAP age check, because a domain under 30 days old is
+// high risk on its own.
 // ---------------------------------------------------------------------------
 
 export async function analyzeForBlock(url) {
@@ -84,7 +85,7 @@ export async function analyzeForBlock(url) {
   let result = analyzeDomain(parsed.hostname, opts);
   let ageDays = null;
 
-  if (result.level === "medium") {
+  if (result.level !== "safe" && result.level !== "high") {
     const domain = getRegistrableDomain(parsed.hostname);
     ageDays = domain ? await getDomainAgeDays(domain).catch(() => null) : null;
     result = analyzeDomain(parsed.hostname, { ...opts, ageDays });

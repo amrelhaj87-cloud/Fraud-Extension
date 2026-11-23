@@ -136,6 +136,10 @@ const FREE_HOSTING = [
   "pages.dev"
 ];
 
+// Any domain younger than this is forced to at least NEW_DOMAIN_MIN_SCORE (high).
+const NEW_DOMAIN_DAYS = 30;
+const NEW_DOMAIN_MIN_SCORE = 70;
+
 // Two-label public suffixes used by the UAE and common external domains.
 const TWO_LEVEL_SUFFIXES = new Set([
   "gov.ae",
@@ -320,6 +324,13 @@ export function analyzeDomain(hostname, opts = {}) {
     } else if (ageDays < 180) {
       add(15, t("age180", { days: formatDays(ageDays) }));
     }
+  }
+
+  // A domain registered in the last 30 days is high risk on its own: almost
+  // every phishing / ClickFix site is used within days of registration.
+  if (Number.isFinite(Number(opts.ageDays)) && opts.ageDays !== null && opts.ageDays !== "" &&
+      Number(opts.ageDays) < NEW_DOMAIN_DAYS) {
+    score = Math.max(score, NEW_DOMAIN_MIN_SCORE);
   }
 
   score = Math.min(100, score);

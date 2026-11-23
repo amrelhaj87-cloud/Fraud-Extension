@@ -5,6 +5,12 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - **Minor** (1.2.0 → 1.3.0): a new feature or a new detection rule.
 - **Patch** (1.2.0 → 1.2.1): a fix or small tweak.
 
+## [1.3.0] - 2026-11-23
+
+### Changed
+- Any domain registered less than 30 days ago is now **high risk** (score of at least 70), even with no other signal. Before this, a 1-day-old `.buzz` ClickFix page (`nvq.aidev-future.buzz`) scored only 55 (medium).
+- The blocker checks domain age (RDAP, cached) for every site that isn't official, not only medium ones, so brand-new scam domains get blocked. In testing, the ClickFix page was replaced by the warning page about 1.6 s after navigation.
+
 ## [1.2.0] - 2026-11-23
 
 ### Added
@@ -32,6 +38,7 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - Offline demo pages and 38 false-positive guard tests.
 - An LLM hook for the team that receives the result title and snippet.
 
+[1.3.0]: https://github.com/amrelhaj87-cloud/Fraud-Extension/releases/tag/v1.3.0
 [1.2.0]: https://github.com/amrelhaj87-cloud/Fraud-Extension/releases/tag/v1.2.0
 [1.1.0]: https://github.com/amrelhaj87-cloud/Fraud-Extension/releases/tag/v1.1.0
 [1.0.0]: https://github.com/amrelhaj87-cloud/Fraud-Extension/releases/tag/v1.0.0

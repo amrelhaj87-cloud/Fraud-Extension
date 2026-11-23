@@ -46,7 +46,8 @@ Every warning names **who** is being impersonated and **which sector** they belo
 | Abused TLD (`.xyz`, `.top`, `.online`…) | +20 |
 | Free hosting (`linktr.ee`, `blogspot`, `netlify`…) with a brand | +40 |
 | Homograph (Cyrillic or Greek letters) | +40 |
-| Domain younger than 30 / 180 days (RDAP) | +35 / +15 |
+| Domain younger than 30 days (RDAP) | +35, and always **high** (at least 70) |
+| Domain younger than 180 days | +15 |
 | Sponsored search result | +15 |
 | HTTP, IP host, many hyphens or subdomains, very long name | +10 to +15 each |
 
@@ -78,7 +79,7 @@ After the demo pages, show the same extension on real Google Search and Maps.
 ## Tests
 
 ```powershell
-node test.js        # 77 scoring tests, including 38 false-positive guards
+node test.js        # 82 scoring tests, including 38 false-positive guards
 node test-rdap.js   # live RDAP lookup (needs internet)
 ```
 
