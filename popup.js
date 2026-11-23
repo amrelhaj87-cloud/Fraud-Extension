@@ -228,4 +228,10 @@ async function loadSettings() {
   });
 }
 
+try {
+  $("version").textContent = `v${chrome.runtime.getManifest().version}`;
+} catch {
+  // Not running as an extension page.
+}
+
 loadSettings().then(() => loadActiveTab());

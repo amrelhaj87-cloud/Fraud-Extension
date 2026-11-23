@@ -113,6 +113,7 @@ Keep API keys in the team's server, never in the extension.
 |---|---|
 | `manifest.json` | MV3 config |
 | `background.js` | Service worker: scoring, RDAP, per-tab results, LLM hook |
+| `CHANGELOG.md` | Version history (every change bumps the version) |
 | `i18n.js` | Arabic / English strings, UAE brand names and sectors |
 | `scoring.js` | Rules engine (pure ES module, also runs in Node) |
 | `rdap.js` | Domain age via the IANA RDAP bootstrap, cached for 7 days |
