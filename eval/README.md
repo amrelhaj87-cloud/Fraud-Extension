@@ -7,7 +7,10 @@ node eval/run.mjs            # summary
 node eval/run.mjs --details  # + missed scams and false alarms
 node eval/run.mjs --write    # also saves RESULTS.md
 npm run eval                 # same as --write
+node eval/fetch-ages.mjs     # look up domain ages (RDAP, network) into data/rdap-ages.json
 ```
+
+With `data/rdap-ages.json` present, a second table shows **URL + domain age**, the layer the browser adds (a domain under 30 days old is high risk on its own). The top-5000 set is a fixed sample of 400 there, to keep registry lookups polite. Ages are relative to the fetch date in the file; the phishing snapshot is from 2026-11-23.
 
 ## The two numbers
 
@@ -29,5 +32,6 @@ npm run eval                 # same as --write
 1. **Design rule changes on the TRAIN half only.** The TEST half shows whether a change works on links nobody looked at. The script lists missed links from the TRAIN half (and the UAE set) only.
 2. **Run it after every change** and write the numbers in `CHANGELOG.md`.
 3. **A new rule that adds false alarms needs a very good reason.**
-4. **URL only.** No domain-age lookup, IP owner or page scan, so the browser catches more than this. Do not quote these numbers as the extension's full accuracy, and do not quote the UAE numbers alone: 14 links is too few.
+4. **Main table is URL only; the second table adds domain age.** Neither has the IP owner or page scan, so the browser catches more than this. Do not quote these numbers as the extension's full accuracy, and do not quote the UAE numbers alone: 14 links is too few.
 5. The global phishing set is English-heavy and not UAE-specific. The goal is a UAE scam set built from real reports (see the report button).
+6. **`.ae` and `.gov.ae` have no public RDAP record**, so the domain-age check never fires for UAE domains (in the browser too). A new `.ae` scam domain is only caught by its name or its page.

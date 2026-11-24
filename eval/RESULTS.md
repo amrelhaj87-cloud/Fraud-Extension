@@ -1,4 +1,4 @@
-# FraudShield accuracy (v2.2.0)
+# FraudShield accuracy (v2.3)
 
 URL only: no domain-age lookup, no IP owner, no page scan.
 
@@ -15,6 +15,20 @@ URL only: no domain-age lookup, no IP owner, no page scan.
 | Top 5000 sites (Tranco) | 5000 | **0.0%** | 0.0% |
 | Legit free hosting + brand subdomains | 46 | **0.0%** | 0.0% |
 | **All legitimate** | 5153 | **0.0%** (1) | |
+
+## URL + domain age (RDAP ages fetched 2026-11-24)
+
+Domains under 30 days old are high risk on their own; under 180 days add points. "Age known" is how many links had a registry record (taken-down and reserved domains have none; free hosting reports the host's own age, e.g. pages.dev).
+
+| Set | Count | Age known | Flagged (medium+high) | High only |
+|---|---|---|---|---|
+| UAE scams (hand-labelled) | 14 | 21.4% | **92.9%** detected | 78.6% |
+| Global phishing, TRAIN half | 150 | 92.7% | **77.3%** detected | 31.3% |
+| Global phishing, TEST half | 150 | 91.3% | **67.3%** detected | 22.0% |
+| UAE legit + hard negatives (hand-labelled) | 18 | 77.8% | **5.6%** false alarms | 0.0% |
+| UAE legit sites | 89 | 40.4% | **0.0%** false alarms | 0.0% |
+| Top sites, fixed sample of 400 (Tranco) | 400 | 80.5% | **0.5%** false alarms | 0.0% |
+| Legit free hosting + brand subdomains | 46 | 76.1% | **0.0%** false alarms | 0.0% |
 
 ## Missed scams (UAE set and TRAIN half only), grouped by domain ending
 

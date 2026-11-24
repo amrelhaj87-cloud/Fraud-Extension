@@ -1,9 +1,29 @@
 # Changelog
 
-Every change raises the version in `manifest.json` and `package.json`, gets an entry here, and gets a git tag (`vX.Y.Z`).
+Every change raises the version, gets an entry here, and gets a git tag.
 
-- **Minor** (1.2.0 → 1.3.0): a new feature or a new detection rule.
-- **Patch** (1.2.0 → 1.2.1): a fix or small tweak.
+- **From 2.3 on, versions have two parts:** every change adds one to the second number (2.3 → 2.4 … 2.9), and a big update moves to the next first number (3.0). `manifest.json` holds `X.Y`, `package.json` holds `X.Y.0` (npm needs three parts), and the tag is `vX.Y`.
+- Up to 2.2.0: minor (1.2.0 → 1.3.0) for a feature or rule, patch (1.2.0 → 1.2.1) for a fix.
+
+## [2.3] - 2026-11-24
+
+### Changed
+- **Two-part versions from now on** (2.3, 2.4 … 2.9, then 3.0 for a big update). `manifest.json` holds `2.3`, `package.json` holds `2.3.0` for npm, and the tag is `v2.3`.
+
+### Added
+- **Domain age in the accuracy scale.** `node eval/fetch-ages.mjs` looks up registry ages with the extension's own `rdap.js` and caches them in `eval/data/rdap-ages.json`; `npm run eval` then shows a second table, **URL + domain age**, the way the browser scores. Data sets moved to `eval/sets.mjs`, shared by both scripts.
+
+### Accuracy scale
+| | URL only | URL + domain age |
+|---|---|---|
+| Global phishing, TRAIN half | 69.3% | **77.3%** (age known for 92.7%) |
+| Global phishing, **TEST half** | 60.0% | **67.3%** (age known for 91.3%) |
+| Flagged high, TEST half | 15.3% | 22.0% |
+| False alarms, top sites (sample of 400) | 0% | 0.5% (2: young `.live` sites) |
+| False alarms, UAE legit sites | 0% | 0% |
+
+### Found
+- **`.ae` and `.gov.ae` domains have no public RDAP record** (51 of the 89 UAE sites had no age). The domain-age check, including "under 30 days = high risk", never fires for `.ae` domains. A new `.ae` scam domain is only caught by its name or its page. Fix later in the backend (the .ae registry's WHOIS, which a browser extension cannot reach).
 
 ## [2.2.0] - 2026-11-24
 

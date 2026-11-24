@@ -5,8 +5,8 @@
  *   detection    share of scam links flagged (medium or high)
  *   false alarms share of legitimate links flagged
  *
- * URL ONLY: no domain-age lookup, no IP owner, no page scan. In the browser
- * those layers add more, so real detection is higher than what this measures.
+ * Main table: URL only. Second table (after `node eval/fetch-ages.mjs`):
+ * URL + domain age, as in the browser. No IP owner or page scan in either.
  *
  * Usage (from the project root):
  *   node eval/run.mjs              summary table
@@ -17,78 +17,73 @@
  * phishing set only; the TEST half shows whether a change generalises.
  */
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { analyzeDomain } from "../scoring.js";
+import { getRegistrableDomain } from "../rdap.js";
+import { SETS, legitTrancoSample } from "./sets.mjs";
 
-const DATA = new URL("./data/", import.meta.url);
 const args = new Set(process.argv.slice(2));
 const version = JSON.parse(readFileSync(new URL("../manifest.json", import.meta.url), "utf8")).version;
 
-// ---------------------------------------------------------------------------
-// Data
-// ---------------------------------------------------------------------------
-
-const readText = (name) =>
-  readFileSync(new URL(name, DATA), "utf8")
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line && !line.startsWith("#"));
-
-const golden = JSON.parse(readFileSync(new URL("uae-golden.json", DATA), "utf8")).cases;
-const openphish = JSON.parse(readFileSync(new URL("phish-openphish.json", DATA), "utf8"));
-
-const SETS = [
-  { name: "UAE scams (hand-labelled)", kind: "scam", urls: golden.filter((c) => c.truth === "phish").map((c) => c.url) },
-  { name: "Global phishing, TRAIN half", kind: "scam", urls: openphish.train, train: true },
-  { name: "Global phishing, TEST half", kind: "scam", urls: openphish.test },
-  { name: "UAE legit + hard negatives (hand-labelled)", kind: "legit", urls: golden.filter((c) => c.truth !== "phish").map((c) => c.url) },
-  { name: "UAE legit sites", kind: "legit", urls: readText("legit-uae.txt") },
-  { name: "Top 5000 sites (Tranco)", kind: "legit", urls: readText("legit-tranco-top5000.txt").map((d) => `https://${d}/`) },
-  { name: "Legit free hosting + brand subdomains", kind: "legit", urls: readText("legit-free-hosting.txt") }
-];
+// Domain ages from `node eval/fetch-ages.mjs` (optional).
+const AGES_FILE = new URL("./data/rdap-ages.json", import.meta.url);
+const ageCache = existsSync(AGES_FILE) ? JSON.parse(readFileSync(AGES_FILE, "utf8")) : null;
 
 // ---------------------------------------------------------------------------
 // Scoring
 // ---------------------------------------------------------------------------
 
-function score(url) {
+function score(url, withAge) {
   const parsed = new URL(url);
-  return analyzeDomain(parsed.hostname, {
-    protocol: parsed.protocol,
-    path: `${parsed.pathname}${parsed.search}`,
-    lang: "en"
-  });
+  const opts = { protocol: parsed.protocol, path: `${parsed.pathname}${parsed.search}`, lang: "en" };
+  let known = false;
+  if (withAge) {
+    const domain = getRegistrableDomain(parsed.hostname);
+    const age = domain ? ageCache.ages[domain] : undefined;
+    if (Number.isFinite(age)) {
+      opts.ageDays = age;
+      known = true;
+    }
+  }
+  return { ...analyzeDomain(parsed.hostname, opts), ageKnown: known };
 }
 
 const pct = (n, d) => (d ? `${((100 * n) / d).toFixed(1)}%` : "—");
 
-const rows = [];
-const details = { missed: [], falseAlarms: [] };
-
-for (const set of SETS) {
-  let flagged = 0;
-  let high = 0;
-  let total = 0;
-  for (const url of set.urls) {
-    let result;
-    try {
-      result = score(url);
-    } catch {
-      continue; // unparsable URL
+function measure(sets, withAge, details) {
+  const rows = [];
+  for (const set of sets) {
+    let flagged = 0;
+    let high = 0;
+    let total = 0;
+    let aged = 0;
+    for (const url of set.urls) {
+      let result;
+      try {
+        result = score(url, withAge);
+      } catch {
+        continue; // unparsable URL
+      }
+      total += 1;
+      if (result.ageKnown) aged += 1;
+      const isFlagged = result.level === "medium" || result.level === "high";
+      if (isFlagged) flagged += 1;
+      if (result.level === "high") high += 1;
+      if (!details) continue;
+      if (set.kind === "scam" && !isFlagged && (set.train || !set.name.startsWith("Global"))) {
+        details.missed.push({ set: set.name, url, score: result.score });
+      }
+      if (set.kind === "legit" && isFlagged) {
+        details.falseAlarms.push({ set: set.name, url, score: result.score, reasons: result.reasons });
+      }
     }
-    total += 1;
-    const isFlagged = result.level === "medium" || result.level === "high";
-    if (isFlagged) flagged += 1;
-    if (result.level === "high") high += 1;
-    if (set.kind === "scam" && !isFlagged && (set.train || !set.name.startsWith("Global"))) {
-      details.missed.push({ set: set.name, url, score: result.score });
-    }
-    if (set.kind === "legit" && isFlagged) {
-      details.falseAlarms.push({ set: set.name, url, score: result.score, reasons: result.reasons });
-    }
+    rows.push({ ...set, total, flagged, high, aged });
   }
-  rows.push({ ...set, total, flagged, high });
+  return rows;
 }
+
+const details = { missed: [], falseAlarms: [] };
+const rows = measure(SETS, false, details);
 
 // ---------------------------------------------------------------------------
 // Output
@@ -109,6 +104,24 @@ lines.push("", "| Legitimate links | Count | False alarms (medium+high) | High o
 lines.push("|---|---|---|---|");
 for (const r of legitRows) lines.push(`| ${r.name} | ${r.total} | **${pct(r.flagged, r.total)}** | ${pct(r.high, r.total)} |`);
 lines.push(`| **All legitimate** | ${legitTotal} | **${pct(legitFlagged, legitTotal)}** (${legitFlagged}) | |`);
+
+// URL + domain age (the layer the browser adds), when ages were fetched.
+if (ageCache) {
+  const ageSets = SETS.map((set) =>
+    set.big ? { ...set, name: "Top sites, fixed sample of 400 (Tranco)", urls: legitTrancoSample() } : set
+  );
+  const ageRows = measure(ageSets, true, null);
+  lines.push("", `## URL + domain age (RDAP ages fetched ${ageCache.fetchedAt})`, "");
+  lines.push("Domains under 30 days old are high risk on their own; under 180 days add points. " +
+    "\"Age known\" is how many links had a registry record (taken-down and reserved domains have none; " +
+    "free hosting reports the host's own age, e.g. pages.dev).", "");
+  lines.push("| Set | Count | Age known | Flagged (medium+high) | High only |");
+  lines.push("|---|---|---|---|---|");
+  for (const r of ageRows) {
+    const label = r.kind === "scam" ? "detected" : "false alarms";
+    lines.push(`| ${r.name} | ${r.total} | ${pct(r.aged, r.total)} | **${pct(r.flagged, r.total)}** ${label} | ${pct(r.high, r.total)} |`);
+  }
+}
 
 if (args.has("--details") || args.has("--write")) {
   lines.push("", "## Missed scams (UAE set and TRAIN half only), grouped by domain ending", "");
