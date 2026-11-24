@@ -206,6 +206,22 @@ for (const hostname of [
   expectHigh(hostname);
 }
 
+// 11) Raw IP links: public IPs are at least medium, high over plain HTTP;
+//     local network / loopback addresses are not flagged.
+for (const ip of ["142.250.201.110", "45.33.32.156"]) {
+  const https = analyzeDomain(ip, { protocol: "https:" });
+  check(`${ip} over https -> medium`, https.level === "medium", https);
+  const http = analyzeDomain(`http://${ip}/login`, { protocol: "http:" });
+  check(`${ip} over http -> high`, http.level === "high", http);
+}
+for (const local of ["192.168.1.1", "127.0.0.1", "10.0.0.5", "172.20.1.1", "[::1]"]) {
+  const result = analyzeDomain(local, { protocol: "https:" });
+  check(`${local} (local network) -> low`, result.level === "low", result);
+}
+// Hex / decimal IP forms are normalised to dotted form by the URL parser.
+const hexIp = analyzeDomain("http://0x8efac96e/", { protocol: "http:" });
+check("hex IP 0x8efac96e -> high", hexIp.level === "high", hexIp);
+
 console.log("");
 console.log(`Results: ${passed} passed, ${failed} failed`);
 if (failed > 0) process.exitCode = 1;

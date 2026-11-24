@@ -49,6 +49,9 @@ const OFFICIAL_DOMAINS = [
   "adnoc.ae"
 ];
 
+// Points for a link that uses a public IP address instead of a domain name.
+const IP_HOST_POINTS = 45;
+
 // Registry-restricted suffixes: only government bodies can register these.
 const OFFICIAL_SUFFIXES = ["gov.ae"];
 
@@ -300,8 +303,15 @@ export function analyzeDomain(hostname, opts = {}) {
   if (hyphenCount > 2) {
     add(10, t("manyHyphens"));
   }
+  // A raw IP instead of a name: legitimate sites almost never send people to
+  // one, phishing kits often do. 45 alone is medium; with plain HTTP it is high.
+  // Local network / loopback addresses (router pages, dev servers) are exempt.
   if (domain.isIp) {
-    add(10, t("ip"));
+    if (isPrivateIp(host)) {
+      reasons.push(t("ipLocal"));
+    } else {
+      add(IP_HOST_POINTS, t("ip"));
+    }
   }
   if (host.length > 30) {
     add(10, t("long"));
@@ -462,6 +472,22 @@ function splitRegistrableDomain(host) {
     subdomainCount: Math.max(0, labels.length - 2),
     isIp: false
   };
+}
+
+function isPrivateIp(host) {
+  const h = host.replace(/^\[|\]$/g, "");
+  const v4 = h.split(".").map(Number);
+  if (v4.length === 4 && v4.every((n) => Number.isInteger(n))) {
+    const [a, b] = v4;
+    return (
+      a === 10 || a === 127 || a === 0 ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      (a === 169 && b === 254) ||
+      (a === 100 && b >= 64 && b <= 127) // carrier-grade NAT
+    );
+  }
+  return h === "::1" || /^f[cd]/i.test(h) || /^fe[89ab]/i.test(h);
 }
 
 function isIpAddress(host) {

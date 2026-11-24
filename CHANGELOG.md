@@ -5,6 +5,12 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - **Minor** (1.2.0 → 1.3.0): a new feature or a new detection rule.
 - **Patch** (1.2.0 → 1.2.1): a fix or small tweak.
 
+## [1.5.1] - 2026-11-24
+
+### Fixed
+- **Links that use a raw IP address were rated "Low risk".** A public IP now adds 45 points (medium on its own) instead of 10. With plain HTTP (+15) it reaches high (60) and is blocked by auto-block. Hex/decimal forms (`http://0x8efac96e/`) are covered because the URL parser turns them into dotted form first.
+- Local network and loopback addresses (`192.168.x.x`, `10.x`, `172.16–31.x`, `127.0.0.1`, `::1`, `fc00::/7`, `fe80::/10`) are not penalised, so router pages and local dev servers are not flagged. They show the reason "Local network address".
+
 ## [1.5.0] - 2026-11-23
 
 ### Added
