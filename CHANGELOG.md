@@ -5,6 +5,11 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - **Minor** (1.2.0 → 1.3.0): a new feature or a new detection rule.
 - **Patch** (1.2.0 → 1.2.1): a fix or small tweak.
 
+## [2.0.1] - 2026-11-24
+
+### Added
+- Demo helper, hidden on purpose: on the report page, **double-click a report number** (e.g. `FS-0001`) in "My reports" to delete that report. If it was the place or site on the page, the form comes back, so the same scam can be reported again during a demo. Numbers continue from the highest one left, so deleting everything starts again at `FS-0001`.
+
 ## [2.0.0] - 2026-11-24
 
 Major version: tonight's work turns FraudShield from a link checker into a tool for the scams that actually hit people in the UAE (fake Maps listings, fake customer-service numbers, fake UAE PASS pages), and lets the user report them.

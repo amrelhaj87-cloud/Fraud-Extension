@@ -156,6 +156,9 @@
       const id = document.createElement("span");
       id.className = "id";
       id.textContent = report.id;
+      // DEMO ONLY, deliberately invisible: double-click the report number to
+      // delete that report, so the same place can be reported again on stage.
+      id.addEventListener("dblclick", () => void deleteReport(report.id));
       const what = document.createElement("span");
       what.className = "what";
       what.textContent = targetLabel(report.target);
@@ -172,6 +175,16 @@
       li.append(id, what, when, status);
       list.appendChild(li);
     }
+  }
+
+  async function deleteReport(id) {
+    const reports = (await store.get(REPORTS_KEY)) || [];
+    await store.set(REPORTS_KEY, reports.filter((r) => r.id !== id));
+    // If the deleted one was this page's target, offer the form again.
+    $("done").hidden = true;
+    $("consent").checked = false;
+    $("send").disabled = false;
+    await renderAuth();
   }
 
   function showDone(text) {
@@ -217,7 +230,8 @@
   // (citizen reports) here and keep the local copy for "My reports".
   async function sendReport(user, target, note) {
     const reports = (await store.get(REPORTS_KEY)) || [];
-    const id = `FS-${String(reports.length + 1).padStart(4, "0")}`;
+    const last = reports.reduce((max, r) => Math.max(max, Number(String(r.id).slice(3)) || 0), 0);
+    const id = `FS-${String(last + 1).padStart(4, "0")}`;
     const report = {
       id,
       at: Date.now(),
