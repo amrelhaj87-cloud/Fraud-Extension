@@ -1,4 +1,4 @@
-# FraudShield accuracy (v2.0.2)
+# FraudShield accuracy (v2.0.3)
 
 URL only: no domain-age lookup, no IP owner, no page scan.
 
@@ -11,10 +11,10 @@ URL only: no domain-age lookup, no IP owner, no page scan.
 | Legitimate links | Count | False alarms (medium+high) | High only |
 |---|---|---|---|
 | UAE legit + hard negatives (hand-labelled) | 18 | **5.6%** | 0.0% |
-| UAE legit sites | 89 | **2.2%** | 0.0% |
-| Top 5000 sites (Tranco) | 5000 | **0.1%** | 0.0% |
+| UAE legit sites | 89 | **0.0%** | 0.0% |
+| Top 5000 sites (Tranco) | 5000 | **0.0%** | 0.0% |
 | Legit pages on free hosting | 27 | **0.0%** | 0.0% |
-| **All legitimate** | 5134 | **0.1%** (7) | |
+| **All legitimate** | 5134 | **0.0%** (1) | |
 
 ## Missed scams (UAE set and TRAIN half only), grouped by domain ending
 
@@ -37,9 +37,3 @@ URL only: no domain-age lookup, no IP owner, no page scan.
 ## False alarms (legitimate links flagged)
 
 - 45 `https://www.dubaipolice-museum.example.org/visit` (UAE legit + hard negatives (hand-labelled)): Impersonates Dubai Police (law enforcement) but is not its official site
-- 45 `https://www.etihadwe.ae/` (UAE legit sites): Impersonates Etihad Airways (airline) but is not its official site
-- 45 `https://www.mashreq.com/en/uae/neo/` (UAE legit sites): Impersonates Mashreq (UAE bank) but is not its official site
-- 40 `https://xn--12c1ezaww.com/` (Top 5000 sites (Tranco)): Domain uses non-Latin look-alike characters (possible homograph attack)
-- 40 `https://xn--18-3qi3cza3b2a2dxc4b9a.com/` (Top 5000 sites (Tranco)): Domain uses non-Latin look-alike characters (possible homograph attack)
-- 60 `https://xn--42cf7cgd7gxbd4m7c.cc/` (Top 5000 sites (Tranco)): Domain uses non-Latin look-alike characters (possible homograph attack); Untrusted extension often used in scam campaigns (.cc)
-- 40 `https://xn--l3ca4b6dsc1b.com/` (Top 5000 sites (Tranco)): Domain uses non-Latin look-alike characters (possible homograph attack)

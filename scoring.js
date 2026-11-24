@@ -28,6 +28,7 @@ const OFFICIAL_DOMAINS = [
   "emiratesnbd.com",
   "fab.ae",
   "mashreqbank.com",
+  "mashreq.com",
   "dib.ae",
   "rakbank.ae",
   "cbd.ae",
@@ -44,6 +45,8 @@ const OFFICIAL_DOMAINS = [
   "emiratesislamic.ae",
   "nbf.ae",
   "etihad.com",
+  "etihadwe.ae", // Etihad Water & Electricity (not the airline)
+  "etihadrail.ae",
   "emirates.com",
   "tdra.gov.ae",
   "adnoc.ae"
@@ -232,8 +235,10 @@ export function analyzeDomain(hostname, opts = {}) {
   const decoded = decodePunycodeHostname(host);
   host = decoded.host;
 
-  const hasNonLatin = /[\u0080-\u{10FFFF}]/u.test(host);
-  if (hasNonLatin) {
+  // Only names disguised as Latin letters count: a label that mixes Latin
+  // with other scripts (аdcb), or one made entirely of look-alikes (аррӏе).
+  // Sites written in their own script (Thai, Arabic, Chinese) are normal.
+  if (host.split(".").some(isLatinDisguise)) {
     add(40, t("homograph"));
   } else if (decoded.failed) {
     add(40, t("punycodeBad"));
@@ -253,7 +258,9 @@ export function analyzeDomain(hostname, opts = {}) {
     );
   }
 
-  const containedBrand = BRANDS.find((brand) => containsBrand(visualHost, brand));
+  // Latin brand token, or a UAE body's name written in Arabic (شرطة-أبوظبي.com).
+  const containedBrand =
+    BRANDS.find((brand) => containsBrand(visualHost, brand)) || findArabicBrand(host);
   if (containedBrand) {
     add(45, t("contains", { brand: brandName(containedBrand) }));
   }
@@ -637,6 +644,39 @@ function normalizeLookalikes(value) {
     .replace(/1/g, "l")
     .replace(/3/g, "e")
     .replace(/5/g, "s");
+}
+
+// Arabic names of the protected bodies, from i18n.js (e.g. "شرطة أبوظبي",
+// "بنك المشرق" and "المشرق"), normalised so spelling variants match.
+const normArabic = (s) =>
+  String(s)
+    .replace(/[أإآ]/g, "ا")
+    .replace(/ة/g, "ه")
+    .replace(/ى/g, "ي")
+    .replace(/[\s\-_.]/g, "");
+// Too short or too common to mean the brand on their own.
+const ARABIC_NAME_SKIP = new Set(["اتصالات", "دو"]);
+const ARABIC_BRANDS = Object.entries((I18N && I18N.BRANDS) || {}).flatMap(([key, value]) => {
+  const full = String(value.ar || "").replace(/\(.*?\)/g, "").trim();
+  const names = [full];
+  if (/^(بنك|مصرف) /.test(full)) names.push(full.split(" ").slice(1).join(" "));
+  return names
+    .filter((n) => /[؀-ۿ]/.test(n) && !ARABIC_NAME_SKIP.has(n) && normArabic(n).length >= 4)
+    .map((n) => ({ key, name: normArabic(n) }));
+});
+
+function findArabicBrand(host) {
+  if (!/[؀-ۿ]/.test(host)) return null;
+  const text = normArabic(host);
+  const hit = ARABIC_BRANDS.find((b) => text.includes(b.name));
+  return hit ? hit.key : null;
+}
+
+function isLatinDisguise(label) {
+  if (!/[\u0080-\u{10FFFF}]/u.test(label)) return false;
+  const latinLetters = /[a-z]/i.test(label);
+  const foldsToLatin = /^[a-z0-9-]+$/i.test(foldConfusables(label));
+  return latinLetters || foldsToLatin;
 }
 
 function foldConfusables(value) {

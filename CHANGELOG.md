@@ -5,6 +5,25 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - **Minor** (1.2.0 → 1.3.0): a new feature or a new detection rule.
 - **Patch** (1.2.0 → 1.2.1): a fix or small tweak.
 
+## [2.0.3] - 2026-11-24
+
+### Fixed (found by the accuracy scale)
+- **Mashreq's real site `mashreq.com` was flagged as impersonating Mashreq.** Added `mashreq.com`, plus `etihadwe.ae` (Etihad Water & Electricity, not the airline) and `etihadrail.ae`, to the official list.
+- **Sites written in their own script (Thai, Arabic, Chinese…) were flagged as homograph attacks.** The rule now fires only for names disguised as Latin: a label that mixes Latin with another script (`аdcb`, `mаshreq`), or one made entirely of Latin look-alikes (`аррӏе`).
+
+### Added
+- UAE body names **written in Arabic inside a domain** count as impersonation (+45): `شرطة-أبوظبي.com`, `المشرق-تحديث.com`, `سالك-شحن.xyz`. Spelling variants (أ/ا, ة/ه) match. Before, these were only caught by the old blanket non-Latin rule.
+- 14 regression tests (142 total).
+
+### Accuracy scale
+| | v2.0.2 | v2.0.3 |
+|---|---|---|
+| False alarms, all legitimate (5134) | 7 | **1** |
+| False alarms, UAE legit sites (89) | 2.2% | **0.0%** |
+| Detection, UAE scams / global train / global test | 92.9% / 36.7% / 34.7% | unchanged |
+
+The one remaining false alarm is `dubaipolice-museum.example.org` from the team's hard-negative set: a made-up domain with "dubaipolice" in its name. Flagging a non-official domain that carries a police name is intended.
+
 ## [2.0.2] - 2026-11-24
 
 ### Added

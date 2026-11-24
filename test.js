@@ -310,6 +310,26 @@ for (const [text, expected] of phoneCases) {
     JSON.stringify(got) === JSON.stringify(expected), got);
 }
 
+// 14) False alarms found by the accuracy scale (v2.0.3) must not come back.
+for (const host of ["mashreq.com", "www.mashreq.com", "etihadwe.ae", "etihadrail.ae"]) {
+  const r = analyzeDomain(host);
+  check(`${host} -> official (scale false alarm)`, r.level === "safe", r);
+}
+for (const host of ["xn--12c1ezaww.com", "xn--l3ca4b6dsc1b.com", "مطعم-الريف.com"]) {
+  const r = analyzeDomain(host);
+  check(`${host} -> own-script site is not a homograph`, r.level === "low", r);
+}
+// Disguised Latin is still caught: mixed scripts, or all look-alike letters.
+for (const host of ["xn--dcb-5cd.com", "mаshreq.com", "аррӏе.com"]) {
+  const r = analyzeDomain(host);
+  check(`${host} -> still flagged as homograph`, r.level !== "low", r);
+}
+// UAE body names written in Arabic inside a domain.
+for (const host of ["شرطة-أبوظبي.com", "شرطه-ابوظبي-مخالفات.net", "المشرق-تحديث.com", "سالك-شحن.xyz"]) {
+  const r = analyzeDomain(host);
+  check(`${host} -> Arabic brand impersonation flagged`, r.level === "medium" || r.level === "high", r);
+}
+
 console.log("");
 console.log(`Results: ${passed} passed, ${failed} failed`);
 if (failed > 0) process.exitCode = 1;
