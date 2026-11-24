@@ -10,6 +10,7 @@ import { getIpOwner } from "./ip-intel.js";
 import { initBlocker, getSettings } from "./blocker.js";
 import { initDownloadGuard } from "./downloads.js";
 import "./i18n.js";
+import "./phone-claims.js";
 
 const I18N = globalThis.FE_I18N;
 
@@ -22,6 +23,8 @@ const MAX_CONCURRENT_DOMAINS = 5;
 const MAX_TAB_RESULTS = 250;
 const TAB_STORAGE_PREFIX = "fe:tab-results:";
 const LLM_TIMEOUT_MS = 6000;
+// Known body + personal mobile number in a search result (fake customer service).
+const BRAND_PHONE_POINTS = 60;
 
 // Last known results per tab. Storage is the crash/restart-safe backup.
 const tabResultsMemory = new Map();
@@ -135,6 +138,12 @@ async function analyzeTarget(target, getAge, lang) {
     ]);
     scored = analyzeDomain(hostname, { ...scoringOptions, ageDays, ipOwner });
 
+    // A known bank / police / government name with a personal mobile number
+    // in the result text (fake "customer service" ads and listings).
+    if (scored.level !== "safe") {
+      scored = applyBrandPhone(scored, `${target.title || ""} ${target.snippet || ""}`, lang);
+    }
+
     // Only gray-zone results are eligible for the optional LLM hook.
     if (scored.level === "medium") {
       scored = await blendWithLlm(scored, {
@@ -242,6 +251,17 @@ function withTimeout(promise, timeoutMs) {
   return Promise.race([promise, timeout]).finally(() => {
     if (timer !== null) clearTimeout(timer);
   });
+}
+
+export function applyBrandPhone(scored, text, lang) {
+  const hit = globalThis.FE_PHONE.findBrandMobile(text);
+  if (!hit) return scored;
+  const score = Math.min(100, scored.score + BRAND_PHONE_POINTS);
+  const reason = I18N.t("searchPhone", lang, {
+    brand: I18N.brandLabel(hit.brand, lang),
+    phone: hit.phone
+  });
+  return { ...scored, score, level: levelForScore(score), reasons: [...scored.reasons, reason] };
 }
 
 function applySponsoredBoost(scored, lang) {

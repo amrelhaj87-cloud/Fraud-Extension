@@ -4,6 +4,7 @@
  */
 
 import { analyzeDomain } from "./scoring.js";
+import "./phone-claims.js";
 import { getIpOwner, isGoogleServiceIp, classifyRdap } from "./ip-intel.js";
 
 let passed = 0;
@@ -289,6 +290,25 @@ const home = analyzeDomain("94.200.1.1", { protocol: "https:", ipOwner: { kind: 
 check("home/mobile connection IP -> high", home.level === "high", home);
 const unknownOwner = analyzeDomain("45.33.32.156", { protocol: "https:", ipOwner: null });
 check("owner unknown -> medium (unchanged)", unknownOwner.level === "medium", unknownOwner);
+
+// 13) Known body + personal mobile number (fake "customer service").
+const PH = globalThis.FE_PHONE;
+const phoneCases = [
+  ["ADCB Customer Care: call 055 123 4567", { brand: "adcb", phone: "0551234567" }],
+  ["شرطة أبوظبي — اتصل على +971 50 123 4567", { brand: "adpolice", phone: "+971501234567" }],
+  ["Emirates Post delivery: 00971-52-765-4321", { brand: "emiratespost", phone: "+971527654321" }],
+  ["بريد الإمارات ٠٥٠١٢٣٤٥٦٧", { brand: "emiratespost", phone: "0501234567" }],
+  ["ADCB contact centre 600 50 2030", null],          // official 600 number
+  ["Abu Dhabi Police 800 2626", null],                // official 800 number
+  ["Abu Dhabi Police landline 02 512 2222", null],    // landline
+  ["My bakery, call 050 123 4567", null],             // no brand claimed
+  ["fab deals, call 050 123 4567", null]              // 'fab' alone is not the bank
+];
+for (const [text, expected] of phoneCases) {
+  const got = PH.findBrandMobile(text);
+  check(`brand+mobile: "${text}" -> ${JSON.stringify(expected)}`,
+    JSON.stringify(got) === JSON.stringify(expected), got);
+}
 
 console.log("");
 console.log(`Results: ${passed} passed, ${failed} failed`);

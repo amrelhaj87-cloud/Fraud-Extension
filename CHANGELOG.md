@@ -5,6 +5,18 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - **Minor** (1.2.0 → 1.3.0): a new feature or a new detection rule.
 - **Patch** (1.2.0 → 1.2.1): a fix or small tweak.
 
+## [1.8.0] - 2026-11-24
+
+### Added
+- **Fake "customer service" numbers** (`phone-claims.js`). Banks, police and government bodies publish landlines and 800 / 600 numbers, never a personal mobile. A known UAE name (English or Arabic) together with a UAE mobile number (`05x`, `+9715x`, `009715x`, Arabic digits too) is now:
+  - **Google Maps:** +60, high on its own, **with or without a website**. Before, a place like "شرطة أبوظبي - مكتب سداد المخالفات" with only a mobile number scored 25 (low).
+  - **Google Search:** the title and snippet of each result are checked too; a non-official result with a known name and a mobile number gets +60 (high).
+  - Short or common words (`fab`, `du`, `e&`, `تم`) do not count as a claim, to avoid false alarms.
+- Demo: Maps has a new "شرطة برقم جوال" tab; Search has a fake "ADCB Customer Care" result with a mobile number.
+
+### Changed
+- Maps: a personal mobile number on a bank / government / courier category place (no known name) is now +35 (medium) instead of +25.
+
 ## [1.7.0] - 2026-11-24
 
 ### Added

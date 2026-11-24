@@ -138,6 +138,12 @@
 
     const host = place.website ? place.website.hostname.toLowerCase() : "";
 
+    // Place claims to be a known bank / police / government body.
+    const brand = BRAND_SITES.find((b) =>
+      b.words.some((w) => w.length > 2 && text.includes(w.toLowerCase()))
+    );
+    const claimedKey = globalThis.FE_PHONE ? globalThis.FE_PHONE.claimedBrand(text) : "";
+
     if (host) {
       const free = FREE_HOSTING.find((d) => hostMatches(host, d));
       if (free && sensitive) {
@@ -145,9 +151,6 @@
       }
 
       // Place claims to be a known brand but links somewhere else.
-      const brand = BRAND_SITES.find((b) =>
-        b.words.some((w) => w.length > 2 && text.includes(w.toLowerCase()))
-      );
       if (brand && !brand.domains.some((d) => hostMatches(host, d))) {
         add(50, T("mapsBrand", { domain: brand.domains[0] }));
       }
@@ -156,8 +159,14 @@
     }
 
     // UAE mobile numbers: +9715x / 05x. Official bodies use landlines / 800 numbers.
-    if (place.phone && sensitive && /^(\+?971|00971|0)5\d{7,8}$/.test(place.phone)) {
-      add(25, T("mapsPhone", { phone: place.phone }));
+    // A known bank / police / government name with a personal mobile is the
+    // fake "customer service" scam: high on its own, website or not.
+    const mobile = place.phone && /^(\+?971|00971|0)5\d{7,8}$/.test(place.phone);
+    if (mobile && (brand || claimedKey)) {
+      const label = claimedKey ? I18N.brandLabel(claimedKey, LANG) : place.name;
+      add(60, T("mapsBrandPhone", { brand: label, phone: place.phone }));
+    } else if (mobile && sensitive) {
+      add(35, T("mapsPhone", { phone: place.phone }));
     }
 
     if (score !== (base ? base.score : 0) || !base) {

@@ -32,6 +32,7 @@
       { label: "بنك رسمي", name: "ADCB - Abu Dhabi Commercial Bank", cat: "Bank", site: "https://www.adcb.com/", phone: "+97126210090" },
       { label: "بنك برابط مجاني", name: "ADCB Customer Service Center", cat: "Bank", site: "https://adcb-support.linktr.ee/", phone: "+971501234567" },
       { label: "رابط منتحل", name: "Emirates Post - Mussafah", cat: "Post office", site: "https://emiratespost-delivery.com/", phone: "+97126220000" },
+      { label: "شرطة برقم جوال", name: "شرطة أبوظبي - مكتب سداد المخالفات", cat: "Government office", site: "", phone: "+971501234567" },
       { label: "محل عادي", name: "Al Reef Bakery", cat: "Bakery", site: "https://www.noon.com/", phone: "+97125550000" }
     ];
     const tabs = document.getElementById("tabs");
@@ -44,8 +45,10 @@
       const h1 = document.createElement("h1"); h1.textContent = p.name;
       const cat = document.createElement("button"); cat.className = "cat"; cat.setAttribute("jsaction", "pane.rating.category"); cat.textContent = p.cat;
       const siteRow = document.createElement("div"); siteRow.className = "row";
-      const a = document.createElement("a"); a.href = p.site; a.setAttribute("data-item-id", "authority"); a.textContent = "🌐 " + new URL(p.site).hostname;
-      siteRow.append(a);
+      if (p.site) {
+        const a = document.createElement("a"); a.href = p.site; a.setAttribute("data-item-id", "authority"); a.textContent = "🌐 " + new URL(p.site).hostname;
+        siteRow.append(a);
+      }
       const phoneRow = document.createElement("div"); phoneRow.className = "row";
       const ph = document.createElement("button"); ph.className = "phone"; ph.setAttribute("data-item-id", "phone:tel:" + p.phone); ph.textContent = "📞 " + p.phone;
       phoneRow.append(ph);

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "FraudShield",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "كشف الروابط والمواقع الاحتيالية في بحث Google وخرائط Google داخل الإمارات — يعمل محليًا بالكامل.",
   "permissions": [
     "storage",
@@ -46,6 +46,7 @@
       ],
       "js": [
         "i18n.js",
+        "phone-claims.js",
         "content-maps.js"
       ],
       "run_at": "document_idle",

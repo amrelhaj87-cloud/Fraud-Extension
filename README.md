@@ -76,7 +76,10 @@ Levels: `low` < 30 ≤ `medium` < 60 ≤ `high`.
 Maps adds three rules of its own:
 - A free site for a bank, government or courier place
 - A place named after a known brand that links to a site that isn't the brand's official one
-- A personal mobile number (05x) on an official-looking place
+- A known bank, police or government name with a personal mobile number (05x / +9715x): +60, high on its own, website or not (the fake "customer service" scam)
+- A personal mobile number on a bank / government / courier category place: +35
+
+Search results get the same check on their title and snippet: a known name plus a personal mobile number on a non-official site is +60 (high). Official 800 / 600 numbers and landlines never count. The matcher is `phone-claims.js`.
 
 ## Install
 
@@ -91,9 +94,9 @@ cd "Fraud Extension"
 python -m http.server 8765 --bind 127.0.0.1
 ```
 
-- Search: http://127.0.0.1:8765/demo/search-mock.html. It has 7 results: 2 official, 1 normal news site, and 4 scams (a sponsored ad, a typosquat, brand + `.top`, and an Emirates Post page on `linktr.ee`).
+- Search: http://127.0.0.1:8765/demo/search-mock.html. It has 8 results: 2 official, 1 normal news site, and 5 scams (a sponsored ad, a typosquat, brand + `.top`, an Emirates Post page on `linktr.ee`, and a fake "ADCB customer care" result with a mobile number).
 - UAE PASS: http://127.0.0.1:8765/demo/uaepass-mock.html. A fake UAE PASS sign-in that asks for the Emirates ID and an OTP; it is blocked as high risk. Nothing on the page is sent anywhere.
-- Maps: http://127.0.0.1:8765/demo/maps-mock.html. Click the tabs to switch between an official bank, a bank on a free link with a mobile number, an impersonating courier site, and a normal shop.
+- Maps: http://127.0.0.1:8765/demo/maps-mock.html. Click the tabs to switch between an official bank, a bank on a free link with a mobile number, an impersonating courier site, a fake "Abu Dhabi Police" office with no website and only a mobile number, and a normal shop.
 
 After the demo pages, show the same extension on real Google Search and Maps.
 
@@ -146,6 +149,7 @@ Keep API keys in the team's server, never in the extension.
 | `content-page.js` | Page scanner (phone / card / ClickFix) |
 | `content-search.js`, `content.css` | Google Search badges |
 | `content-maps.js`, `content-maps.css` | Google Maps banner |
+| `phone-claims.js` | Known UAE body + personal mobile number matcher (Search and Maps) |
 | `blocker.js` | Blocks high-risk navigations before they load |
 | `warning.html`, `warning.js`, `warning.css` | The blocking page |
 | `popup.html`, `popup.js`, `popup.css` | Toolbar popup |
