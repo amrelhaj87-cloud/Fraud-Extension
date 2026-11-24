@@ -27,7 +27,7 @@ globalThis.chrome = {
   }
 };
 
-const { getDomainAgeDays } = await import("./rdap.js");
+const { getDomainAgeDays } = await import("../rdap.js");
 
 const domains = [
   "google.com",

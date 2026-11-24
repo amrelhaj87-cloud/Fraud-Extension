@@ -3,11 +3,11 @@
 Measures the scorer before and after every rule change.
 
 ```
-node eval/run.mjs            # summary
-node eval/run.mjs --details  # + missed scams and false alarms
-node eval/run.mjs --write    # also saves RESULTS.md
+node dev/eval/run.mjs            # summary
+node dev/eval/run.mjs --details  # + missed scams and false alarms
+node dev/eval/run.mjs --write    # also saves RESULTS.md
 npm run eval                 # same as --write
-node eval/fetch-ages.mjs     # look up domain ages (RDAP, network) into data/rdap-ages.json
+node dev/eval/fetch-ages.mjs     # look up domain ages (RDAP, network) into data/rdap-ages.json
 ```
 
 With `data/rdap-ages.json` present, a second table shows **URL + domain age**, the layer the browser adds (a domain under 30 days old is high risk on its own). The top-5000 set is a fixed sample of 400 there, to keep registry lookups polite. Ages are relative to the fetch date in the file; the phishing snapshot is from 2026-11-23.
@@ -17,7 +17,7 @@ With `data/rdap-ages.json` present, a second table shows **URL + domain age**, t
 - **Detection:** share of scam links flagged medium or high. Higher is better.
 - **False alarms:** share of legitimate links flagged medium or high. Lower is better, and it matters more: a tool that cries wolf gets uninstalled.
 
-## Data (`eval/data/`)
+## Data (`dev/eval/data/`)
 
 | File | What | Source |
 |---|---|---|

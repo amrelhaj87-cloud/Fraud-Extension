@@ -1,13 +1,13 @@
 /**
  * Looks up domain ages (RDAP) for the scale's links and caches them in
- * eval/data/rdap-ages.json, so `node eval/run.mjs` can measure the
+ * dev/eval/data/rdap-ages.json, so `node dev/eval/run.mjs` can measure the
  * "URL + domain age" layer without network access.
  *
  * Uses the extension's own rdap.js, so it measures exactly what the browser
  * does. Only public registry data is requested (the domain name).
  *
- *   node eval/fetch-ages.mjs            fetch what is missing
- *   node eval/fetch-ages.mjs --refresh  fetch everything again
+ *   node dev/eval/fetch-ages.mjs            fetch what is missing
+ *   node dev/eval/fetch-ages.mjs --refresh  fetch everything again
  *
  * Ages are relative to the fetch date stored in the file. The phishing
  * snapshot is from 2026-11-23, so ages are close to what a victim saw.
@@ -27,7 +27,7 @@ globalThis.chrome = {
     }
   }
 };
-const { getDomainAgeDays, getRegistrableDomain } = await import("../rdap.js");
+const { getDomainAgeDays, getRegistrableDomain } = await import("../../rdap.js");
 const { legitTrancoSample, allEvalUrls } = await import("./sets.mjs");
 
 const CACHE = new URL("./data/rdap-ages.json", import.meta.url);

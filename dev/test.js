@@ -3,9 +3,9 @@
  * Run with: node test.js
  */
 
-import { analyzeDomain } from "./scoring.js";
-import "./phone-claims.js";
-import { getIpOwner, isGoogleServiceIp, classifyRdap } from "./ip-intel.js";
+import { analyzeDomain } from "../scoring.js";
+import "../phone-claims.js";
+import { getIpOwner, isGoogleServiceIp, classifyRdap } from "../ip-intel.js";
 
 let passed = 0;
 let failed = 0;

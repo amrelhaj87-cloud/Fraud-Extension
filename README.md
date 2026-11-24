@@ -107,17 +107,17 @@ cd "Fraud Extension"
 python -m http.server 8765 --bind 127.0.0.1
 ```
 
-- Search: http://127.0.0.1:8765/demo/search-mock.html. It has 8 results: 2 official, 1 normal news site, and 5 scams (a sponsored ad, a typosquat, brand + `.top`, an Emirates Post page on `linktr.ee`, and a fake "ADCB customer care" result with a mobile number).
-- UAE PASS: http://127.0.0.1:8765/demo/uaepass-mock.html. A fake UAE PASS sign-in that asks for the Emirates ID and an OTP; it is blocked as high risk. Nothing on the page is sent anywhere.
-- Maps: http://127.0.0.1:8765/demo/maps-mock.html. Click the tabs to switch between an official bank, a bank on a free link with a mobile number, an impersonating courier site, a fake "Abu Dhabi Police" office with no website and only a mobile number, a real-world copy of a "دفع المخالفات" listing filed as a warehouse with a mobile number, and a normal shop. A results list with real police websites sits next to the panel, like on real Maps.
+- Search: http://127.0.0.1:8765/dev/demo/search-mock.html. It has 8 results: 2 official, 1 normal news site, and 5 scams (a sponsored ad, a typosquat, brand + `.top`, an Emirates Post page on `linktr.ee`, and a fake "ADCB customer care" result with a mobile number).
+- UAE PASS: http://127.0.0.1:8765/dev/demo/uaepass-mock.html. A fake UAE PASS sign-in that asks for the Emirates ID and an OTP; it is blocked as high risk. Nothing on the page is sent anywhere.
+- Maps: http://127.0.0.1:8765/dev/demo/maps-mock.html. Click the tabs to switch between an official bank, a bank on a free link with a mobile number, an impersonating courier site, a fake "Abu Dhabi Police" office with no website and only a mobile number, a real-world copy of a "دفع المخالفات" listing filed as a warehouse with a mobile number, and a normal shop. A results list with real police websites sits next to the panel, like on real Maps.
 
 After the demo pages, show the same extension on real Google Search and Maps.
 
 ## Tests
 
 ```powershell
-node test.js        # 86 scoring tests, including 38 false-positive guards
-node test-rdap.js   # live RDAP lookup (needs internet)
+node dev/test.js        # 178 tests: scoring, IP owner, phone numbers, false-positive guards
+node dev/test-rdap.js   # live RDAP lookup (needs internet)
 ```
 
 ## Team LLM hook
@@ -156,7 +156,7 @@ Keep API keys in the team's server, never in the extension.
 | `scoring.js` | Rules engine (pure ES module, also runs in Node) |
 | `rdap.js` | Domain age via the IANA RDAP bootstrap, cached for 7 days |
 | `ip-intel.js` | Who owns an IP: Google service ranges + RDAP owner, cached for 7 days |
-| `ip-ranges.js` | Generated list of Google's own service ranges (`node tools/update-ip-ranges.js`) |
+| `ip-ranges.js` | Generated list of Google's own service ranges (`node dev/tools/update-ip-ranges.js`) |
 | `page-hooks.js` | In-page hooks: clipboard guard, fullscreen/locks, traps, popups |
 | `downloads.js` | Download guard |
 | `content-page.js` | Page scanner (phone / card / ClickFix) |
@@ -168,4 +168,4 @@ Keep API keys in the team's server, never in the extension.
 | `blocker.js` | Blocks high-risk navigations before they load |
 | `warning.html`, `warning.js`, `warning.css` | The blocking page |
 | `popup.html`, `popup.js`, `popup.css` | Toolbar popup |
-| `demo/` | Offline demo pages |
+| `dev/` | Developer files, not in the release zip: `DEMO.md` one-minute video script, `build.ps1` release zip (`npm run build`), `demo/` offline demo pages, `eval/` accuracy scale, `test.js`, `test-rdap.js`, `tools/` |

@@ -1,7 +1,7 @@
 /**
  * Regenerates ip-ranges.js: Google's own service addresses
  * (goog.json minus the rentable Google Cloud ranges in cloud.json).
- * Run from the project root: node tools/update-ip-ranges.js
+ * Run from the project root: node dev/tools/update-ip-ranges.js
  */
 
 import { writeFileSync } from "node:fs";
@@ -44,13 +44,13 @@ const list = (items) =>
 
 const date = String(goog.creationTime || "").slice(0, 10);
 writeFileSync(
-  new URL("../ip-ranges.js", import.meta.url),
+  new URL("../../ip-ranges.js", import.meta.url),
   `/**
  * Google's own service addresses (Search, Gmail, YouTube...): the ranges in
  * ${GOOG_URL} minus the rentable Google Cloud
  * ranges in ${CLOUD_URL}.
  * Generated from the lists dated ${date}. Regenerate with:
- *   node tools/update-ip-ranges.js
+ *   node dev/tools/update-ip-ranges.js
  * GENERATED FILE: do not edit by hand.
  */
 

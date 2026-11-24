@@ -5,27 +5,27 @@
  *   detection    share of scam links flagged (medium or high)
  *   false alarms share of legitimate links flagged
  *
- * Main table: URL only. Second table (after `node eval/fetch-ages.mjs`):
+ * Main table: URL only. Second table (after `node dev/eval/fetch-ages.mjs`):
  * URL + domain age, as in the browser. No IP owner or page scan in either.
  *
  * Usage (from the project root):
- *   node eval/run.mjs              summary table
- *   node eval/run.mjs --details    + missed scams (TRAIN half only) and false alarms
- *   node eval/run.mjs --write      also writes eval/RESULTS.md
+ *   node dev/eval/run.mjs              summary table
+ *   node dev/eval/run.mjs --details    + missed scams (TRAIN half only) and false alarms
+ *   node dev/eval/run.mjs --write      also writes dev/eval/RESULTS.md
  *
  * Rule changes must be designed by looking at the TRAIN half of the global
  * phishing set only; the TEST half shows whether a change generalises.
  */
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { analyzeDomain } from "../scoring.js";
-import { getRegistrableDomain } from "../rdap.js";
+import { analyzeDomain } from "../../scoring.js";
+import { getRegistrableDomain } from "../../rdap.js";
 import { SETS, legitTrancoSample } from "./sets.mjs";
 
 const args = new Set(process.argv.slice(2));
-const version = JSON.parse(readFileSync(new URL("../manifest.json", import.meta.url), "utf8")).version;
+const version = JSON.parse(readFileSync(new URL("../../manifest.json", import.meta.url), "utf8")).version;
 
-// Domain ages from `node eval/fetch-ages.mjs` (optional).
+// Domain ages from `node dev/eval/fetch-ages.mjs` (optional).
 const AGES_FILE = new URL("./data/rdap-ages.json", import.meta.url);
 const ageCache = existsSync(AGES_FILE) ? JSON.parse(readFileSync(AGES_FILE, "utf8")) : null;
 
@@ -145,5 +145,5 @@ const text = lines.join("\n");
 console.log(text);
 if (args.has("--write")) {
   writeFileSync(new URL("./RESULTS.md", import.meta.url), `${text}\n`);
-  console.log("\nWrote eval/RESULTS.md");
+  console.log("\nWrote dev/eval/RESULTS.md");
 }

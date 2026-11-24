@@ -5,6 +5,16 @@ Every change raises the version, gets an entry here, and gets a git tag.
 - **From 2.3 on, versions have two parts:** every change adds one to the second number (2.3 → 2.4 … 2.9), and a big update moves to the next first number (3.0). `manifest.json` holds `X.Y`, `package.json` holds `X.Y.0` (npm needs three parts), and the tag is `vX.Y`.
 - Up to 2.2.0: minor (1.2.0 → 1.3.0) for a feature or rule, patch (1.2.0 → 1.2.1) for a fix.
 
+## [2.5] - 2026-11-24
+
+### Added
+- **Release zip:** `npm run build` writes `dist/FraudShield-vX.Y.zip` with only the files Chrome needs (29 files, about 98 KB). `dist/` is ignored by git.
+- **One-minute demo video script** (`dev/DEMO.md`, Arabic): setup checklist, four shots with timings and voice-over.
+
+### Changed
+- **Cleaner repo:** developer files moved into `dev/`: `demo/`, `eval/`, `test.js`, `test-rdap.js`, `tools/`. The root now holds the extension itself plus README, CHANGELOG and package.json. Demo pages are now at `http://127.0.0.1:8765/dev/demo/…`; `npm test` and `npm run eval` work as before.
+- No rule changes; scores and accuracy are the same as 2.4.
+
 ## [2.4] - 2026-11-24
 
 ### Added
