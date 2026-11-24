@@ -29,13 +29,19 @@ FraudShield تفحص الرابط نفسه على جهاز المستخدم:
 
 تجمع الإضافة أربع إشارات في درجة من 0 إلى 100: هل الرابط ينتحل اسم جهة معروفة؟ هل الدومين جديد؟ من يملك عنوان الـIP؟ هل الصفحة تطلب الهوية أو رمز التحقق في موقع غير رسمي؟
 
-كل شيء يعمل داخل المتصفح، بدون سيرفر ولا مفتاح API.
+### الاختيارات التقنية والأدوات والبيانات
 
-### التشغيل
+- **التقنية:** إضافة Chrome (Manifest V3) بلغة JavaScript، بدون مكتبات ولا سيرفر ولا مفتاح API.
+- **واجهات خارجية:** RDAP العام لمعرفة عمر الدومين ومالك عنوان الـIP، ونطاقات عناوين Google المنشورة.
+- **البيانات:** اختبرنا الدقة على OpenPhish وPhishing.Database وأشهر 5000 موقع (Tranco) وروابط إماراتية مصنفة يدويًا.
+
+### البناء والتشغيل
 
 1. حمّل المشروع: `git clone https://github.com/amrelhaj87-cloud/FraudShield.git`
 2. افتح `chrome://extensions` وفعّل **Developer mode**.
 3. اضغط **Load unpacked** واختر فولدر المشروع.
+
+لا تحتاج الإضافة أي بناء. ولعمل ملف zip: `npm run build`، وللاختبارات: `npm test`.
 
 </div>
 
@@ -66,12 +72,16 @@ FraudShield checks the link itself, on the user's device:
 
 The extension combines four signals into a 0–100 score: does the link impersonate a known body, is the domain new, who owns the IP, and does the page ask for an Emirates ID or OTP on an unofficial site?
 
-Everything runs in the browser: plain JavaScript (Chrome Manifest V3), no server, no API key. It only uses public registry lookups (RDAP) for domain age and IP owner.
+## Technical choices, tools, APIs and data
 
-## How to run
+- **Tech:** a Chrome extension (Manifest V3) in plain JavaScript. No libraries, no server, no API key.
+- **APIs:** public RDAP lookups for domain age and IP owner, and Google's published IP ranges.
+- **Data:** accuracy tested on OpenPhish, Phishing.Database, the Tranco top 5000 sites, and hand-labelled UAE links.
+
+## How to build and run
 
 1. Clone the repo: `git clone https://github.com/amrelhaj87-cloud/FraudShield.git`
 2. Open `chrome://extensions` and turn on **Developer mode**.
 3. Click **Load unpacked** and pick the project folder.
 
-No build step is needed. The demo video and the presentation are in [submission/](submission/). Full technical details, including accuracy results, are in [dev/DETAILS.md](dev/DETAILS.md).
+No build step is needed. To make a release zip: `npm run build`. To run the tests: `npm test`. The demo video and the presentation are in [submission/](submission/). Full technical details, including accuracy results, are in [dev/DETAILS.md](dev/DETAILS.md).
