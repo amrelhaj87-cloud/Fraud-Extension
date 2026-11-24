@@ -5,6 +5,15 @@ Every change raises the version, gets an entry here, and gets a git tag.
 - **From 2.3 on, versions have two parts:** every change adds one to the second number (2.3 → 2.4 … 2.9), and a big update moves to the next first number (3.0). `manifest.json` holds `X.Y`, `package.json` holds `X.Y.0` (npm needs three parts), and the tag is `vX.Y`.
 - Up to 2.2.0: minor (1.2.0 → 1.3.0) for a feature or rule, patch (1.2.0 → 1.2.1) for a fix.
 
+## [2.11] - 2026-11-24
+
+### Changed
+- **Presentation in Arabic** (right-to-left, 9 slides), with the repo link under its new name `FraudShield`.
+- **Video:** the low background drone (heard as a buzz) is removed; only the sound effects remain. The end card shows the new repo link.
+- The previous video and presentation are kept in `submission/archive/` with `-archive` in their names.
+- README and `dev/DETAILS.md` point to `github.com/amrelhaj87-cloud/FraudShield`.
+- No code or rule changes.
+
 ## [2.10] - 2026-11-24
 
 ### Changed

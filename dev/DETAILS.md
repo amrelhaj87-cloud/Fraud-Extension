@@ -130,7 +130,7 @@ APIs and data used:
 
 **Run the extension (no build needed):**
 
-1. Clone the repo: `git clone https://github.com/amrelhaj87-cloud/Fraud-Extension.git`
+1. Clone the repo: `git clone https://github.com/amrelhaj87-cloud/FraudShield.git`
 2. Open `chrome://extensions` and turn on **Developer mode**.
 3. Click **Load unpacked** and pick the cloned folder (the one with `manifest.json`).
 4. Pin the FraudShield icon. In the popup, choose ع / EN, and keep "block high-risk sites" on.

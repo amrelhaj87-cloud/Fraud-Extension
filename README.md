@@ -33,7 +33,7 @@ FraudShield تفحص الرابط نفسه على جهاز المستخدم:
 
 ### التشغيل
 
-1. حمّل المشروع: `git clone https://github.com/amrelhaj87-cloud/Fraud-Extension.git`
+1. حمّل المشروع: `git clone https://github.com/amrelhaj87-cloud/FraudShield.git`
 2. افتح `chrome://extensions` وفعّل **Developer mode**.
 3. اضغط **Load unpacked** واختر فولدر المشروع.
 
@@ -70,7 +70,7 @@ Everything runs in the browser: plain JavaScript (Chrome Manifest V3), no server
 
 ## How to run
 
-1. Clone the repo: `git clone https://github.com/amrelhaj87-cloud/Fraud-Extension.git`
+1. Clone the repo: `git clone https://github.com/amrelhaj87-cloud/FraudShield.git`
 2. Open `chrome://extensions` and turn on **Developer mode**.
 3. Click **Load unpacked** and pick the project folder.
 
