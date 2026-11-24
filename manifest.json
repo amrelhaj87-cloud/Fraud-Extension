@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "FraudShield",
-  "version": "2.13",
+  "version": "2.14",
   "description": "كشف الروابط والمواقع الاحتيالية في بحث Google وخرائط Google داخل الإمارات — يعمل محليًا بالكامل.",
   "permissions": [
     "storage",
@@ -68,6 +68,19 @@
       "matches": [
         "http://*/*",
         "https://*/*"
+      ],
+      "exclude_matches": [
+        "https://www.google.com/*",
+        "https://www.google.ae/*",
+        "https://accounts.google.com/*",
+        "https://mail.google.com/*",
+        "https://drive.google.com/*",
+        "https://docs.google.com/document/*",
+        "https://docs.google.com/spreadsheets/*",
+        "https://docs.google.com/presentation/*",
+        "https://calendar.google.com/*",
+        "https://meet.google.com/*",
+        "https://www.youtube.com/*"
       ],
       "js": [
         "page-hooks.js"
