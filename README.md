@@ -1,10 +1,56 @@
-# FraudShield (browser extension)
+# FraudShield
 
-Chrome extension (Manifest V3) that flags fraudulent links **before the user clicks**, in Google Search results and Google Maps place cards. It focuses on scams that impersonate UAE entities (Abu Dhabi Police, TAMM, UAE PASS, local banks, Emirates Post, etc.).
+A Chrome extension that warns people in the UAE about scam links, fake UAE PASS pages and fake "government" phone numbers on Google Maps, **before they click**. It explains every warning in Arabic or English.
 
 Built for the **ScamShield AI** hackathon (42 Abu Dhabi × Abu Dhabi Police).
 
-Everything runs locally: no server and no API key. The only outbound requests are public RDAP lookups: a domain's registration date, and the owner of an IP address when a link uses one.
+**Quick start:** clone the repo, open `chrome://extensions`, turn on Developer mode, click **Load unpacked** and pick this folder. No build step, no server, no API key. [Full instructions below](#how-to-build-and-run).
+
+## The problem
+
+Scammers in the UAE pretend to be the bodies people trust most:
+
+- SMS and WhatsApp links that say "pay your traffic fine" or "your parcel is held", on look-alike sites of Abu Dhabi Police, TAMM, Emirates Post, Salik or a local bank.
+- Fake **UAE PASS** sign-in pages that steal the Emirates ID number, the password and the OTP.
+- **Google Maps** listings such as "دفع المخالفات" (pay traffic fines) that give a personal mobile number. The victim calls, and the "officer" asks for card details.
+
+Most link checkers look the link up in a global blocklist. A scam domain registered this morning is on no list yet. These checkers also don't know UAE names or Arabic, and they don't look at Google Maps at all.
+
+## The solution
+
+FraudShield checks the link itself, on the user's device, in milliseconds. Where people meet a scam, it shows them who is being impersonated and why the link is dangerous:
+
+| Where | What happens |
+|---|---|
+| Google Search | A 🟢 / 🟡 / 🔴 badge and a 0–100 score next to every result, with the reasons on hover |
+| Google Maps | A banner on the open place: official ✅, caution 🟡 or danger 🔴. It catches a government service offered with a personal mobile number. |
+| Any website | A high-risk site is **blocked before it loads**, and a warning page explains why. Fake UAE PASS pages are caught by their content. |
+| Downloads and clipboard | Dangerous files from risky sites are paused. Hidden "paste this command" tricks (ClickFix) are stopped. |
+| Report | A 🚩 button sends a report signed in with UAE PASS. This is a demo sign-in for now, with a report number such as `FS-0001`. |
+
+How it decides:
+
+- **Who is impersonated:** it knows the official domains of more than 40 UAE bodies and global brands, in Latin and Arabic script. It catches look-alikes (`adp0lice`), names hidden in a subdomain (`adpolice.gov.ae.fines-pay.xyz`), Arabic domain names and mixed alphabets.
+- **How new the domain is:** a domain under 30 days old is high risk on its own.
+- **Who owns the IP:** a raw IP of a home connection or a cheap host is suspicious; Google's own servers are not.
+- **What the page asks for:** Emirates ID, OTP or card details on the wrong site.
+
+## Accuracy (measured, not guessed)
+
+`npm run eval` scores the same rules on labelled links. Rules were designed on half of the global set, and the other half (TEST) was never looked at.
+
+| Set | Links | Result |
+|---|---|---|
+| UAE scam links (hand-labelled, small set) | 14 | **92.9% detected** |
+| Global phishing, TEST half (URL only) | 150 | **60.0% detected** |
+| Global phishing, TEST half (URL + domain age) | 150 | **67.3% detected** |
+| Legitimate sites: top 5000 worldwide, 89 UAE sites, free hosting | 5153 | **1 false alarm** |
+
+Honest limits:
+- On the older Phishing.Database list, it flags 13–34%. Many of those links have no clue in the URL at all, and are only caught by a blocklist or by scanning the page.
+- `.ae` domains have no public registry API (RDAP), so their age is unknown.
+
+Full tables are in [dev/eval/RESULTS.md](dev/eval/RESULTS.md).
 
 ## Built for the UAE
 
@@ -91,36 +137,79 @@ Risky results have a **🚩 Report** button: on the Maps banner, on the warning 
 - Reporting needs a signed-in user, so reports are not random or malicious. Protection itself never needs sign-in.
 - **Demo:** "Sign in with UAE PASS (demo)" signs in with one click, with no real account. In the real version this is the official UAE PASS sign-in, so every report comes from a verified identity.
 - The user adds an optional note ("they called and asked for the OTP"), ticks consent, and gets a report number (`FS-0001`). The same site or place is only reported once per user. "My reports" lists them.
-- **Demo:** reports are saved on this device (`chrome.storage.local`). After the merge, `sendReport()` in `report.js` posts them to the team backend's citizen-reports API.
+- **Demo:** reports are saved on this device (`chrome.storage.local`). Next step: `sendReport()` in `report.js` posts them to a police reports server.
 - Sign out from the popup or the report page.
 
-## Install
+## Technical choices, tools, APIs and data
 
-1. Open `chrome://extensions`
-2. Turn on **Developer mode**
-3. Click **Load unpacked** and pick this folder (the one with `manifest.json`)
+| Choice | Why |
+|---|---|
+| **Chrome extension, Manifest V3**, plain JavaScript (ES modules), no framework, no dependencies | No build step, about 100 KB, easy to audit. It runs where the scam is seen: in the browser, inside Search and Maps. |
+| **Explainable rules engine** (`scoring.js`) instead of a black-box model | Every warning says *who* is impersonated and *why*, in Arabic or English. It works offline and is instant. No labelled UAE scam data existed to train a model on, so the rules are tested on real data instead (see Accuracy). |
+| **Private by design:** no server, no account, no API key | The browsing history never leaves the device. The only network calls are the public RDAP lookups listed below. |
+| **Built for the UAE** | Lists of official UAE domains and phone formats (800 / 600 numbers vs. personal 05x mobiles), Arabic brand names, Arabic-first right-to-left interface. |
+
+APIs and data used:
+
+- **RDAP** (the public successor of WHOIS): the domain's registration date, through the IANA bootstrap (`data.iana.org/rdap/dns.json`), and the IP owner through `rdap.arin.net`, which forwards to RIPE or APNIC. Results are cached for 7 days.
+- **Google's published IP ranges** (`goog.json` minus `cloud.json`), to tell Google's own servers from rented cloud machines. Refresh them with `node dev/tools/update-ip-ranges.js`.
+- **Chrome APIs:** `tabs`, `webNavigation` (block before load), `downloads`, `storage`.
+- **Evaluation data** (`dev/eval/data/`): an OpenPhish snapshot, Phishing.Database (MIT), the Tranco top 5000, and hand-labelled UAE scam and legitimate links.
+
+## How to build and run
+
+**Requirements:** Google Chrome (or Edge/Brave). [Node.js](https://nodejs.org) 18+ only for the tests. Python only for the demo pages.
+
+**Run the extension (no build needed):**
+
+1. Clone the repo: `git clone https://github.com/amrelhaj87-cloud/Fraud-Extension.git`
+2. Open `chrome://extensions` and turn on **Developer mode**.
+3. Click **Load unpacked** and pick the cloned folder (the one with `manifest.json`).
+4. Pin the FraudShield icon. In the popup, choose ع / EN, and keep "block high-risk sites" on.
+5. Search Google, open Google Maps, or paste any link into the popup's **Check a link** box.
+
+**Build the release zip** (Windows PowerShell):
+
+```powershell
+npm run build
+```
+
+This writes `dist/FraudShield-vX.Y.zip` with only the files Chrome needs.
+
+**Run the tests and the accuracy scale:**
+
+```powershell
+npm test
+```
+
+```powershell
+npm run eval
+```
 
 ## Demo (no internet surprises)
 
 ```powershell
-cd "Fraud Extension"
 python -m http.server 8765 --bind 127.0.0.1
 ```
+
+Run it from the project folder, then open:
 
 - Search: http://127.0.0.1:8765/dev/demo/search-mock.html. It has 8 results: 2 official, 1 normal news site, and 5 scams (a sponsored ad, a typosquat, brand + `.top`, an Emirates Post page on `linktr.ee`, and a fake "ADCB customer care" result with a mobile number).
 - UAE PASS: http://127.0.0.1:8765/dev/demo/uaepass-mock.html. A fake UAE PASS sign-in that asks for the Emirates ID and an OTP; it is blocked as high risk. Nothing on the page is sent anywhere.
 - Maps: http://127.0.0.1:8765/dev/demo/maps-mock.html. Click the tabs to switch between an official bank, a bank on a free link with a mobile number, an impersonating courier site, a fake "Abu Dhabi Police" office with no website and only a mobile number, a real-world copy of a "دفع المخالفات" listing filed as a warehouse with a mobile number, and a normal shop. A results list with real police websites sits next to the panel, like on real Maps.
 
-After the demo pages, show the same extension on real Google Search and Maps.
+After the demo pages, show the same extension on real Google Search and Maps. A one-minute video script is in [dev/DEMO.md](dev/DEMO.md).
 
-## Tests
+Tests in detail: `node dev/test.js` runs 178 tests (scoring, IP owner, phone numbers, false-alarm guards); `node dev/test-rdap.js` runs a live RDAP lookup (needs internet).
 
-```powershell
-node dev/test.js        # 178 tests: scoring, IP owner, phone numbers, false-positive guards
-node dev/test-rdap.js   # live RDAP lookup (needs internet)
-```
+## Next steps
 
-## Team LLM hook
+- Send reports to a police dashboard, and use verified report counts as an extra signal (never block on reports alone).
+- Add `.ae` WHOIS on a server, since `.ae` has no public RDAP.
+- Add an AI second opinion for the gray zone, through the hook below. The API key stays on a server.
+- Check phone numbers on any page and in WhatsApp Web.
+
+## AI hook (for the next step)
 
 `background.js` exports `llmAnalyze({ url, title, snippet })`. Gray-zone results (`medium`) are sent there with a 6-second timeout.
 
@@ -143,7 +232,7 @@ export async function llmAnalyze({ url, title, snippet }) {
 }
 ```
 
-Keep API keys in the team's server, never in the extension.
+Keep API keys on a server, never in the extension.
 
 ## Files
 
