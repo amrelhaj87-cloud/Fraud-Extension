@@ -5,6 +5,13 @@ Every change raises the version, gets an entry here, and gets a git tag.
 - **From 2.3 on, versions have two parts:** every change adds one to the second number (2.3 → 2.4 … 2.9), and a big update moves to the next first number (3.0). `manifest.json` holds `X.Y`, `package.json` holds `X.Y.0` (npm needs three parts), and the tag is `vX.Y`.
 - Up to 2.2.0: minor (1.2.0 → 1.3.0) for a feature or rule, patch (1.2.0 → 1.2.1) for a fix.
 
+## [2.12] - 2026-11-24
+
+### Changed
+- **Video:** Arabic and English captions now sit side by side at the same size, shorter so each fits on one line. The numbers scene is removed; its time goes to the other scenes, and the end card shows the repo link. Still 60 seconds.
+- The previous videos are in `submission/archive/` (`-archive-v1`, `-archive-v2`).
+- No code or rule changes.
+
 ## [2.11] - 2026-11-24
 
 ### Changed
