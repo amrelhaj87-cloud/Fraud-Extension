@@ -119,8 +119,10 @@
     setupDownloadTexts();
     const info = await send({ type: "GET_DOWNLOAD", id: downloadId });
     if (!info) {
-      $("url").textContent = parsed ? parsed.href : "—";
-      return failReasons();
+      // No record means this is an old warning tab that Chrome restored after a
+      // restart (the record lives in session storage). Nothing is paused any more,
+      // so close it instead of showing an empty alarm.
+      return closeSelf();
     }
 
     $("url").textContent = info.filename;
@@ -144,6 +146,13 @@
     $("done").hidden = false;
   }
 
+  function closeSelf() {
+    chrome.tabs.getCurrent((tab) => {
+      if (tab && Number.isInteger(tab.id)) chrome.tabs.remove(tab.id).catch(() => {});
+      else window.close();
+    });
+  }
+
   // ---- Buttons -------------------------------------------------------------
 
   $("back").addEventListener("click", async () => {
@@ -152,6 +161,8 @@
     $("proceed").disabled = true;
     await send({ type: "DOWNLOAD_DECISION", id: downloadId, action: "delete" });
     showDone("dDeleted");
+    // Close the tab after a moment so it is not left open and restored next start.
+    setTimeout(closeSelf, 2500);
   });
 
   $("proceed").addEventListener("click", async () => {
@@ -160,6 +171,7 @@
       $("back").disabled = true;
       await send({ type: "DOWNLOAD_DECISION", id: downloadId, action: "keep" });
       showDone("dKept");
+      setTimeout(closeSelf, 2500);
       return;
     }
     if (!parsed) return;

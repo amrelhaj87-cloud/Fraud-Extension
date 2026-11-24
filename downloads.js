@@ -21,18 +21,34 @@ const DANGEROUS = new Set([
 const ARCHIVES = new Set(["zip", "rar", "7z", "cab", "gz", "tgz", "xz"]);
 const DANGEROUS_MIME = /x-msdownload|x-msi|x-ms-installer|vnd\.microsoft\.portable-executable|x-dosexec|android\.package-archive|x-sh|x-bat/i;
 
-const ACTIVITY_WINDOW_MS = 8000;
+// Long enough for "Your download will start shortly" pages that wait a few
+// seconds after the click before starting the file.
+const ACTIVITY_WINDOW_MS = 20000;
 const PENDING_KEY = "fe:downloads";
 
-// host -> last click / key press time, reported by content-page.js
+// site -> last click / key press time, reported by content-page.js
 const activity = new Map();
+
+// Group subdomains: www.microsoft.com and developer.microsoft.com count as one
+// site, so a click on one page and a download from the next is not "automatic".
+function siteOf(host) {
+  const parts = String(host || "").toLowerCase().split(".").filter(Boolean);
+  if (parts.length <= 2) return parts.join(".");
+  const sld = parts[parts.length - 2];
+  const keep = sld.length <= 3 && parts.length > 2 ? 3 : 2; // co.uk, com.ae, gov.ae
+  return parts.slice(-keep).join(".");
+}
 
 export function noteActivity(url) {
   try {
-    activity.set(new URL(url).hostname, Date.now());
+    activity.set(siteOf(new URL(url).hostname), Date.now());
   } catch {
     // Ignore bad URLs.
   }
+}
+
+function lastActivity(...hosts) {
+  return Math.max(0, ...hosts.filter(Boolean).map((h) => activity.get(siteOf(h)) || 0));
 }
 
 function extOf(name) {
@@ -141,7 +157,8 @@ async function handleCreated(created) {
   const worst = verdicts.sort((a, b) => b.score - a.score)[0] || null;
 
   const pageHost = pageUrl ? new URL(pageUrl).hostname : "";
-  const lastActive = pageHost ? activity.get(pageHost) || 0 : Date.now();
+  const fileHost = fileUrl ? new URL(fileUrl).hostname : "";
+  const lastActive = pageHost ? lastActivity(pageHost, fileHost) : Date.now();
   const automatic = Boolean(pageHost) && Date.now() - lastActive > ACTIVITY_WINDOW_MS;
 
   const allowedHost = (pageHost && (await isAllowed(pageHost))) ||
