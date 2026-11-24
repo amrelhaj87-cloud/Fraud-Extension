@@ -5,6 +5,24 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - **Minor** (1.2.0 → 1.3.0): a new feature or a new detection rule.
 - **Patch** (1.2.0 → 1.2.1): a fix or small tweak.
 
+## [2.0.2] - 2026-11-24
+
+### Added
+- **Accuracy scale** (`eval/`, `npm run eval`). Runs the scorer on labelled data and reports detection and false alarms. See `eval/README.md`.
+  - Data: the team's hand-labelled UAE set (32), 300 real OpenPhish URLs split train / test, the top 5000 sites (Tranco), 89 real UAE sites, 27 legitimate pages on free hosting.
+  - Baseline, URL only (no domain age, IP owner or page scan):
+
+| | Detection | | False alarms |
+|---|---|---|---|
+| UAE scams (14) | 92.9% | Top 5000 sites | 0.1% |
+| Global phishing, train (150) | 36.7% | UAE legit sites (89) | 2.2% |
+| Global phishing, test (150) | 34.7% | All legitimate (5134) | 0.1% (7) |
+
+### Found by the scale (not fixed yet)
+- `mashreq.com` (Mashreq's real site) and `etihadwe.ae` (Etihad Water & Electricity) are flagged as impersonation.
+- Legitimate Thai sites with non-Latin domain names are flagged as homograph attacks.
+- About 40% of missed global phishing is on free hosting (pages.dev, blogspot, vercel.app, workers.dev) with no UAE brand in it.
+
 ## [2.0.1] - 2026-11-24
 
 ### Added

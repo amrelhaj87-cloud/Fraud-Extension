@@ -1,0 +1,30 @@
+# Legitimate pages on free hosting / site builders. The team eval noted that
+# the false-alarm cost of free-hosting rules was not measured; this list is a
+# small first check. Real, long-standing pages.
+https://pages.github.com/
+https://docs.github.com/en/pages
+https://facebook.github.io/react-native/
+https://google.github.io/styleguide/
+https://microsoft.github.io/monaco-editor/
+https://mozilla.github.io/pdf.js/
+https://twbs.github.io/
+https://d3js.org/
+https://googleblog.blogspot.com/
+https://android-developers.googleblog.com/
+https://chromereleases.googleblog.com/
+https://security.googleblog.com/
+https://workspaceupdates.googleblog.com/
+https://nextjs.org/
+https://vercel.com/templates
+https://svelte.dev/
+https://vitejs.dev/
+https://astro.build/
+https://www.netlify.com/blog/
+https://answers.netlify.com/
+https://developers.cloudflare.com/pages/
+https://blog.cloudflare.com/
+https://www.wix.com/blog
+https://www.weebly.com/
+https://linktr.ee/
+https://about.linktr.ee/
+https://openai.github.io/openai-agents-python/

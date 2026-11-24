@@ -1,0 +1,39 @@
+{
+  "about": "Hand-labelled regression set. Labels were written BEFORE looking at scores. 'truth' is what the link really is: phish (a scam-style link), benign, or hard_negative (a legitimate link that carries scam-like words such as login or verify). Phishing-style addresses use made-up or reserved domains and are only ever scored from their text, never opened. This is a small development set, not evidence of accuracy.",
+  "cases": [
+    {"url": "https://www.adcb.com/personal", "truth": "benign", "note": "official brand domain"},
+    {"url": "https://www.emiratesnbd.com/en/", "truth": "benign", "note": "official brand domain"},
+    {"url": "https://www.emirates.com/ae/english/", "truth": "benign", "note": "official brand domain"},
+    {"url": "https://www.etisalat.ae/en/", "truth": "benign", "note": "official brand domain"},
+    {"url": "https://www.du.ae/personal", "truth": "benign", "note": "official brand domain"},
+    {"url": "https://www.aramex.com/ae/en/track", "truth": "benign", "note": "official brand domain"},
+    {"url": "https://u.ae/en/information-and-services", "truth": "benign", "note": "UAE government portal"},
+    {"url": "https://www.wikipedia.org/", "truth": "benign", "note": "popular site"},
+    {"url": "https://github.com/anthropics", "truth": "benign", "note": "popular site"},
+    {"url": "https://www.google.com/", "truth": "benign", "note": "popular site"},
+
+    {"url": "https://www.paypal.com/signin", "truth": "hard_negative", "note": "real site, has the word signin"},
+    {"url": "https://accounts.google.com/signin/v2/identifier", "truth": "hard_negative", "note": "real login page"},
+    {"url": "https://www.dhl.com/ae-en/home/tracking.html", "truth": "hard_negative", "note": "official domain with tracking"},
+    {"url": "https://www.bankfab.com/en-ae/personal/login", "truth": "hard_negative", "note": "official domain with login"},
+    {"url": "https://login.microsoftonline.com/common/oauth2/authorize", "truth": "hard_negative", "note": "real login host"},
+    {"url": "https://www.emirates-estate-agents.ae/properties", "truth": "hard_negative", "note": "legitimate-looking .ae business that merely contains 'emirates' (a documented weak spot)"},
+    {"url": "https://www.dubaipolice-museum.example.org/visit", "truth": "hard_negative", "note": "unrelated reserved-domain site with a brand-ish word"},
+    {"url": "https://secure.example.com/account/verify", "truth": "hard_negative", "note": "generic reserved-domain page with pressure words but no brand"},
+
+    {"url": "http://adcb-secure-login.example.com/verify", "truth": "phish", "note": "brand + login words"},
+    {"url": "http://emiratesnbd-verify-account.top/login", "truth": "phish", "note": "brand + words + risky ending"},
+    {"url": "http://etisalat-bill-payment.xyz/pay", "truth": "phish", "note": "brand + payment + risky ending"},
+    {"url": "http://dubai-police-fine-payment.top/pay", "truth": "phish", "note": "fine-payment lure"},
+    {"url": "http://salik-recharge-now.click/verify", "truth": "phish", "note": "toll lure"},
+    {"url": "http://dhl-parcel-held-uae.xyz/track", "truth": "phish", "note": "parcel lure"},
+    {"url": "http://aramex-delivery-fee.top/pay", "truth": "phish", "note": "delivery-fee lure"},
+    {"url": "http://tamm-abudhabi-login.example.com/signin", "truth": "phish", "note": "government service lookalike"},
+    {"url": "http://fab-bank-secure.site/login", "truth": "phish", "note": "bank lookalike"},
+    {"url": "http://emirates-airline-refund.info/claim", "truth": "phish", "note": "airline refund lure"},
+    {"url": "http://emiratesid-renewal-verify.cc/start", "truth": "phish", "note": "ID renewal lure"},
+    {"url": "http://203.0.113.9/login/verify-account", "truth": "phish", "note": "raw IP address plus account words (documentation address range)"},
+    {"url": "http://mаshreq.com/login", "truth": "phish", "note": "Cyrillic 'a' imitating mashreq"},
+    {"url": "http://bit.ly/3xYzAbC", "truth": "phish", "note": "shortener hides the target; the text alone gives little to go on (expected miss)"}
+  ]
+}
