@@ -8,6 +8,7 @@
 
 import { analyzeDomain } from "./scoring.js";
 import { getDomainAgeDays, getRegistrableDomain } from "./rdap.js";
+import { getIpOwner } from "./ip-intel.js";
 import "./i18n.js";
 
 const I18N = globalThis.FE_I18N;
@@ -87,6 +88,14 @@ export async function analyzeForBlock(url) {
   const opts = { protocol: parsed.protocol, path: `${parsed.pathname}${parsed.search}`, lang };
   let result = analyzeDomain(parsed.hostname, opts);
   let ageDays = null;
+
+  // An IP address is always looked up: its owner can lower the score
+  // (Google's own servers) as well as raise it.
+  const ipOwner = await getIpOwner(parsed.hostname).catch(() => null);
+  if (ipOwner) {
+    opts.ipOwner = ipOwner;
+    result = analyzeDomain(parsed.hostname, opts);
+  }
 
   if (result.level !== "safe" && result.level !== "high") {
     const domain = getRegistrableDomain(parsed.hostname);

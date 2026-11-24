@@ -4,6 +4,7 @@
  */
 
 import { analyzeDomain } from "./scoring.js";
+import { getIpOwner, isGoogleServiceIp, classifyRdap } from "./ip-intel.js";
 
 let passed = 0;
 let failed = 0;
@@ -221,6 +222,73 @@ for (const local of ["192.168.1.1", "127.0.0.1", "10.0.0.5", "172.20.1.1", "[::1
 // Hex / decimal IP forms are normalised to dotted form by the URL parser.
 const hexIp = analyzeDomain("http://0x8efac96e/", { protocol: "http:" });
 check("hex IP 0x8efac96e -> high", hexIp.level === "high", hexIp);
+
+// 12) Who owns the IP? Google's own service ranges vs rented / home addresses.
+check("142.250.201.110 is a Google service IP", isGoogleServiceIp("142.250.201.110"), null);
+check("8.8.8.8 is a Google service IP", isGoogleServiceIp("8.8.8.8"), null);
+check("34.117.59.81 (Google Cloud) is NOT a Google service IP", !isGoogleServiceIp("34.117.59.81"), null);
+check("2a00:1450:4001:80b::200e is a Google service IP", isGoogleServiceIp("2a00:1450:4001:80b::200e"), null);
+check("[2a00:1450:4001:80b::200e] (brackets) handled", isGoogleServiceIp("[2a00:1450:4001:80b::200e]"), null);
+
+const rdap = (name, registrant, extra = {}) => ({
+  name,
+  entities: [{ roles: ["registrant"], vcardArray: ["vcard", [["fn", {}, "text", registrant]]] }],
+  ...extra
+});
+const owners = [
+  ["AWS", rdap("AT-88-Z", "Amazon Technologies Inc."), "hosting"],
+  ["Google Cloud", rdap("GOOGL-2", "Google LLC"), "hosting"],
+  ["Apple", rdap("APPLE-WWNET", "Apple Inc."), "service"],
+  ["Meta", rdap("THEFA-3", "Facebook, Inc."), "service"],
+  ["Telefonica (RIPE, with Hostmaster role)", {
+    name: "DE-MEDIAWAYS-20120425",
+    entities: [
+      { roles: ["registrant"], vcardArray: ["vcard", [["fn", {}, "text", "MDA-Z"]]] },
+      { roles: ["abuse"], vcardArray: ["vcard", [["fn", {}, "text", "mediaWays Hostmaster"]]] },
+      { roles: ["registrant"], vcardArray: ["vcard", [["fn", {}, "text", "Telefonica Germany GmbH & Co.OHG"]]] }
+    ]
+  }, "isp"],
+  ["du (owner only in remarks)", {
+    name: "DIC-NET",
+    entities: [{ roles: ["registrant"], vcardArray: ["vcard", [["fn", {}, "text", "DIC-MNT"]]] }],
+    remarks: [{ description: ["Emirates Integrated Telecommunications Company PJSC (EITC-DU)", "*****"] }]
+  }, "isp"]
+];
+for (const [label, data, kind] of owners) {
+  const owner = classifyRdap(data);
+  check(`RDAP owner ${label} -> ${kind} (${owner && owner.owner})`, owner && owner.kind === kind, owner);
+}
+const geo = classifyRdap({ name: "LINODE-US", entities: [{ roles: ["registrant"], vcardArray: ["vcard", [["fn", {}, "text", "Akamai Technologies, Inc."]]] }], remarks: [{ description: ["Geofeed https://ipgeo.akamai.com/linode-geofeed.csv"] }] });
+check("Geofeed remark is not used as the owner name", geo.owner === "Akamai Technologies, Inc." && geo.kind === "hosting", geo);
+const du = classifyRdap(owners[5][1]);
+check("du owner name read from remarks", du.owner.startsWith("Emirates Integrated"), du);
+
+// getIpOwner: Google service IPs and local IPs never hit the network.
+let fetchCalls = 0;
+const fakeFetch = async () => {
+  fetchCalls += 1;
+  return { ok: true, json: async () => rdap("AT-88-Z", "Amazon Technologies Inc.") };
+};
+const googleOwner = await getIpOwner("142.250.201.110", { fetch: fakeFetch });
+check("getIpOwner(142.250.201.110) -> Google service, no network", googleOwner.kind === "service" && fetchCalls === 0, googleOwner);
+check("getIpOwner(192.168.1.1) -> null, no network", (await getIpOwner("192.168.1.1", { fetch: fakeFetch })) === null && fetchCalls === 0, null);
+check("getIpOwner(example.com) -> null (not an IP)", (await getIpOwner("example.com", { fetch: fakeFetch })) === null, null);
+const awsOwner = await getIpOwner("52.95.110.1", { fetch: fakeFetch });
+check("getIpOwner(52.95.110.1) -> hosting via RDAP", awsOwner.kind === "hosting" && fetchCalls === 1, awsOwner);
+const failOwner = await getIpOwner("52.95.110.2", { fetch: async () => { throw new Error("offline"); } });
+check("getIpOwner offline -> null (no crash)", failOwner === null, failOwner);
+
+// Scoring with the owner.
+const gService = analyzeDomain("142.250.201.110", { protocol: "https:", ipOwner: googleOwner });
+check("Google's own IP -> low with 'own services' reason", gService.level === "low" && gService.score === 0 && gService.reasons.some((r) => r.includes("Google")), gService);
+const gHttp = analyzeDomain("http://142.250.201.110/", { protocol: "http:", ipOwner: googleOwner });
+check("Google's own IP over http -> still low (http only)", gHttp.level === "low", gHttp);
+const rented = analyzeDomain("34.117.59.81", { protocol: "https:", ipOwner: { kind: "hosting", owner: "Google LLC" }, lang: "en" });
+check("rented cloud IP -> medium with 'rented server' reason", rented.level === "medium" && rented.reasons.some((r) => r.startsWith("Rented server at Google LLC")), rented);
+const home = analyzeDomain("94.200.1.1", { protocol: "https:", ipOwner: { kind: "isp", owner: "EITC-DU" } });
+check("home/mobile connection IP -> high", home.level === "high", home);
+const unknownOwner = analyzeDomain("45.33.32.156", { protocol: "https:", ipOwner: null });
+check("owner unknown -> medium (unchanged)", unknownOwner.level === "medium", unknownOwner);
 
 console.log("");
 console.log(`Results: ${passed} passed, ${failed} failed`);

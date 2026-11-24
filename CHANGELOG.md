@@ -5,6 +5,18 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - **Minor** (1.2.0 → 1.3.0): a new feature or a new detection rule.
 - **Patch** (1.2.0 → 1.2.1): a fix or small tweak.
 
+## [1.6.0] - 2026-11-24
+
+### Added
+- **IP owner check (`ip-intel.js`).** A link that uses an IP address now gets a second look: who owns that address?
+  - **Layer 1, local and instant:** Google publishes its address ranges (`goog.json`) and the subset it rents out as Google Cloud (`cloud.json`). The difference is Google itself (Search, Gmail, YouTube, 8.8.8.8). It ships as `ip-ranges.js` (297 IPv4 + 98 IPv6 prefixes) and is rebuilt with `node tools/update-ip-ranges.js`. `142.250.201.110` is now **low risk** with the reason "IP belongs to Google's own services".
+  - **Layer 2, RDAP (cached 7 days):** the registry record of the network (ARIN, redirected to RIPE/APNIC/... as needed) names the owner, which is classified:
+    - Apple / Meta own networks: IP points removed.
+    - Cloud or hosting (Amazon, Google Cloud, Microsoft, Cloudflare, DigitalOcean, Hetzner, OVH, Linode…): stays medium, and the reason names the provider ("anyone can rent a server there").
+    - Home or mobile internet (du, Etisalat, Telefonica, Vodafone…): +20 more, so **high** (often a hacked device).
+  - Local network addresses are never sent anywhere.
+- The auto-blocker now always runs the owner check for IP links, so Google's own IPs are no longer blocked over HTTP.
+
 ## [1.5.1] - 2026-11-24
 
 ### Fixed

@@ -6,6 +6,7 @@
 
 import { analyzeDomain } from "./scoring.js";
 import { getDomainAgeDays, getRegistrableDomain } from "./rdap.js";
+import { getIpOwner } from "./ip-intel.js";
 import { initBlocker, getSettings } from "./blocker.js";
 import { initDownloadGuard } from "./downloads.js";
 import "./i18n.js";
@@ -127,8 +128,12 @@ async function analyzeTarget(target, getAge, lang) {
     let scored = analyzeDomain(hostname, scoringOptions);
 
     // The lookup is shared/cached; scoring is re-run with the real age.
-    const ageDays = await getAge(hostname);
-    scored = analyzeDomain(hostname, { ...scoringOptions, ageDays });
+    // For an IP address, also ask who owns it (Google itself vs a rented server).
+    const [ageDays, ipOwner] = await Promise.all([
+      getAge(hostname),
+      getIpOwner(hostname).catch(() => null)
+    ]);
+    scored = analyzeDomain(hostname, { ...scoringOptions, ageDays, ipOwner });
 
     // Only gray-zone results are eligible for the optional LLM hook.
     if (scored.level === "medium") {

@@ -51,6 +51,8 @@ const OFFICIAL_DOMAINS = [
 
 // Points for a link that uses a public IP address instead of a domain name.
 const IP_HOST_POINTS = 45;
+// Extra points when that IP is a home / mobile connection (often a hacked device).
+const IP_ISP_POINTS = 20;
 
 // Registry-restricted suffixes: only government bodies can register these.
 const OFFICIAL_SUFFIXES = ["gov.ae"];
@@ -192,7 +194,8 @@ const CONFUSABLES = Object.freeze({
  * Score a hostname from 0 (confirmed official) to 100 (very likely fraudulent).
  *
  * @param {string} hostname
- * @param {{protocol?: string, ageDays?: number|null, path?: string}} opts
+ * @param {{protocol?: string, ageDays?: number|null, path?: string,
+ *          ipOwner?: {kind: string, owner: string}|null}} opts
  * @returns {{score: number, level: "safe"|"low"|"medium"|"high", reasons: string[]}}
  */
 export function analyzeDomain(hostname, opts = {}) {
@@ -307,10 +310,22 @@ export function analyzeDomain(hostname, opts = {}) {
   // one, phishing kits often do. 45 alone is medium; with plain HTTP it is high.
   // Local network / loopback addresses (router pages, dev servers) are exempt.
   if (domain.isIp) {
+    // opts.ipOwner (ip-intel.js) says who owns the address.
+    const owner = opts.ipOwner && typeof opts.ipOwner === "object" ? opts.ipOwner : null;
     if (isPrivateIp(host)) {
       reasons.push(t("ipLocal"));
+    } else if (owner && owner.kind === "service") {
+      // The company's own network (Google Search, Apple, Meta), not rented out.
+      reasons.push(t("ipService", { owner: owner.owner }));
     } else {
       add(IP_HOST_POINTS, t("ip"));
+      if (owner && owner.kind === "hosting") {
+        reasons.push(t("ipHosting", { owner: owner.owner }));
+      } else if (owner && owner.kind === "isp") {
+        add(IP_ISP_POINTS, t("ipIsp", { owner: owner.owner }));
+      } else if (owner && owner.owner) {
+        reasons.push(t("ipOwner", { owner: owner.owner }));
+      }
     }
   }
   if (host.length > 30) {

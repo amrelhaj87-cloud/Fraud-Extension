@@ -4,7 +4,7 @@ Chrome extension (Manifest V3) that flags fraudulent links **before the user cli
 
 Built for the **ScamShield AI** hackathon (42 Abu Dhabi × Abu Dhabi Police).
 
-Everything runs locally: no server and no API key. The only outbound request is a public RDAP lookup to get a domain's registration date.
+Everything runs locally: no server and no API key. The only outbound requests are public RDAP lookups: a domain's registration date, and the owner of an IP address when a link uses one.
 
 ## Built for the UAE
 
@@ -55,6 +55,11 @@ Every warning names **who** is being impersonated and **which sector** they belo
 | Sponsored search result | +15 |
 | Link targets a UAE carrier (`op=ae-etisalat`) | +30 |
 | Random-looking subdomain | +15 |
+| Raw public IP instead of a domain | +45 (medium; high with HTTP) |
+| IP of Google's own services, Apple or Meta (local list + RDAP owner) | IP points removed |
+| IP of a cloud / hosting provider | +45, reason names the provider |
+| IP of a home or mobile connection (ISP) | +45 +20 (high) |
+| Local network IP (`192.168.x`, `10.x`, `127.0.0.1`) | 0 |
 | Page: ClickFix instructions | +70 |
 | Page: phone capture with bait | +40 (+20 on an otherwise clean domain) |
 | Page: card form on a suspicious domain | +25 |
@@ -132,6 +137,8 @@ Keep API keys in the team's server, never in the extension.
 | `i18n.js` | Arabic / English strings, UAE brand names and sectors |
 | `scoring.js` | Rules engine (pure ES module, also runs in Node) |
 | `rdap.js` | Domain age via the IANA RDAP bootstrap, cached for 7 days |
+| `ip-intel.js` | Who owns an IP: Google service ranges + RDAP owner, cached for 7 days |
+| `ip-ranges.js` | Generated list of Google's own service ranges (`node tools/update-ip-ranges.js`) |
 | `page-hooks.js` | In-page hooks: clipboard guard, fullscreen/locks, traps, popups |
 | `downloads.js` | Download guard |
 | `content-page.js` | Page scanner (phone / card / ClickFix) |
