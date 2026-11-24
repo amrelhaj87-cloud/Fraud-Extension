@@ -23,6 +23,7 @@ With `data/rdap-ages.json` present, a second table shows **URL + domain age**, t
 |---|---|---|
 | `uae-golden.json` | 14 UAE-style scam links, 10 legit, 8 hard negatives (legit links with scam-like words) | Team repo `fraudshield/backend/tests/fixtures/golden_urls.json`, hand-labelled before scoring |
 | `phish-openphish.json` | 300 real phishing URLs, split 150 train / 150 test (seed 2026) | Team repo, OpenPhish snapshot |
+| `phish-phishingdb.json` | **Test only, never used to design rules.** Fixed samples from Phishing.Database (MIT, ACTIVE lists, last updated 2026-10-02): 2000 links, 2000 domains, and 600 of the 1928 links that name a UAE body, city or `.ae` (keyword match, so noisy) | github.com/Phishing-Database/Phishing.Database |
 | `legit-tranco-top5000.txt` | Top 5000 sites, home pages | Team repo `config/popular_domains.txt` (Tranco, 2026-11-23). The extension does not use this list, so it is a fair test |
 | `legit-uae.txt` | 89 real UAE sites: government, banks, telecom, shopping, news… | Hand-picked |
 | `legit-free-hosting.txt` | 27 legitimate pages on free hosting (github.io, blogspot, vercel, netlify, linktr.ee…) and 19 brands' own subdomains (developer.paypal.com, help.netflix.com…) | Hand-picked |

@@ -5,6 +5,20 @@ Every change raises the version, gets an entry here, and gets a git tag.
 - **From 2.3 on, versions have two parts:** every change adds one to the second number (2.3 → 2.4 … 2.9), and a big update moves to the next first number (3.0). `manifest.json` holds `X.Y`, `package.json` holds `X.Y.0` (npm needs three parts), and the tag is `vX.Y`.
 - Up to 2.2.0: minor (1.2.0 → 1.3.0) for a feature or rule, patch (1.2.0 → 1.2.1) for a fix.
 
+## [2.4] - 2026-11-24
+
+### Added
+- **Phishing.Database in the accuracy scale, as a test-only set** (`eval/data/phish-phishingdb.json`): fixed samples of 2000 links, 2000 domains, and 600 links that name a UAE body, city or `.ae`. Source: github.com/Phishing-Database/Phishing.Database (MIT), ACTIVE lists as of its last update on 2026-10-02, so many entries are already dead.
+
+### Accuracy scale (URL only)
+| Phishing.Database | Detected |
+|---|---|
+| Links (2000) | 13.1% |
+| Domains (2000) | 33.6% |
+| Links naming UAE / `.ae` (600) | 19.2% |
+
+Why links score so low, out of the 1739 missed: **973 have nothing suspicious in the link at all**, 398 are on free hosting / site builders without a brand in the name, 308 are hacked legitimate sites with the brand only in the path (`/reg-ebill-etisalat/…`), 60 are WordPress-style hacked paths. These need a list lookup or the page scan, not more URL rules. No rule was changed for this set.
+
 ## [2.3] - 2026-11-24
 
 ### Changed

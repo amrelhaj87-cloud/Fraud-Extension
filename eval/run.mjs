@@ -70,7 +70,7 @@ function measure(sets, withAge, details) {
       if (isFlagged) flagged += 1;
       if (result.level === "high") high += 1;
       if (!details) continue;
-      if (set.kind === "scam" && !isFlagged && (set.train || !set.name.startsWith("Global"))) {
+      if (set.kind === "scam" && !isFlagged && (set.train || (!set.name.startsWith("Global") && !set.holdout))) {
         details.missed.push({ set: set.name, url, score: result.score });
       }
       if (set.kind === "legit" && isFlagged) {

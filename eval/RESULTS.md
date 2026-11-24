@@ -1,4 +1,4 @@
-# FraudShield accuracy (v2.3)
+# FraudShield accuracy (v2.4)
 
 URL only: no domain-age lookup, no IP owner, no page scan.
 
@@ -7,6 +7,9 @@ URL only: no domain-age lookup, no IP owner, no page scan.
 | UAE scams (hand-labelled) | 14 | **92.9%** | 78.6% |
 | Global phishing, TRAIN half | 150 | **69.3%** | 22.0% |
 | Global phishing, TEST half | 150 | **60.0%** | 15.3% |
+| Phishing.Database links (sample 2000) | 2000 | **13.1%** | 2.0% |
+| Phishing.Database domains (sample 2000) | 2000 | **33.6%** | 4.5% |
+| Phishing.Database links naming UAE / .ae (600) | 600 | **19.2%** | 4.7% |
 
 | Legitimate links | Count | False alarms (medium+high) | High only |
 |---|---|---|---|
@@ -25,6 +28,9 @@ Domains under 30 days old are high risk on their own; under 180 days add points.
 | UAE scams (hand-labelled) | 14 | 21.4% | **92.9%** detected | 78.6% |
 | Global phishing, TRAIN half | 150 | 92.7% | **77.3%** detected | 31.3% |
 | Global phishing, TEST half | 150 | 91.3% | **67.3%** detected | 22.0% |
+| Phishing.Database links (sample 2000) | 2000 | 10.3% | **13.1%** detected | 2.0% |
+| Phishing.Database domains (sample 2000) | 2000 | 14.4% | **33.6%** detected | 4.5% |
+| Phishing.Database links naming UAE / .ae (600) | 600 | 0.7% | **19.2%** detected | 4.7% |
 | UAE legit + hard negatives (hand-labelled) | 18 | 77.8% | **5.6%** false alarms | 0.0% |
 | UAE legit sites | 89 | 40.4% | **0.0%** false alarms | 0.0% |
 | Top sites, fixed sample of 400 (Tranco) | 400 | 80.5% | **0.5%** false alarms | 0.0% |

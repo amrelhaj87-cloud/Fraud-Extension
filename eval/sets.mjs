@@ -14,12 +14,17 @@ const readText = (name) =>
 
 const golden = JSON.parse(readFileSync(new URL("uae-golden.json", DATA), "utf8")).cases;
 const openphish = JSON.parse(readFileSync(new URL("phish-openphish.json", DATA), "utf8"));
+const phishdb = JSON.parse(readFileSync(new URL("phish-phishingdb.json", DATA), "utf8"));
 const tranco = readText("legit-tranco-top5000.txt").map((d) => `https://${d}/`);
 
 export const SETS = [
   { name: "UAE scams (hand-labelled)", kind: "scam", urls: golden.filter((c) => c.truth === "phish").map((c) => c.url) },
   { name: "Global phishing, TRAIN half", kind: "scam", urls: openphish.train, train: true },
   { name: "Global phishing, TEST half", kind: "scam", urls: openphish.test },
+  // Test-only: never used to design rules.
+  { name: "Phishing.Database links (sample 2000)", kind: "scam", urls: phishdb.links, holdout: true },
+  { name: "Phishing.Database domains (sample 2000)", kind: "scam", urls: phishdb.domains, holdout: true },
+  { name: "Phishing.Database links naming UAE / .ae (600)", kind: "scam", urls: phishdb.uae.links, holdout: true },
   { name: "UAE legit + hard negatives (hand-labelled)", kind: "legit", urls: golden.filter((c) => c.truth !== "phish").map((c) => c.url) },
   { name: "UAE legit sites", kind: "legit", urls: readText("legit-uae.txt") },
   { name: "Top 5000 sites (Tranco)", kind: "legit", urls: tranco, big: true },
