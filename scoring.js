@@ -144,6 +144,48 @@ const FREE_HOSTING = [
   "pages.dev"
 ];
 
+// Free hosting used by throw-away phishing pages too (checked with the scale).
+FREE_HOSTING.push("workers.dev", "godaddysites.com", "web.app", "firebaseapp.com", "glitch.me", "framer.website");
+
+// Wildcard DNS services that turn any IP into a name.
+const IP_IN_NAME_HOSTS = ["sslip.io", "nip.io", "xip.io", "traefik.me"];
+
+// Brands phished worldwide (the UAE list is BRANDS above).
+// single: the brand runs one site only, so roblox.ss or roblox.com.bo is fake.
+const GLOBAL_BRANDS = {
+  paypal: { name: "PayPal", single: true, sites: ["paypal.com", "paypal.me"] },
+  netflix: { name: "Netflix", single: true, sites: ["netflix.com", "netflix.net"] },
+  instagram: { name: "Instagram", single: true, sites: ["instagram.com"] },
+  facebook: { name: "Facebook", single: true, sites: ["facebook.com", "facebook.net"] },
+  whatsapp: { name: "WhatsApp", single: true, sites: ["whatsapp.com", "whatsapp.net"] },
+  roblox: { name: "Roblox", single: true, sites: ["roblox.com", "roblox.net"] },
+  linkedin: { name: "LinkedIn", single: true, sites: ["linkedin.com"] },
+  docusign: { name: "DocuSign", single: true, sites: ["docusign.com", "docusign.net"] },
+  coinbase: { name: "Coinbase", single: true, sites: ["coinbase.com"] },
+  metamask: { name: "MetaMask", single: true, sites: ["metamask.io"] },
+  walletconnect: { name: "WalletConnect", single: true, sites: ["walletconnect.com", "walletconnect.network"] },
+  steamcommunity: { name: "Steam", single: true, sites: ["steamcommunity.com"] },
+  steampowered: { name: "Steam", single: true, sites: ["steampowered.com"] },
+  dropbox: { name: "Dropbox", single: true, sites: ["dropbox.com"] },
+  icloud: { name: "iCloud", single: true, sites: ["icloud.com", "icloud.com.cn"] },
+  microsoft: { name: "Microsoft", sites: ["microsoft.com"] },
+  office365: { name: "Microsoft 365", sites: ["office365.com"] },
+  outlook: { name: "Outlook", sites: ["outlook.com"] },
+  amazon: { name: "Amazon", sites: [] },
+  apple: { name: "Apple", sites: ["apple.com"] },
+  binance: { name: "Binance", sites: [] },
+  shopee: { name: "Shopee", sites: [] },
+  mercadolivre: { name: "Mercado Livre", sites: [] },
+  mercadolibre: { name: "Mercado Libre", sites: [] },
+  vodafone: { name: "Vodafone", sites: [] },
+  telegram: { name: "Telegram", sites: ["telegram.org"] },
+  tiktok: { name: "TikTok", sites: ["tiktok.com"] },
+  dhl: { name: "DHL", sites: [] },
+  fedex: { name: "FedEx", sites: [] },
+  hsbc: { name: "HSBC", sites: [] },
+  bbva: { name: "BBVA", sites: [] }
+};
+
 // Any domain younger than this is forced to at least NEW_DOMAIN_MIN_SCORE (high).
 const NEW_DOMAIN_DAYS = 30;
 const NEW_DOMAIN_MIN_SCORE = 70;
@@ -302,7 +344,27 @@ export function analyzeDomain(hostname, opts = {}) {
     const freeText = foldConfusables(normalizeLookalikes(`${host} ${path}`));
     if (BRANDS.some((brand) => containsBrand(freeText, brand))) {
       add(40, t("freeHost", { host: freeHost }));
+    } else if (findGlobalBrand(host.slice(0, -freeHost.length)) &&
+               !isOwnCodeHostAccount(host, freeHost)) {
+      // A globally phished brand on a free site (instagramrecovery.blogspot.com).
+      add(40, t("freeHost", { host: freeHost }));
     }
+    // Machine-made throw-away names (7h9u4-5zb-xqvi-ynb8i-20-10-2026-aa.pages.dev).
+    if (looksGenerated(host.slice(0, -freeHost.length - 1))) {
+      add(20, t("freeHostRandom", { host: freeHost }));
+    }
+  }
+
+  // 6b) A single-site global brand on another ending: roblox.ss, roblox.com.bo.
+  const lookalikeSite = findBrandOnOtherEnding(host);
+  if (lookalikeSite) {
+    add(50, t("contains", { brand: lookalikeSite }));
+  }
+
+  // 6c) An IP address hidden in a name (217-77-5-150.sslip.io): same as a raw IP.
+  if (IP_IN_NAME_HOSTS.some((suffix) => host.endsWith(`.${suffix}`)) &&
+      /(^|[.-])\d{1,3}[.-]\d{1,3}[.-]\d{1,3}[.-]\d{1,3}([.-]|$)/.test(host)) {
+    add(IP_HOST_POINTS, t("ipInName"));
   }
 
   // 7) Structural red flags.
@@ -670,6 +732,57 @@ function findArabicBrand(host) {
   const text = normArabic(host);
   const hit = ARABIC_BRANDS.find((b) => text.includes(b.name));
   return hit ? hit.key : null;
+}
+
+// Global brand token in a name: a whole token (apple-id), or glued to a
+// risk word / digits (instagramrecovery, shopeeid377), never inside another
+// word (pineapple, metadata).
+function findGlobalBrand(text) {
+  const tokens = String(text).toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  for (const brand of Object.keys(GLOBAL_BRANDS)) {
+    for (const token of tokens) {
+      if (token === brand) return brand;
+      if (!token.startsWith(brand) && !token.endsWith(brand)) continue;
+      const rest = token.startsWith(brand) ? token.slice(brand.length) : token.slice(0, -brand.length);
+      if (/^\d+$/.test(rest) || RISK_WORDS.some((w) => rest.includes(w)) ||
+          /(recovery|login|clone|support|help|verify|secure|account|id|info|followers|app|admin|web)/.test(rest)) {
+        return brand;
+      }
+    }
+  }
+  return null;
+}
+
+// roblox.ss, www.roblox.com.bo: a single-site brand as the whole name on
+// another ending. Returns the brand's display name.
+function findBrandOnOtherEnding(host) {
+  const labels = host.replace(/^www\./, "").split(".");
+  const info = GLOBAL_BRANDS[labels[0]];
+  if (!info || !info.single || labels.length < 2 || labels.length > 3) return null;
+  const host2 = labels.join(".");
+  if (info.sites.includes(host2)) return null;
+  // Only "brand.tld" or "brand.com.cc" / "brand.co.cc".
+  if (labels.length === 3 && !/^(com|co|net|org)$/.test(labels[1])) return null;
+  return info.name;
+}
+
+// facebook.github.io, microsoft.github.io: on code hosts the first label is
+// a unique account name, and an account named exactly like the brand is the
+// brand's own.
+function isOwnCodeHostAccount(host, freeHost) {
+  if (!["github.io", "gitlab.io"].includes(freeHost)) return false;
+  const account = host.slice(0, -freeHost.length - 1).split(".").pop();
+  return Object.prototype.hasOwnProperty.call(GLOBAL_BRANDS, account);
+}
+
+// Auto-generated label: a dd-mm-yyyy date, or 4+ hyphen-separated chunks
+// mixing letters and digits.
+function looksGenerated(sub) {
+  if (!sub) return false;
+  const label = sub.split(".").pop();
+  if (/\d{2}-\d{2}-\d{4}/.test(label)) return true;
+  const chunks = label.split("-");
+  return chunks.length >= 4 && chunks.filter((c) => /\d/.test(c) && /[a-z]/.test(c)).length >= 2;
 }
 
 function isLatinDisguise(label) {

@@ -5,6 +5,28 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - **Minor** (1.2.0 → 1.3.0): a new feature or a new detection rule.
 - **Patch** (1.2.0 → 1.2.1): a fix or small tweak.
 
+## [2.1.0] - 2026-11-24
+
+### Added (designed on the TRAIN half of the global phishing set only)
+- **Globally phished brands** (PayPal, Netflix, Instagram, Facebook, WhatsApp, Roblox, Microsoft, Apple/iCloud, Amazon, Binance, Coinbase, MetaMask, Shopee, Mercado Livre, Vodafone, DHL, HSBC…), separate from the UAE list:
+  - **On free hosting** (`instagramrecovery.blogspot.com`, `vodafone-admin-app.netlify.app`): +40. The brand must be a whole word or glued to a risk word / digits, so `pineapple` or `metadata` never count. A code-host account named exactly like the brand (`facebook.github.io`) is the brand's own and is not flagged.
+  - **A single-site brand on another ending** (`roblox.ss`, `roblox.com.bo`, `paypal.co`): +50. Brands' own extra domains (`facebook.net`, `netflix.net`, `roblox.net`, `icloud.com.cn`) are listed as official.
+- **Machine-generated throw-away names on free hosting** (`7h9u4-5zb-xqvi-ynb8i-20-10-2026-aa.pages.dev`): +20.
+- **IP address hidden in a name** (`217-77-5-150.sslip.io`, nip.io…): scored like a raw IP (+45).
+- More free hosts: `workers.dev`, `godaddysites.com`, `web.app`, `firebaseapp.com`, `glitch.me`, `framer.website`.
+- 20 regression tests (162 total).
+
+### Accuracy scale (URL only)
+| | v2.0.3 | v2.1.0 |
+|---|---|---|
+| Global phishing, TRAIN half (150) | 36.7% | **64.0%** |
+| Global phishing, **TEST half** (150, never looked at) | 34.7% | **56.0%** |
+| Flagged as high (TRAIN / TEST) | 0% / 0% | 17.3% / 12.0% |
+| UAE scams (14) | 92.9% | 92.9% |
+| False alarms, all legitimate (5134) | 1 | **1** |
+
+The TEST half rose almost as much as the TRAIN half, so the rules generalise rather than memorise. Caveats: the false-alarm fixes for `facebook.net` & co. were made by looking at the legit set, and the legit free-hosting set is small (27 pages).
+
 ## [2.0.3] - 2026-11-24
 
 ### Fixed (found by the accuracy scale)
