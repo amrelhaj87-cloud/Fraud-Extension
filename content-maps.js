@@ -1,5 +1,5 @@
 /**
- * Fraud Extension — Google Maps content script.
+ * FraudShield — Google Maps content script.
  * Reads the open place panel (name, category, website, phone), scores the
  * website via the background worker, adds Maps-specific rules, and shows a
  * floating Arabic banner. Fails silently if Google changes its DOM.
@@ -288,7 +288,7 @@
       }
       showBanner(place, result);
     } catch (error) {
-      try { console.warn("[Fraud Extension] Maps check failed:", error); } catch { /* ignore */ }
+      try { console.warn("[FraudShield] Maps check failed:", error); } catch { /* ignore */ }
     } finally {
       running = false;
     }

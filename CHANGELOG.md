@@ -5,6 +5,11 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - **Minor** (1.2.0 → 1.3.0): a new feature or a new detection rule.
 - **Patch** (1.2.0 → 1.2.1): a fix or small tweak.
 
+## [1.6.1] - 2026-11-24
+
+### Changed
+- **Renamed to FraudShield**, the same name as the team's backend and web app, so the extension and the server read as one product. The new name shows in the toolbar, popup, warning and download pages, Search and Maps labels, and console logs. Internal message IDs and the GitHub repo name are unchanged.
+
 ## [1.6.0] - 2026-11-24
 
 ### Added

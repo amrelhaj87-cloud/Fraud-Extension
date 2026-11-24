@@ -1,5 +1,5 @@
 /**
- * Fraud Extension — popup.
+ * FraudShield — popup.
  * Shows the verdict for the active tab, a manual URL checker, and the list of
  * links already analyzed on the current page (from the background worker).
  */

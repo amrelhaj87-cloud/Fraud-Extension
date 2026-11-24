@@ -1,5 +1,5 @@
 /**
- * Fraud Extension — shared Arabic / English strings.
+ * FraudShield — shared Arabic / English strings.
  * Plain script (no import/export) so it works everywhere:
  *   - content scripts (listed before them in manifest.json)
  *   - popup.html / warning.html (<script src="i18n.js">)
@@ -103,7 +103,7 @@
       dlExecutable: (p) => `ملف تنفيذي خطير (.${p.ext}) يمكنه تثبيت برامج على جهازك`,
       dlArchive: (p) => `ملف مضغوط (.${p.ext}) من موقع عالي الخطورة`,
       dlAuto: "بدأ التنزيل تلقائيًا دون أن تضغط على أي شيء",
-      dLead: "أوقفت Fraud Extension تنزيل هذا الملف لأنه قد يكون ضارًا:",
+      dLead: "أوقفت FraudShield تنزيل هذا الملف لأنه قد يكون ضارًا:",
       dSource: "المصدر:",
       dStep1: "لا تفتح هذا الملف ولا تشغّله.",
       dStep2: "الجهات الرسمية والبنوك لا تطلب منك تنزيل برامج من روابط أو رسائل.",
@@ -140,7 +140,7 @@
       noSignals: "لا توجد مؤشرات خطر معروفة.",
       ageDays: (p) => `عمر الدومين: ${p.days} يومًا`,
       ageUnknownLine: "عمر الدومين: غير معروف",
-      brandSearch: "Fraud Extension — فحص محلي",
+      brandSearch: "FraudShield — فحص محلي",
       ariaResult: (p) => `${p.level}، ${p.score} من 100. ${p.reasons.join("، ")}`,
 
       // ---- Maps banner ----
@@ -151,7 +151,7 @@
       close: "إغلاق",
       mapsPlace: "مكان على الخريطة",
       mapsNoSiteShort: "بدون موقع إلكتروني",
-      brandMaps: "Fraud Extension — فحص الخرائط",
+      brandMaps: "FraudShield — فحص الخرائط",
 
       // ---- Popup ----
       tagline: "نحمي نتائج البحث قبل ما تضغط",
@@ -173,8 +173,8 @@
       reloadHint: "أعد تحميل صفحة البحث لتحديث لغة الشارات.",
 
       // ---- Warning page ----
-      wTitle: "تحذير: موقع احتيالي محتمل — Fraud Extension",
-      wLead: "منعت Fraud Extension تحميل هذه الصفحة لأنها تبدو موقعًا احتياليًا:",
+      wTitle: "تحذير: موقع احتيالي محتمل — FraudShield",
+      wLead: "منعت FraudShield تحميل هذه الصفحة لأنها تبدو موقعًا احتياليًا:",
       wWhy: "لماذا هذا الموقع مشبوه؟",
       wNext: "الخطوات التالية",
       wStep1: "لا تُدخل بيانات بطاقتك البنكية أو كلمات المرور أو رمز التحقق (OTP) أو بيانات UAE PASS في هذا الموقع.",
@@ -184,7 +184,7 @@
       wAlways: "لا تحذّرني مجددًا من هذا الموقع",
       wBack: "العودة بأمان",
       wProceed: "المتابعة رغم الخطر",
-      wFoot: "Fraud Extension — فحص محلي لحماية المستخدمين في الإمارات",
+      wFoot: "FraudShield — فحص محلي لحماية المستخدمين في الإمارات",
       wInvalid: "رابط غير صالح",
       wLoadFail: "تعذر تحميل التفاصيل.",
       wLoading: "جارٍ تحميل التفاصيل…"
@@ -236,7 +236,7 @@
       dlExecutable: (p) => `Dangerous executable file (.${p.ext}) that can install software on your device`,
       dlArchive: (p) => `Archive file (.${p.ext}) from a high-risk site`,
       dlAuto: "The download started by itself, without any click",
-      dLead: "Fraud Extension stopped this download because the file may be harmful:",
+      dLead: "FraudShield stopped this download because the file may be harmful:",
       dSource: "Source:",
       dStep1: "Do not open or run this file.",
       dStep2: "Government bodies and banks never ask you to download software from links or messages.",
@@ -271,7 +271,7 @@
       noSignals: "No known risk signals.",
       ageDays: (p) => `Domain age: ${p.days} days`,
       ageUnknownLine: "Domain age: unknown",
-      brandSearch: "Fraud Extension — local check",
+      brandSearch: "FraudShield — local check",
       ariaResult: (p) => `${p.level}, ${p.score} of 100. ${p.reasons.join(", ")}`,
 
       mapsSafe: "✅ Verified official website",
@@ -281,7 +281,7 @@
       close: "Close",
       mapsPlace: "Place on the map",
       mapsNoSiteShort: "No website",
-      brandMaps: "Fraud Extension — Maps check",
+      brandMaps: "FraudShield — Maps check",
 
       tagline: "Protecting search results before you click",
       current: "Current page",
@@ -301,8 +301,8 @@
       cantCheckLink: "Could not check the link.",
       reloadHint: "Reload the search page to update the badge language.",
 
-      wTitle: "Warning: likely scam site — Fraud Extension",
-      wLead: "Fraud Extension blocked this page because it looks like a scam site:",
+      wTitle: "Warning: likely scam site — FraudShield",
+      wLead: "FraudShield blocked this page because it looks like a scam site:",
       wWhy: "Why is this site suspicious?",
       wNext: "Next steps",
       wStep1: "Do not enter card details, passwords, one-time codes (OTP) or UAE PASS details on this site.",
@@ -312,7 +312,7 @@
       wAlways: "Don't warn me again about this site",
       wBack: "Go back safely",
       wProceed: "Proceed anyway",
-      wFoot: "Fraud Extension — local protection for users in the UAE",
+      wFoot: "FraudShield — local protection for users in the UAE",
       wInvalid: "Invalid link",
       wLoadFail: "Could not load the details.",
       wLoading: "Loading details…"

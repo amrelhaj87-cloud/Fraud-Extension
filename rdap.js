@@ -1,5 +1,5 @@
 /**
- * Fraud Extension — RDAP domain-age lookup.
+ * FraudShield — RDAP domain-age lookup.
  * Uses the IANA RDAP bootstrap to find the authoritative registry per TLD.
  * No public RDAP proxy dependency. Every failure is non-fatal: callers get null.
  */
@@ -513,9 +513,9 @@ function debugLog(enabled, message, detail) {
 
   try {
     if (detail === undefined) {
-      console.warn(`[Fraud Extension] RDAP: ${message}`);
+      console.warn(`[FraudShield] RDAP: ${message}`);
     } else {
-      console.warn(`[Fraud Extension] RDAP: ${message} —`, detail);
+      console.warn(`[FraudShield] RDAP: ${message} —`, detail);
     }
   } catch {
     // Debug logging must never affect analysis.

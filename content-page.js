@@ -1,5 +1,5 @@
 /**
- * Fraud Extension — page scanner (runs on every top-level page).
+ * FraudShield — page scanner (runs on every top-level page).
  * Looks at what the page *asks for*, not just its link:
  *   - phoneCapture: a phone field with "verify / not a robot / prize / OTP" bait
  *   - cardForm:     bank-card fields

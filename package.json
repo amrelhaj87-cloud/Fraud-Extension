@@ -1,6 +1,6 @@
 {
-  "name": "fraud-extension",
-  "version": "1.6.0",
+  "name": "fraudshield-extension",
+  "version": "1.6.1",
   "private": true,
   "type": "module",
   "scripts": {

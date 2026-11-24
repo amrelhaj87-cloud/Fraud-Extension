@@ -1,4 +1,4 @@
-# Fraud Extension
+# FraudShield (browser extension)
 
 Chrome extension (Manifest V3) that flags fraudulent links **before the user clicks**, in Google Search results and Google Maps place cards. It focuses on scams that impersonate UAE entities (Abu Dhabi Police, TAMM, UAE PASS, local banks, Emirates Post, etc.).
 
@@ -8,7 +8,7 @@ Everything runs locally: no server and no API key. The only outbound requests ar
 
 ## Built for the UAE
 
-Fraud Extension is not a generic link checker. Its rules and wording are built around the scams that target people in the UAE:
+FraudShield is not a generic link checker. Its rules and wording are built around the scams that target people in the UAE:
 
 | Sector | Entities it knows (official domains are trusted, look-alikes are flagged) |
 |---|---|

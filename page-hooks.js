@@ -1,5 +1,5 @@
 /**
- * Fraud Extension — in-page behavior hooks (runs in the page's MAIN world at
+ * FraudShield — in-page behavior hooks (runs in the page's MAIN world at
  * document_start, top frame only).
  *
  * Watches browser APIs that scam pages abuse and reports them to

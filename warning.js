@@ -1,5 +1,5 @@
 /**
- * Fraud Extension — warning page.
+ * FraudShield — warning page.
  * Two modes:
  *   ?u=<url>[&s=signals]   a high-risk page was blocked before it loaded
  *   ?d=<downloadId>&u=...  a dangerous download was paused (or deleted)

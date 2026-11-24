@@ -1,5 +1,5 @@
 /**
- * Fraud Extension — MV3 service worker.
+ * FraudShield — MV3 service worker.
  * Coordinates rules scoring, RDAP age lookup, tab result storage and the
  * optional team LLM hook. No remote code and no API keys.
  */
@@ -40,7 +40,7 @@ if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage)
         handleAnalyzeMessage(message, sender)
           .then((results) => safeRespond(sendResponse, results))
           .catch((error) => {
-            console.warn("[Fraud Extension] Analyze failed:", error);
+            console.warn("[FraudShield] Analyze failed:", error);
             safeRespond(sendResponse, []);
           });
         return true;
@@ -53,7 +53,7 @@ if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage)
         return true;
       }
     } catch (error) {
-      console.warn("[Fraud Extension] Message handler failed:", error);
+      console.warn("[FraudShield] Message handler failed:", error);
       safeRespond(sendResponse, message.type === "ANALYZE" ? [] : emptyTabPayload(null));
       return false;
     }
@@ -358,7 +358,7 @@ function mergeTabResults(tabId, freshResults) {
     .catch(() => {})
     .then(() => performMergeTabResults(tabId, freshResults))
     .catch((error) => {
-      console.warn("[Fraud Extension] Saving tab results failed:", error);
+      console.warn("[FraudShield] Saving tab results failed:", error);
     });
 
   tabMergeQueues.set(tabId, queued);

@@ -22,7 +22,7 @@
     // Starts a download with no click, like a drive-by download page.
     // The "exe" is a harmless text file used only to show the download guard.
     setTimeout(() => {
-      const blob = new Blob(["Fraud Extension demo file. Harmless. Not a real program."], { type: "application/octet-stream" });
+      const blob = new Blob(["FraudShield demo file. Harmless. Not a real program."], { type: "application/octet-stream" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = "AbuDhabi-Fine-Viewer.exe";

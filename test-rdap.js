@@ -1,5 +1,5 @@
 /**
- * Manual RDAP diagnostic for Fraud Extension.
+ * Manual RDAP diagnostic for FraudShield.
  * Run with: node test-rdap.js
  *
  * Uses an in-memory chrome.storage.local shim so the same cache/TTL code paths
@@ -37,7 +37,7 @@ const domains = [
   "example.xyz"
 ];
 
-console.log("Fraud Extension — RDAP diagnostics (debug: true)");
+console.log("FraudShield — RDAP diagnostics (debug: true)");
 console.log("");
 
 for (const domain of domains) {
