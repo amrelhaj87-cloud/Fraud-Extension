@@ -274,7 +274,7 @@ Run it from the project folder, then open:
 - UAE PASS: http://127.0.0.1:8765/dev/demo/uaepass-mock.html. A fake UAE PASS sign-in that asks for the Emirates ID and an OTP; it is blocked as high risk. Nothing on the page is sent anywhere.
 - Maps: http://127.0.0.1:8765/dev/demo/maps-mock.html. Click the tabs to switch between an official bank, a bank on a free link with a mobile number, an impersonating courier site, a fake "Abu Dhabi Police" office with no website and only a mobile number, a real-world copy of a "دفع المخالفات" listing filed as a warehouse with a mobile number, and a normal shop. A results list with real police websites sits next to the panel, like on real Maps.
 
-After the demo pages, show the same extension on real Google Search and Maps. A one-minute video script is in [dev/DEMO.md](dev/DEMO.md).
+After the demo pages, show the same extension on real Google Search and Maps. A one-minute video script is in [dev/DEMO.md](dev/DEMO.md). The finished video and the presentation are in [submission/](submission/).
 
 Tests in detail: `node dev/test.js` runs 178 tests (scoring, IP owner, phone numbers, false-alarm guards); `node dev/test-rdap.js` runs a live RDAP lookup (needs internet).
 
@@ -333,4 +333,5 @@ Keep API keys on a server, never in the extension.
 | `blocker.js` | Blocks high-risk navigations before they load |
 | `warning.html`, `warning.js`, `warning.css` | The blocking page |
 | `popup.html`, `popup.js`, `popup.css` | Toolbar popup |
+| `submission/` | Hackathon submission: one-minute demo video and the presentation (not in the release zip) |
 | `dev/` | Developer files, not in the release zip: `DEMO.md` one-minute video script, `build.ps1` release zip (`npm run build`), `demo/` offline demo pages, `eval/` accuracy scale, `test.js`, `test-rdap.js`, `tools/` |
