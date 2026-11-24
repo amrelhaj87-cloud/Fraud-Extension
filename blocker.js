@@ -121,7 +121,7 @@ function remember(map, key, value) {
 }
 
 const SIGNAL_NAMES = [
-  "phoneCapture", "cardForm", "clickFix", "clipboardCommand",
+  "phoneCapture", "cardForm", "fakeUaePass", "clickFix", "clipboardCommand",
   "scareware", "trap", "notifications", "popupSpam"
 ];
 
@@ -147,6 +147,8 @@ export function combineWithPage(base, signals, lang) {
 
   // A page that silently copies a command to the clipboard (we blocked the copy).
   if (signals.clipboardCommand) add(80, "pageClipboard");
+  // A UAE PASS look-alike sign-in outside uaepass.ae: identity theft.
+  if (signals.fakeUaePass) add(70, "pageUaePass");
   // ClickFix ("Win+R, Ctrl+V" with a fake verification) is never legitimate.
   if (signals.clickFix) add(70, "pageClickFix");
   // Tech-support scareware: fullscreen + locked keyboard/mouse or dialog loop.

@@ -60,6 +60,7 @@ Every warning names **who** is being impersonated and **which sector** they belo
 | IP of a cloud / hosting provider | +45, reason names the provider |
 | IP of a home or mobile connection (ISP) | +45 +20 (high) |
 | Local network IP (`192.168.x`, `10.x`, `127.0.0.1`) | 0 |
+| Page: fake UAE PASS sign-in (UAE PASS title/heading/logo + Emirates ID, password or OTP field, not on `uaepass.ae`) | +70 (high, blocked) |
 | Page: ClickFix instructions | +70 |
 | Page: phone capture with bait | +40 (+20 on an otherwise clean domain) |
 | Page: card form on a suspicious domain | +25 |
@@ -91,6 +92,7 @@ python -m http.server 8765 --bind 127.0.0.1
 ```
 
 - Search: http://127.0.0.1:8765/demo/search-mock.html. It has 7 results: 2 official, 1 normal news site, and 4 scams (a sponsored ad, a typosquat, brand + `.top`, and an Emirates Post page on `linktr.ee`).
+- UAE PASS: http://127.0.0.1:8765/demo/uaepass-mock.html. A fake UAE PASS sign-in that asks for the Emirates ID and an OTP; it is blocked as high risk. Nothing on the page is sent anywhere.
 - Maps: http://127.0.0.1:8765/demo/maps-mock.html. Click the tabs to switch between an official bank, a bank on a free link with a mobile number, an impersonating courier site, and a normal shop.
 
 After the demo pages, show the same extension on real Google Search and Maps.

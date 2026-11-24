@@ -4,6 +4,8 @@
  *   - phoneCapture: a phone field with "verify / not a robot / prize / OTP" bait
  *   - cardForm:     bank-card fields
  *   - clickFix:     "Win+R → cmd → Ctrl+V" instructions (ClickFix malware)
+ *   - fakeUaePass:  a page branded as UAE PASS that asks for an Emirates ID,
+ *                   password or one-time code, outside uaepass.ae
  * Sends the signals to the background, which combines them with the domain
  * score, colors the toolbar icon, and blocks the page if it becomes high risk.
  *   - behaviors from page-hooks.js: clipboard commands, scareware
@@ -44,6 +46,30 @@
 
   const FAKE_CHECK = /verif|not a robot|human|captcha|cloudflare|تحقق|لست روبوت/i;
 
+  // UAE PASS branding. Only the title, headings and logo images count: many
+  // real sites show a "Sign in with UAE PASS" button that goes to uaepass.ae.
+  const UAE_PASS = /uae\s*-?\s*pass|الهوية الرقمية|يو\s*إ?ي\s*إ?ي\s*باس/i;
+  const UAE_PASS_OFFICIAL = /(^|\.)uaepass\.ae$/i;
+  // What the real UAE PASS never asks for on another site: Emirates ID,
+  // password, or a one-time code.
+  const EID_INPUT =
+    'input[name*="emirates" i], input[id*="emirates" i], input[name*="eid" i], input[id*="eid" i], ' +
+    'input[name*="identity" i], input[id*="identity" i], input[placeholder*="784"], ' +
+    'input[placeholder*="emirates id" i], input[placeholder*="الهوية"]';
+  const SECRET_INPUT =
+    'input[type="password"], input[autocomplete="one-time-code"], input[name*="otp" i], ' +
+    'input[id*="otp" i], input[placeholder*="otp" i], input[placeholder*="رمز التحقق"]';
+
+  function claimsUaePass() {
+    if (UAE_PASS.test(document.title || "")) return true;
+    const headings = [...document.querySelectorAll("h1, h2, h3, header, [class*='logo' i]")];
+    if (headings.some((el) => UAE_PASS.test(el.textContent || ""))) return true;
+    return [...document.querySelectorAll("img, svg")].some((img) =>
+      /uae.?pass/i.test(`${img.getAttribute("alt") || ""} ${img.getAttribute("src") || ""} ` +
+        `${img.getAttribute("aria-label") || ""}`)
+    );
+  }
+
   let timer = null;
   let lastSent = "";
   const started = Date.now();
@@ -58,6 +84,14 @@
         phoneInputs.some((i) => UAE_PREFIX.test(i.value || i.placeholder || "")));
 
     const cardForm = [...document.querySelectorAll(CARD_INPUT)].some(visible);
+
+    // Fake UAE PASS sign-in: branded as UAE PASS, asks for an Emirates ID,
+    // password or OTP, and is not on uaepass.ae.
+    const fakeUaePass =
+      !UAE_PASS_OFFICIAL.test(location.hostname) &&
+      ([...document.querySelectorAll(EID_INPUT)].some(visible) ||
+        [...document.querySelectorAll(SECRET_INPUT)].some(visible)) &&
+      claimsUaePass();
 
     // Instructions + a fake "verification" (tutorial pages don't claim to verify you).
     const clickFix =
@@ -82,6 +116,7 @@
     return {
       phoneCapture,
       cardForm,
+      fakeUaePass,
       clickFix,
       clipboardCommand: behavior.clipboardCommand,
       scareware,

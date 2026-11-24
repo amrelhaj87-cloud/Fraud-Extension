@@ -5,6 +5,15 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - **Minor** (1.2.0 → 1.3.0): a new feature or a new detection rule.
 - **Patch** (1.2.0 → 1.2.1): a fix or small tweak.
 
+## [1.7.0] - 2026-11-24
+
+### Added
+- **Fake UAE PASS sign-in detection** (page scanner). A page is flagged (+70, high, blocked) when all three hold:
+  1. It presents itself as UAE PASS in its **title, headings or logo** ("UAE PASS", "الهوية الرقمية"). A plain "Sign in with UAE PASS" button or link does not count, because many real sites have one that goes to uaepass.ae.
+  2. It shows an **Emirates ID field** (name/id with emirates/eid/identity, or a `784-` placeholder), a **password field**, or a **one-time-code (OTP) field**.
+  3. It is **not on uaepass.ae**. Official domains (`*.gov.ae`, banks on the official list) are never affected.
+- Demo page `demo/uaepass-mock.html`: a harmless fake UAE PASS sign-in ("your traffic fine is overdue") with Emirates ID and OTP fields. It has no form action and sends nothing.
+
 ## [1.6.1] - 2026-11-24
 
 ### Changed
