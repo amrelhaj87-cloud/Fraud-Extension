@@ -178,7 +178,7 @@ const GLOBAL_BRANDS = {
   mercadolivre: { name: "Mercado Livre", sites: [] },
   mercadolibre: { name: "Mercado Libre", sites: [] },
   vodafone: { name: "Vodafone", sites: [] },
-  telegram: { name: "Telegram", sites: ["telegram.org"] },
+  telegram: { name: "Telegram", sites: ["telegram.org", "telegra.ph", "t.me"] },
   tiktok: { name: "TikTok", sites: ["tiktok.com"] },
   dhl: { name: "DHL", sites: [] },
   fedex: { name: "FedEx", sites: [] },
@@ -353,6 +353,33 @@ export function analyzeDomain(hostname, opts = {}) {
     if (looksGenerated(host.slice(0, -freeHost.length - 1))) {
       add(20, t("freeHostRandom", { host: freeHost }));
     }
+  }
+
+  // 6a) Global brand misspelt on purpose (steamconmmunity, e-docssign).
+  const globalTypo = findGlobalBrandTypo(host);
+  if (globalTypo && !typo) {
+    add(45, t("typo", { brand: globalTypo, misspell: true }));
+  }
+
+  // 6a+) Global brand + risk word in the domain itself (instagram-verify.com,
+  //       paypal-login.net). The brand alone is not enough: fan sites exist.
+  const globalInBase = !freeHost && !globalTypo ? findGlobalBrand(domain.base) : null;
+  if (globalInBase && !GLOBAL_BRANDS[globalInBase].sites.some((s) => host === s || host.endsWith(`.${s}`)) &&
+      (riskMatches.length > 0 || findMisspeltRiskWord(host))) {
+    add(40, t("contains", { brand: GLOBAL_BRANDS[globalInBase].name }));
+  }
+
+  // 6a') Global brand as a subdomain of an unrelated site
+  //      (walletconnect.wallet-veriffy.com, bbva.e-docssign.net).
+  const brandSub = findGlobalBrandSubdomain(host, domain);
+  if (brandSub && !freeHost) {
+    add(30, t("contains", { brand: brandSub }));
+  }
+
+  // 6a'') Risk word misspelt by an added or dropped letter (veriffy, acount).
+  const misspelt = findMisspeltRiskWord(host);
+  if (misspelt) {
+    add(15, t("riskWords", { words: [misspelt] }));
   }
 
   // 6b) A single-site global brand on another ending: roblox.ss, roblox.com.bo.
@@ -764,6 +791,82 @@ function findBrandOnOtherEnding(host) {
   // Only "brand.tld" or "brand.com.cc" / "brand.co.cc".
   if (labels.length === 3 && !/^(com|co|net|org)$/.test(labels[1])) return null;
   return info.name;
+}
+
+// Name tokens of the host, without the ending (com, co.uk…).
+function hostTokens(host) {
+  const labels = host.split(".");
+  return labels.slice(0, -1).join(".").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+}
+
+function findGlobalBrandTypo(host) {
+  for (const token of hostTokens(host)) {
+    // rn -> m, 0 -> o, Cyrillic а -> a: instagrarn, paypa1.
+    const visual = foldConfusables(normalizeLookalikes(token));
+    if (visual !== token && Object.prototype.hasOwnProperty.call(GLOBAL_BRANDS, visual)) {
+      return GLOBAL_BRANDS[visual].name;
+    }
+    for (const [brand, info] of Object.entries(GLOBAL_BRANDS)) {
+      // Long brands only: short ones are one letter away from real words.
+      if (brand.length < 7 || token === brand || token[0] !== brand[0]) continue;
+      // Another brand (mercadolibre vs mercadolivre) or the brand's own site.
+      if (Object.prototype.hasOwnProperty.call(GLOBAL_BRANDS, token)) continue;
+      if (info.sites.some((s) => host === s || host.endsWith(`.${s}`))) continue;
+      if (Math.abs(token.length - brand.length) > 1) continue;
+      if (levenshtein(token, brand) === 1) return info.name;
+    }
+  }
+  return null;
+}
+
+// Customer portals legitimately named after a brand on these platforms.
+const SAAS_TENANT_HOSTS = [
+  "sharepoint.com", "zendesk.com", "service-now.com", "salesforce.com", "force.com",
+  "okta.com", "atlassian.net", "myshopify.com", "freshdesk.com", "hubspot.com",
+  "workday.com", "box.com", "slack.com", "webex.com", "zoom.us", "cloudfront.net",
+  "amazonaws.com", "azurewebsites.net", "akamaihd.net", "edgekey.net"
+];
+
+function findGlobalBrandSubdomain(host, domain) {
+  if (domain.isIp || domain.subdomainCount < 1) return null;
+  const registrable = host.split(".").slice(-(domain.tld.includes(".") ? 3 : 2)).join(".");
+  if (SAAS_TENANT_HOSTS.some((s) => host === s || host.endsWith(`.${s}`))) return null;
+  const labels = host.split(".");
+  const subs = labels.slice(0, domain.subdomainCount);
+  for (const [i, label] of subs.entries()) {
+    const info = GLOBAL_BRANDS[label];
+    if (!info) continue;
+    // amazon.co.jp, shopee.com.br: the brand's own country site.
+    const rest = labels.slice(i + 1);
+    if (rest.length === 2 && /^(co|com|net|org|ne|or|ac)$/.test(rest[0]) && rest[1].length === 2) return null;
+    // The brand's own subdomain on its own site is fine (www.paypal.com).
+    if (info.sites.some((s) => registrable === s || host.endsWith(`.${s}`))) return null;
+    if (domain.base === label) return null;
+    return info.name;
+  }
+  return null;
+}
+
+// verify -> veriffy / verfy, account -> acount. Only an added or dropped
+// letter (not a swapped one: postal is a real word next to portal), and not
+// a plain ending (updates, secured).
+const MISSPELL_WORDS = ["verify", "account", "secure", "update", "wallet", "delivery", "confirm", "signin", "recovery", "support"];
+
+function findMisspeltRiskWord(host) {
+  for (const token of hostTokens(host)) {
+    for (const word of MISSPELL_WORDS) {
+      if (token.includes(word)) continue;
+      for (let i = 0; i + word.length - 1 <= token.length; i += 1) {
+        for (const len of [word.length - 1, word.length + 1]) {
+          const part = token.slice(i, i + len);
+          if (part.length !== len || part[0] !== word[0]) continue;
+          if (len > word.length && (part.endsWith("s") || part.endsWith("d")) && part.startsWith(word)) continue;
+          if (levenshtein(part, word) === 1) return part;
+        }
+      }
+    }
+  }
+  return null;
 }
 
 // facebook.github.io, microsoft.github.io: on code hosts the first label is

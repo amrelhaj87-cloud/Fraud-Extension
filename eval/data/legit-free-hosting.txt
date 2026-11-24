@@ -28,3 +28,23 @@ https://www.weebly.com/
 https://linktr.ee/
 https://about.linktr.ee/
 https://openai.github.io/openai-agents-python/
+# Brands' own subdomains (checks the "brand as a subdomain" rule)
+https://developer.paypal.com/
+https://help.netflix.com/en
+https://about.instagram.com/
+https://business.facebook.com/
+https://support.apple.com/
+https://aws.amazon.com/
+https://sellercentral.amazon.ae/
+https://learn.microsoft.com/
+https://devforum.roblox.com/
+https://store.steampowered.com/
+https://help.steampowered.com/
+https://support.docusign.com/
+https://help.coinbase.com/
+https://support.metamask.io/
+https://web.whatsapp.com/
+https://faq.whatsapp.com/
+https://www.linkedin.com/jobs/
+https://www.dhl.com/ae-en/home.html
+https://www.hsbc.ae/

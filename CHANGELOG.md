@@ -5,6 +5,27 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - **Minor** (1.2.0 → 1.3.0): a new feature or a new detection rule.
 - **Patch** (1.2.0 → 1.2.1): a fix or small tweak.
 
+## [2.2.0] - 2026-11-24
+
+### Added (designed on the TRAIN half only)
+- **Global brand misspelt on purpose** (`steamconmmunity.life`, `e-docssign.net`): +45. Brands of 7+ letters only, one letter off, same first letter. Look-alike tricks count too (`instagrarn` = rn→m). Sibling brands (Mercado Libre / Livre) and brands' own services (`telegra.ph`) are excluded.
+- **Global brand as a subdomain of an unrelated site** (`walletconnect.wallet-veriffy.com`, `bbva.e-docssign.net`): +30. Not on the brand's own site, its country sites (`amazon.co.jp`, `shopee.com.br`), or customer-portal platforms (Zendesk, SharePoint, Salesforce…).
+- **Risk word misspelt by an added or dropped letter** (`veriffy`, `acount`): +15. A swapped letter does not count (`postal` is a real word), nor a plain ending (`updates`, `secured`).
+- **Global brand + risk word in the domain** (`instagram-verify.com`, `paypal-login.net`): +40. The brand alone is not enough (fan sites). Not in the dataset; covered by tests.
+- The scale's legit set now includes 19 real brand subdomains (`developer.paypal.com`, `help.netflix.com`, `aws.amazon.com`…), because the top-5000 list has home pages only.
+- 16 regression tests (178 total).
+
+### Accuracy scale (URL only)
+| | v2.1.0 | v2.2.0 |
+|---|---|---|
+| Global phishing, TRAIN half (150) | 64.0% | **69.3%** |
+| Global phishing, **TEST half** (150) | 56.0% | **60.0%** |
+| Flagged as high (TRAIN / TEST) | 17.3% / 12.0% | 22.0% / 15.3% |
+| UAE scams (14) | 92.9% | 92.9% |
+| False alarms, all legitimate | 1 of 5134 | **1 of 5153** |
+
+The first version of these rules raised false alarms to 16 (Amazon/Shopee country sites, Mercado Libre vs Livre, `telegra.ph`); all were fixed before release.
+
 ## [2.1.0] - 2026-11-24
 
 ### Added (designed on the TRAIN half of the global phishing set only)

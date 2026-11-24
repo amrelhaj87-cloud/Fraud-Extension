@@ -361,6 +361,28 @@ for (const u of [
   check(`${u} -> not flagged (legit)`, !flagged, r);
 }
 
+// 16) Deliberate misspellings and brand subdomains (v2.2.0, TRAIN half only).
+for (const u of [
+  "https://steamconmmunity.life/profile/1",
+  "https://login.e-docssign.net/x",
+  "https://walletconnect.wallet-veriffy.com/solutions/trading",
+  "https://bbva.e-docssign.net/education_redirect_second",
+  "https://paypal.account-check.net/",
+  "https://instagrarn-verify.com/"
+]) {
+  const { r, flagged } = flaggedUrl(u);
+  check(`${u} -> flagged (misspelling / brand subdomain)`, flagged, r);
+}
+for (const u of [
+  "https://amazon.co.jp/", "https://shopee.com.br/", "https://mercadolibre.com.mx/",
+  "https://mercadolivre.com.br/", "https://telegra.ph/", "https://postal-service.com/",
+  "https://updates.example.com/", "https://secured-storage.com/",
+  "https://paypal.zendesk.com/", "https://developer.paypal.com/"
+]) {
+  const { r, flagged } = flaggedUrl(u);
+  check(`${u} -> not flagged (legit)`, !flagged, r);
+}
+
 console.log("");
 console.log(`Results: ${passed} passed, ${failed} failed`);
 if (failed > 0) process.exitCode = 1;

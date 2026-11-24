@@ -22,7 +22,7 @@ npm run eval                 # same as --write
 | `phish-openphish.json` | 300 real phishing URLs, split 150 train / 150 test (seed 2026) | Team repo, OpenPhish snapshot |
 | `legit-tranco-top5000.txt` | Top 5000 sites, home pages | Team repo `config/popular_domains.txt` (Tranco, 2026-11-23). The extension does not use this list, so it is a fair test |
 | `legit-uae.txt` | 89 real UAE sites: government, banks, telecom, shopping, news… | Hand-picked |
-| `legit-free-hosting.txt` | 27 legitimate pages on github.io, blogspot, vercel, netlify, linktr.ee… | Hand-picked |
+| `legit-free-hosting.txt` | 27 legitimate pages on free hosting (github.io, blogspot, vercel, netlify, linktr.ee…) and 19 brands' own subdomains (developer.paypal.com, help.netflix.com…) | Hand-picked |
 
 ## Rules for using it honestly
 

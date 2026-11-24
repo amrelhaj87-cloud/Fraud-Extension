@@ -44,7 +44,7 @@ const SETS = [
   { name: "UAE legit + hard negatives (hand-labelled)", kind: "legit", urls: golden.filter((c) => c.truth !== "phish").map((c) => c.url) },
   { name: "UAE legit sites", kind: "legit", urls: readText("legit-uae.txt") },
   { name: "Top 5000 sites (Tranco)", kind: "legit", urls: readText("legit-tranco-top5000.txt").map((d) => `https://${d}/`) },
-  { name: "Legit pages on free hosting", kind: "legit", urls: readText("legit-free-hosting.txt") }
+  { name: "Legit free hosting + brand subdomains", kind: "legit", urls: readText("legit-free-hosting.txt") }
 ];
 
 // ---------------------------------------------------------------------------
