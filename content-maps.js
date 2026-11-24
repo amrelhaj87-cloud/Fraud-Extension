@@ -98,6 +98,11 @@
     const authority = panel.querySelector('a[data-item-id="authority"]');
     if (authority && authority.href) website = unwrap(authority.href);
 
+    const addressEl = panel.querySelector('[data-item-id="address"]');
+    const address = addressEl
+      ? (addressEl.getAttribute("aria-label") || addressEl.textContent || "").replace(/^[^:]*:\s*/, "").trim()
+      : "";
+
     // "Claim this business": nobody has verified ownership of the listing.
     const unclaimed = !!panel.querySelector('[data-item-id="merchant"]');
 
@@ -112,7 +117,7 @@
       phone = raw.replace(/^phone:tel:/, "").replace(/[^\d+]/g, "");
     }
 
-    return { name, category, website, phone, unclaimed };
+    return { name, category, website, phone, unclaimed, address };
   }
 
   function unwrap(href) {
@@ -265,6 +270,35 @@
         list.appendChild(li);
       }
       banner.appendChild(list);
+    }
+
+    // Report button on risky places: opens the report page (sign-in required there).
+    if (result.level === "medium" || result.level === "high") {
+      const report = document.createElement("button");
+      report.type = "button";
+      report.className = "fe-maps-report";
+      report.textContent = T("reportPlace");
+      report.addEventListener("click", () => {
+        try {
+          chrome.runtime.sendMessage({
+            type: "OPEN_REPORT",
+            draft: {
+              kind: "place",
+              name: place.name,
+              phone: place.phone,
+              address: place.address,
+              website: place.website ? place.website.href : "",
+              url: location.href,
+              level: result.level,
+              score: result.score,
+              reasons: result.reasons
+            }
+          }, () => void chrome.runtime.lastError);
+        } catch {
+          // Extension reloaded; ignore.
+        }
+      });
+      banner.appendChild(report);
     }
 
     const brand = document.createElement("div");

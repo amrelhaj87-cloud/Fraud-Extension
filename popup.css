@@ -134,3 +134,17 @@ body {
 .hint { margin-top: 8px; color: var(--medium); }
 [dir="ltr"] .results .r-host { direction: ltr; text-align: left; }
 [dir="ltr"] .host { text-align: left; }
+
+.report-btn {
+  margin-top: 10px; width: 100%; border: 1px solid var(--high); border-radius: 8px;
+  padding: 6px 10px; background: transparent; color: var(--high); font: inherit; font-weight: 700; cursor: pointer;
+}
+.report-btn:hover { background: var(--high); color: #fff; }
+.report-btn[hidden] { display: none; }
+.account-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted);
+}
+.account-actions { display: flex; gap: 10px; }
+.link { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; cursor: pointer; text-decoration: underline; }
+.link[hidden] { display: none; }

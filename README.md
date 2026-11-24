@@ -84,6 +84,16 @@ Maps adds three rules of its own:
 
 Search results get the same check on their title and snippet: a known name plus a personal mobile number on a non-official site is +60 (high). Official 800 / 600 numbers and landlines never count. The matcher is `phone-claims.js`.
 
+## Report button (demo sign-in)
+
+Risky results have a **🚩 Report** button: on the Maps banner, on the warning page, and in the popup. It opens `report.html` with the site or place already filled in (name, number, address, score, reasons).
+
+- Reporting needs a signed-in user, so reports are not random or malicious. Protection itself never needs sign-in.
+- **Demo:** "Sign in with UAE PASS (demo)" signs in with one click, with no real account. In the real version this is the official UAE PASS sign-in, so every report comes from a verified identity.
+- The user adds an optional note ("they called and asked for the OTP"), ticks consent, and gets a report number (`FS-0001`). The same site or place is only reported once per user. "My reports" lists them.
+- **Demo:** reports are saved on this device (`chrome.storage.local`). After the merge, `sendReport()` in `report.js` posts them to the team backend's citizen-reports API.
+- Sign out from the popup or the report page.
+
 ## Install
 
 1. Open `chrome://extensions`
@@ -152,6 +162,8 @@ Keep API keys in the team's server, never in the extension.
 | `content-page.js` | Page scanner (phone / card / ClickFix) |
 | `content-search.js`, `content.css` | Google Search badges |
 | `content-maps.js`, `content-maps.css` | Google Maps banner |
+| `reports.js` | Report button plumbing: saves the draft, opens the report page |
+| `report.html`, `report.js`, `report.css` | Report page: demo UAE PASS sign-in, report form, "My reports" |
 | `phone-claims.js` | Known UAE body + personal mobile number matcher (Search and Maps) |
 | `blocker.js` | Blocks high-risk navigations before they load |
 | `warning.html`, `warning.js`, `warning.css` | The blocking page |

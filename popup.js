@@ -51,8 +51,16 @@ async function analyzeUrl(url) {
 // Rendering
 // ---------------------------------------------------------------------------
 
+let reportTarget = null; // verdict shown in the card, for the Report button
+
 function renderVerdict(result, { titleKey } = {}) {
   const card = $("current");
+
+  // Report button for risky http(s) links only.
+  const reportable =
+    (result.level === "medium" || result.level === "high") && /^https?:\/\//i.test(String(result.url || ""));
+  reportTarget = reportable ? result : null;
+  $("report-current").hidden = !reportable;
   const verdict = $("current-verdict");
   const note = $("current-note");
 
@@ -234,10 +242,55 @@ async function loadSettings() {
   });
 }
 
+// ---------------------------------------------------------------------------
+// Report button + demo sign-in line
+// ---------------------------------------------------------------------------
+
+$("report-current").addEventListener("click", async () => {
+  if (!reportTarget) return;
+  await send({
+    type: "OPEN_REPORT",
+    draft: {
+      kind: "site",
+      url: reportTarget.url,
+      level: reportTarget.level,
+      score: reportTarget.score,
+      reasons: reportTarget.reasons
+    }
+  });
+  window.close();
+});
+
+$("my-reports").addEventListener("click", () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL("report.html") });
+  window.close();
+});
+
+$("sign-out").addEventListener("click", async () => {
+  await chrome.storage.local.remove("fs:user");
+  void renderAccount();
+});
+
+async function renderAccount() {
+  let user = null;
+  try {
+    user = (await chrome.storage.local.get("fs:user"))["fs:user"] || null;
+  } catch {
+    user = null;
+  }
+  $("account-line").textContent = user && user.name
+    ? T("rSignedInAs", { name: user.name })
+    : T("signedOutLine");
+  $("sign-out").hidden = !(user && user.name);
+}
+
 try {
   $("version").textContent = `v${chrome.runtime.getManifest().version}`;
 } catch {
   // Not running as an extension page.
 }
 
-loadSettings().then(() => loadActiveTab());
+loadSettings().then(() => {
+  void renderAccount();
+  return loadActiveTab();
+});

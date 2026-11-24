@@ -82,6 +82,21 @@
     $("score").textContent = `${result.score}/100`;
     void send({ type: "MARK_BLOCKED", score: result.score });
     fillReasons(result.reasons, result.ageDays);
+
+    // Report this site (the report page asks the user to sign in first).
+    $("report-row").hidden = false;
+    $("report").addEventListener("click", () => {
+      void send({
+        type: "OPEN_REPORT",
+        draft: {
+          kind: "site",
+          url: parsed.href,
+          level: result.level || "high",
+          score: result.score,
+          reasons: result.reasons
+        }
+      });
+    });
   }
 
   // ---- Paused download -----------------------------------------------------

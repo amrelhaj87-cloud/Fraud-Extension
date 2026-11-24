@@ -84,3 +84,16 @@ h2 { font-size: 20px; margin: 28px 0 8px; }
 .done { margin-top: 16px; padding: 10px 14px; border-radius: 8px; background: var(--panel); font-weight: 600; }
 .check[hidden] { display: none; }
 .actions button:disabled { opacity: .55; cursor: default; }
+
+.report-row { margin-top: 18px; }
+.report-row[hidden] { display: none; }
+.report {
+  font: inherit;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 9px 18px;
+  cursor: pointer;
+  background: var(--danger-soft);
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}

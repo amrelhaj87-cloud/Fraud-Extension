@@ -5,6 +5,25 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - **Minor** (1.2.0 → 1.3.0): a new feature or a new detection rule.
 - **Patch** (1.2.0 → 1.2.1): a fix or small tweak.
 
+## [2.0.0] - 2026-11-24
+
+Major version: tonight's work turns FraudShield from a link checker into a tool for the scams that actually hit people in the UAE (fake Maps listings, fake customer-service numbers, fake UAE PASS pages), and lets the user report them.
+
+### Added
+- **🚩 Report button** on the Maps banner (medium/high places), the warning page, and the popup (medium/high sites). It opens `report.html` with the site or place filled in: name, phone, address, score and reasons.
+- **Sign-in before reporting**, so reports are not random or malicious. Protection never needs sign-in.
+  - Demo: "Sign in with UAE PASS (demo)" is one click with no real account. In the real version this is the official UAE PASS sign-in.
+  - The popup shows who is signed in, with "My reports" and "Sign out".
+- **Report page:** optional note ("they called and asked for the OTP"), required consent, report number (`FS-0001`), one report per site or place per user, and a "My reports" list.
+- Demo: reports are saved on this device. After the merge, `sendReport()` in `report.js` posts them to the team backend's citizen-reports API.
+
+### Since 1.5.0 (all tonight)
+- 1.5.1 / 1.6.0: raw IP links are rated by who owns the address (Google's own services vs rented cloud vs home connections).
+- 1.6.1: renamed to FraudShield.
+- 1.7.0: fake UAE PASS sign-in pages are detected and blocked.
+- 1.8.0: a known UAE name with a personal mobile number is high risk in Maps and Search.
+- 1.8.1: Maps reads only the open place (it had shown a "دفع المخالفات" scam as verified official); government payment services with a mobile number are high risk.
+
 ## [1.8.1] - 2026-11-24
 
 ### Fixed

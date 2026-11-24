@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FraudShield</title>
+  <link rel="stylesheet" href="report.css">
+</head>
+<body>
+  <main class="wrap">
+    <header class="top">
+      <img src="icons/icon48.png" alt="" width="36" height="36">
+      <div>
+        <h1 data-i18n="rHeading"></h1>
+        <p class="lead" data-i18n="rLead"></p>
+      </div>
+    </header>
+
+    <!-- What is being reported -->
+    <section class="panel" id="target" hidden>
+      <h2 data-i18n="rWhat"></h2>
+      <div class="kind" id="t-kind"></div>
+      <div class="t-main" id="t-main" dir="auto"></div>
+      <dl class="facts" id="t-facts"></dl>
+      <div class="score-row" id="t-score-row" hidden>
+        <span class="pill" id="t-level"></span>
+        <span class="score" id="t-score"></span>
+      </div>
+      <div id="t-why-wrap" hidden>
+        <h3 data-i18n="rWhy"></h3>
+        <ul class="reasons" id="t-reasons"></ul>
+      </div>
+    </section>
+
+    <p class="panel note" id="no-draft" data-i18n="rNoDraft" hidden></p>
+
+    <!-- Sign-in gate -->
+    <section class="panel gate" id="gate" hidden>
+      <p data-i18n="rSignInNeeded"></p>
+      <button type="button" class="uaepass" id="sign-in">
+        <span class="fp" aria-hidden="true">◉</span>
+        <span data-i18n="rSignIn"></span>
+      </button>
+      <p class="demo" data-i18n="rDemoNote"></p>
+    </section>
+
+    <!-- Signed in -->
+    <div class="account" id="account" hidden>
+      <span id="account-name"></span>
+      <button type="button" class="link" id="sign-out" data-i18n="rSignOut"></button>
+    </div>
+
+    <form class="panel" id="form" hidden>
+      <label for="note" data-i18n="rNoteLabel"></label>
+      <textarea id="note" rows="3" maxlength="600" data-i18n-placeholder="rNotePlaceholder"></textarea>
+      <label class="consent">
+        <input type="checkbox" id="consent" required>
+        <span data-i18n="rConsent"></span>
+      </label>
+      <button type="submit" class="primary" id="send" data-i18n="rSend"></button>
+    </form>
+
+    <section class="panel done" id="done" role="status" hidden>
+      <p class="done-main" id="done-main"></p>
+      <p class="demo" data-i18n="rSentDemo"></p>
+    </section>
+
+    <section class="mine" id="mine" hidden>
+      <h2 data-i18n="rMine"></h2>
+      <ul id="mine-list"></ul>
+      <p class="note" id="mine-empty" data-i18n="rMineEmpty" hidden></p>
+    </section>
+
+    <p class="foot" data-i18n="wFoot"></p>
+  </main>
+  <script src="i18n.js"></script>
+  <script src="report.js"></script>
+</body>
+</html>
