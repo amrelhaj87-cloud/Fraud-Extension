@@ -1,4 +1,4 @@
-# FraudShield accuracy (v2.6)
+# FraudShield accuracy (v2.7)
 
 URL only: no domain-age lookup, no IP owner, no page scan.
 
