@@ -5,6 +5,20 @@ Every change raises the version in `manifest.json` and `package.json`, gets an e
 - **Minor** (1.2.0 → 1.3.0): a new feature or a new detection rule.
 - **Patch** (1.2.0 → 1.2.1): a fix or small tweak.
 
+## [1.8.1] - 2026-11-24
+
+### Fixed
+- **Maps read the wrong place and called a scam "verified official".** Found on real Google Maps: with the results list and a place open side by side, the scanner took the first heading on the page ("Results") as the name, and, because the place had no website, borrowed the first link on the page, a real police listing's `adpolice.gov.ae`. A "دفع المخالفات" listing with a mobile number showed ✅ 0/100.
+  - The scanner now reads only the open place panel (`[role="main"]` with the place's heading, not the `[role="feed"]` results list).
+  - The website comes only from the place's own "Website" button. The "any link on the page" fallback is removed.
+  - With only the results list open, nothing is shown.
+
+### Added
+- Maps: a **government payment service** in the place name ("دفع المخالفات", "سداد", fines, Salik) with a personal mobile number is +60 (high). Visa / residency / Emirates ID services with a mobile are +35 (medium), because typing centres offer them legitimately.
+- Maps: a government service filed under an unrelated category (warehouse, shop, flat, restaurant…) adds +15.
+- Maps: "Claim this business" (unverified listing) is shown as a reason when the place is already suspicious.
+- Demo: the Maps mock now has a results list with real police websites beside the panel (like real Maps), and a copy of the real "دفع المخالفات" listing (warehouse, 056 number). It scores 75 (high).
+
 ## [1.8.0] - 2026-11-24
 
 ### Added

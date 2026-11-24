@@ -45,6 +45,16 @@
     { words: ["tamm", "تم"], domains: ["tamm.abudhabi"] }
   ];
 
+  // Government services named in a listing instead of the body that runs them
+  // ("دفع المخالفات", "Traffic fines payment"). Paying fines or Salik is only
+  // done through official channels, so a mobile number here is high risk.
+  const GOV_PAYMENT = /مخالف|غرام(ة|ات)|سداد|سالك|salik|traffic\s*fines?|\bfines?\b|fine\s*payment/i;
+  // Visa / ID services: typing centres offer these legitimately with mobile
+  // numbers, so this stays medium.
+  const GOV_DOCS = /تأشير|إقام|اقام|الهوية|رخصة|تجديد|\bvisa\b|residen|emirates\s*id|licen[cs]e|renewal/i;
+  // Categories that make no sense for a government service.
+  const ODD_CATEGORY = /warehouse|مستودع|storage|مخزن|apartment|شقة|residential|سكني|\bstore\b|\bshop\b|محل|grocery|بقالة|salon|صالون|restaurant|مطعم|\bcafe\b|مقهى/i;
+
   const I18N = globalThis.FE_I18N;
   let LANG = I18N.DEFAULT_LANG;
   const T = (key, params) => I18N.t(key, LANG, params);
@@ -57,33 +67,42 @@
   // Panel extraction
   // -------------------------------------------------------------------------
 
+  // The open place's own panel: a [role="main"] with the place name as its
+  // label and an h1, that is not the results list ([role="feed"], whose h1 is
+  // "Results"). With the list and a place open side by side, the list comes
+  // first in the page, so "first h1 on the page" reads the wrong thing.
+  function findPlacePanel() {
+    const panels = [...document.querySelectorAll('[role="main"]')].filter(
+      (m) => m.querySelector("h1") && !m.querySelector('[role="feed"]') &&
+        !m.closest('[role="feed"]')
+    );
+    return panels.length ? panels[panels.length - 1] : null;
+  }
+
   function readPlace() {
-    const nameEl =
-      document.querySelector('[role="main"] h1') || document.querySelector("h1");
-    const name = nameEl ? nameEl.textContent.trim() : "";
+    const panel = findPlacePanel();
+    if (!panel) return { name: "", category: "", website: null, phone: "", unclaimed: false };
+
+    const nameEl = panel.querySelector("h1");
+    const name =
+      (nameEl && nameEl.textContent.trim()) || (panel.getAttribute("aria-label") || "").trim();
 
     const categoryEl =
-      document.querySelector('button[jsaction*="category"]') ||
-      document.querySelector("[data-fe-category]");
+      panel.querySelector('button[jsaction*="category"]') ||
+      panel.querySelector("[data-fe-category]");
     const category = categoryEl ? categoryEl.textContent.trim() : "";
 
+    // Only the place's own "Website" button. Never guess from other links:
+    // a nearby real police listing once made a scam look "verified".
     let website = null;
-    const authority = document.querySelector('a[data-item-id="authority"]');
+    const authority = panel.querySelector('a[data-item-id="authority"]');
     if (authority && authority.href) website = unwrap(authority.href);
 
-    if (!website) {
-      const scope = document.querySelector('[role="main"]') || document.body;
-      for (const a of scope.querySelectorAll("a[href^='http']")) {
-        const url = unwrap(a.href);
-        if (url && !isGoogle(url.hostname)) {
-          website = url;
-          break;
-        }
-      }
-    }
+    // "Claim this business": nobody has verified ownership of the listing.
+    const unclaimed = !!panel.querySelector('[data-item-id="merchant"]');
 
     let phone = "";
-    const phoneEl = document.querySelector('[data-item-id^="phone"]');
+    const phoneEl = panel.querySelector('[data-item-id^="phone"]');
     if (phoneEl) {
       const raw =
         phoneEl.getAttribute("data-item-id") ||
@@ -93,7 +112,7 @@
       phone = raw.replace(/^phone:tel:/, "").replace(/[^\d+]/g, "");
     }
 
-    return { name, category, website, phone };
+    return { name, category, website, phone, unclaimed };
   }
 
   function unwrap(href) {
@@ -165,9 +184,21 @@
     if (mobile && (brand || claimedKey)) {
       const label = claimedKey ? I18N.brandLabel(claimedKey, LANG) : place.name;
       add(60, T("mapsBrandPhone", { brand: label, phone: place.phone }));
-    } else if (mobile && sensitive) {
+    } else if (mobile && GOV_PAYMENT.test(place.name)) {
+      // "دفع المخالفات" with 056...: fines are never paid through a mobile number.
+      add(60, T("mapsGovPhone", { service: place.name, phone: place.phone }));
+    } else if (mobile && (sensitive || GOV_DOCS.test(place.name))) {
       add(35, T("mapsPhone", { phone: place.phone }));
     }
+
+    // A government service listed as a warehouse, shop, flat...
+    if ((GOV_PAYMENT.test(place.name) || GOV_DOCS.test(place.name)) &&
+        place.category && ODD_CATEGORY.test(place.category)) {
+      add(15, T("mapsOddCategory", { category: place.category }));
+    }
+
+    // Unverified listing: only worth saying when something else is wrong.
+    if (place.unclaimed && score >= 30) reasons.push(T("mapsUnclaimed"));
 
     if (score !== (base ? base.score : 0) || !base) {
       level = score >= 60 ? "high" : score >= 30 ? "medium" : base && base.level === "safe" ? "safe" : "low";

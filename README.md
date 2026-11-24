@@ -77,7 +77,10 @@ Maps adds three rules of its own:
 - A free site for a bank, government or courier place
 - A place named after a known brand that links to a site that isn't the brand's official one
 - A known bank, police or government name with a personal mobile number (05x / +9715x): +60, high on its own, website or not (the fake "customer service" scam)
-- A personal mobile number on a bank / government / courier category place: +35
+- A government payment service in the name ("دفع المخالفات", traffic fines, Salik) with a personal mobile: +60 (high)
+- A personal mobile number on a bank / government / courier category place, or a visa / ID service: +35
+- A government service listed under an unrelated category (warehouse, shop, flat): +15
+- The scanner reads only the open place panel and its own "Website" button; it never borrows a website from the results list
 
 Search results get the same check on their title and snippet: a known name plus a personal mobile number on a non-official site is +60 (high). Official 800 / 600 numbers and landlines never count. The matcher is `phone-claims.js`.
 
@@ -96,7 +99,7 @@ python -m http.server 8765 --bind 127.0.0.1
 
 - Search: http://127.0.0.1:8765/demo/search-mock.html. It has 8 results: 2 official, 1 normal news site, and 5 scams (a sponsored ad, a typosquat, brand + `.top`, an Emirates Post page on `linktr.ee`, and a fake "ADCB customer care" result with a mobile number).
 - UAE PASS: http://127.0.0.1:8765/demo/uaepass-mock.html. A fake UAE PASS sign-in that asks for the Emirates ID and an OTP; it is blocked as high risk. Nothing on the page is sent anywhere.
-- Maps: http://127.0.0.1:8765/demo/maps-mock.html. Click the tabs to switch between an official bank, a bank on a free link with a mobile number, an impersonating courier site, a fake "Abu Dhabi Police" office with no website and only a mobile number, and a normal shop.
+- Maps: http://127.0.0.1:8765/demo/maps-mock.html. Click the tabs to switch between an official bank, a bank on a free link with a mobile number, an impersonating courier site, a fake "Abu Dhabi Police" office with no website and only a mobile number, a real-world copy of a "دفع المخالفات" listing filed as a warehouse with a mobile number, and a normal shop. A results list with real police websites sits next to the panel, like on real Maps.
 
 After the demo pages, show the same extension on real Google Search and Maps.
 

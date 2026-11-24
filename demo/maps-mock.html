@@ -6,6 +6,10 @@
   <title>Maps (عرض تجريبي)</title>
   <style>
     body { margin: 0; font: 14px/1.6 Arial, "Noto Sans Arabic", sans-serif; color: #202124; background: #fff; display: flex; min-height: 100vh; }
+    .results { width: 300px; max-width: 100%; border-left: 1px solid #e0e0e0; padding: 20px; box-sizing: border-box; }
+    .results h1 { font-size: 18px; }
+    .results .item { padding: 10px 0; border-top: 1px solid #f1f3f4; font-size: 13px; }
+    .results .item a { color: #1a73e8; }
     aside { width: 400px; max-width: 100%; border-left: 1px solid #e0e0e0; padding: 20px; box-sizing: border-box; }
     .map { flex: 1; background: linear-gradient(135deg, #e8f0e3 25%, #dfe9f5 25%, #dfe9f5 50%, #e8f0e3 50%, #e8f0e3 75%, #dfe9f5 75%); background-size: 60px 60px; }
     .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
@@ -20,6 +24,18 @@
   </style>
 </head>
 <body>
+  <!-- Mirrors real Google Maps: the results list (role="feed", h1 "Results")
+       comes BEFORE the open place panel, and lists real police websites.
+       The scanner must read the open place, not the list. -->
+  <div role="main" class="results">
+    <div role="feed" aria-label="Results for مخالفات">
+      <h1>Results</h1>
+      <div class="item">Traffic and Patrols Directorate · قسم الشرطة · 800 3333 ·
+        <a href="https://www.adpolice.gov.ae/">Website</a></div>
+      <div class="item">Customer Service and Happiness Center - Traffic and Patrols · مكتب حكومي ·
+        <a href="https://www.adpolice.gov.ae/">Website</a></div>
+    </div>
+  </div>
   <aside>
     <span class="demo-tag">صفحة عرض تجريبية — بيانات وهمية</span>
     <div class="tabs" id="tabs"></div>
@@ -33,6 +49,7 @@
       { label: "بنك برابط مجاني", name: "ADCB Customer Service Center", cat: "Bank", site: "https://adcb-support.linktr.ee/", phone: "+971501234567" },
       { label: "رابط منتحل", name: "Emirates Post - Mussafah", cat: "Post office", site: "https://emiratespost-delivery.com/", phone: "+97126220000" },
       { label: "شرطة برقم جوال", name: "شرطة أبوظبي - مكتب سداد المخالفات", cat: "Government office", site: "", phone: "+971501234567" },
+      { label: "دفع المخالفات (مستودع)", name: "دفع المخالفات", cat: "Warehouse", site: "", phone: "0564864684", unclaimed: true },
       { label: "محل عادي", name: "Al Reef Bakery", cat: "Bakery", site: "https://www.noon.com/", phone: "+97125550000" }
     ];
     const tabs = document.getElementById("tabs");
@@ -42,6 +59,7 @@
       const p = PLACES[i];
       [...tabs.children].forEach((b, j) => b.setAttribute("aria-pressed", String(i === j)));
       panel.innerHTML = "";
+      panel.setAttribute("aria-label", p.name);
       const h1 = document.createElement("h1"); h1.textContent = p.name;
       const cat = document.createElement("button"); cat.className = "cat"; cat.setAttribute("jsaction", "pane.rating.category"); cat.textContent = p.cat;
       const siteRow = document.createElement("div"); siteRow.className = "row";
@@ -53,6 +71,11 @@
       const ph = document.createElement("button"); ph.className = "phone"; ph.setAttribute("data-item-id", "phone:tel:" + p.phone); ph.textContent = "📞 " + p.phone;
       phoneRow.append(ph);
       panel.append(h1, cat, siteRow, phoneRow);
+      if (p.unclaimed) {
+        const claim = document.createElement("a"); claim.href = "#"; claim.setAttribute("data-item-id", "merchant"); claim.textContent = "Claim this business";
+        const claimRow = document.createElement("div"); claimRow.className = "row"; claimRow.append(claim);
+        panel.append(claimRow);
+      }
     }
 
     PLACES.forEach((p, i) => {
