@@ -5,6 +5,19 @@ Every change raises the version, gets an entry here, and gets a git tag.
 - **From 2.3 on, versions have two parts:** every change adds one to the second number (2.3 → 2.4 … 2.9), and a big update moves to the next first number (3.0). `manifest.json` holds `X.Y`, `package.json` holds `X.Y.0` (npm needs three parts), and the tag is `vX.Y`.
 - Up to 2.2.0: minor (1.2.0 → 1.3.0) for a feature or rule, patch (1.2.0 → 1.2.1) for a fix.
 
+## [2.17] - 2026-11-25
+
+### Added
+- **Google sign-in and shared reports (Phase 1), off until set up.** New `cloud.js` signs in with Google (`chrome.identity`) and exchanges the token with Firebase Auth, all over plain REST: no SDK, no remote code. Reports go to Firestore as `pending`, one per user per site or place (document id `<uid>_<hash>`). Sending the same report twice says "You already reported this". The ID token refreshes on its own.
+- **Report page:** a "Sign in with Google" step (only when the cloud is set up), the signed-in account with sign out, an error line when sending fails, and "Under review" in "My reports" for shared reports.
+- `config.js` holds the Firebase Web API key and project ID. While they are empty, reports stay on the device exactly as in 2.16.
+- `dev/firebase/firestore.rules`: users create only their own `pending` reports and read only their own; the owner (`admins/{uid}`) reviews them; `public/*` is readable by everyone and writable only by the owner.
+- `dev/firebase/SETUP.md`: step by step Firebase and Google OAuth setup.
+
+### Changed
+- `manifest.json` has a `key`, so the unpacked extension always has the same ID (`eadmfiahjcllmfhnncnfdfghkbgpaeen`), which the Google OAuth client needs. Adds the `identity` permission and an `oauth2` block (client ID still a placeholder). Because the ID changes once, settings and local reports from the old unpacked copy do not carry over.
+- `.gitignore` ignores `*.pem`.
+
 ## [2.16] - 2026-11-25
 
 ### Changed

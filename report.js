@@ -3,9 +3,9 @@
  *   report.html?d=<draftId>   report the site / place saved by reports.js
  *   report.html               only "My reports"
  *
- * For now reports are saved on this device only (chrome.storage.local).
- * Next: Google sign-in, and sendReport() posts to the shared reports database,
- * where each report is reviewed before it counts for everyone.
+ * When the shared database is set up (config.js), the user signs in with
+ * Google and the report is sent for review (cloud.js). Otherwise it is saved
+ * on this device only. Either way a copy is kept for "My reports".
  */
 (() => {
   "use strict";
@@ -20,6 +20,18 @@
 
   const draftId = new URLSearchParams(location.search).get("d") || "";
   let draft = null;
+  // { configured, user } from cloud.js
+  let cloud = { configured: false, user: null };
+
+  function send(message) {
+    return new Promise((resolve) => {
+      try {
+        chrome.runtime.sendMessage(message, (res) => resolve(chrome.runtime.lastError ? null : res));
+      } catch {
+        resolve(null);
+      }
+    });
+  }
 
   // ---- Storage -------------------------------------------------------------
 
@@ -119,7 +131,11 @@
   }
 
   async function renderForm() {
-    $("form").hidden = !draft || !$("done").hidden;
+    const needSignIn = cloud.configured && !cloud.user;
+    $("gate").hidden = !needSignIn || !draft || !$("done").hidden;
+    $("account").hidden = !cloud.user;
+    if (cloud.user) $("account-name").textContent = T("rSignedInAs", { name: cloud.user.name || cloud.user.email });
+    $("form").hidden = needSignIn || !draft || !$("done").hidden;
     if (draft) {
       const reports = (await store.get(REPORTS_KEY)) || [];
       const previous = reports.find((r) => r.key === targetKey(draft));
@@ -155,14 +171,16 @@
       });
       const status = document.createElement("span");
       status.className = "status";
-      status.textContent = `· ${T("rStatus")}`;
+      status.textContent = `· ${T(report.shared ? "rPending" : "rStatus")}`;
       li.append(id, what, when, status);
       list.appendChild(li);
     }
   }
 
-  function showDone(text) {
+  function showDone(text, note = "") {
     $("done-main").textContent = text;
+    $("done-note").textContent = note;
+    $("done-note").hidden = !note;
     $("done").hidden = false;
   }
 
@@ -172,16 +190,56 @@
     event.preventDefault();
     if (!draft || !$("consent").checked) return;
     $("send").disabled = true;
-    const report = await sendReport(draft, $("note").value.trim().slice(0, 600));
+    $("send-error").hidden = true;
+    const note = $("note").value.trim().slice(0, 600);
+
+    let shared = false;
+    if (cloud.configured) {
+      const res = await send({ type: "CLOUD_REPORT", report: { key: targetKey(draft), target: draft, note } });
+      if (!res || !res.ok) {
+        if (res && res.error === "signed-out") {
+          cloud.user = null;
+          $("send").disabled = false;
+          return renderForm();
+        }
+        $("send-error").textContent = T("rSendFailed");
+        $("send-error").hidden = false;
+        $("send").disabled = false;
+        return;
+      }
+      shared = true;
+    }
+
+    const report = await sendReport(draft, note, shared);
     if (draftId) await store.remove(`${DRAFT_PREFIX}${draftId}`);
     $("form").hidden = true;
-    showDone(T("rSent", { id: report.id }));
+    showDone(T("rSent", { id: report.id }), T(shared ? "rSentShared" : "rSavedLocal"));
     await renderMine();
   });
 
-  // Saved on this device for now. Next step: POST to the shared reports
-  // database here and keep the local copy for "My reports".
-  async function sendReport(target, note) {
+  $("sign-in").addEventListener("click", async () => {
+    $("sign-in").disabled = true;
+    $("gate-error").hidden = true;
+    const res = await send({ type: "CLOUD_SIGN_IN" });
+    $("sign-in").disabled = false;
+    if (res && res.user) {
+      cloud = res;
+      await renderForm();
+      $("note").focus();
+    } else {
+      $("gate-error").textContent = T("rSignInFailed");
+      $("gate-error").hidden = false;
+    }
+  });
+
+  $("sign-out").addEventListener("click", async () => {
+    await send({ type: "CLOUD_SIGN_OUT" });
+    cloud = { configured: cloud.configured, user: null };
+    await renderForm();
+  });
+
+  // Local copy for "My reports" (shared = also sent to the reports database).
+  async function sendReport(target, note, shared) {
     const reports = (await store.get(REPORTS_KEY)) || [];
     const last = reports.reduce((max, r) => Math.max(max, Number(String(r.id).slice(3)) || 0), 0);
     const id = `FS-${String(last + 1).padStart(4, "0")}`;
@@ -191,7 +249,8 @@
       key: targetKey(target),
       target,
       note,
-      status: "received"
+      shared: Boolean(shared),
+      status: shared ? "pending" : "saved"
     };
     reports.push(report);
     await store.set(REPORTS_KEY, reports.slice(-200));
@@ -206,6 +265,7 @@
     document.title = T("rTitle");
     if (draftId) draft = (await store.get(`${DRAFT_PREFIX}${draftId}`)) || null;
     renderTarget();
+    cloud = (await send({ type: "CLOUD_STATE" })) || { configured: false, user: null };
     await renderForm();
   }
 

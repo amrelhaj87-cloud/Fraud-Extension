@@ -43,7 +43,7 @@ body {
   padding: 16px 18px;
   margin: 0 0 16px;
 }
-.panel[hidden], .mine[hidden] { display: none; }
+.panel[hidden], .mine[hidden], .account[hidden], .demo[hidden] { display: none; }
 
 h2 { font-size: 16px; margin: 0 0 8px; color: var(--muted); font-weight: 600; }
 h3 { font-size: 15px; margin: 14px 0 6px; }
@@ -96,3 +96,13 @@ textarea {
 .note { color: var(--muted); }
 
 .foot { color: var(--muted); font-size: 13px; margin-top: 28px; }
+
+.gate p { margin: 0 0 12px; }
+.google {
+  display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px;
+  background: #fff; color: #1f1f1f; border: 1px solid #c7c7c7; border-radius: 8px;
+  font: inherit; font-weight: 600; cursor: pointer;
+}
+.google:disabled { opacity: .6; cursor: default; }
+.google .g { font-weight: 700; color: #4285f4; }
+.account { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 0 0 12px; color: var(--muted); font-size: 14px; }

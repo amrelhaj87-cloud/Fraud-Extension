@@ -1,0 +1,68 @@
+rules_version = '2';
+
+// FraudShield Firestore rules.
+// Paste into Firebase console > Firestore Database > Rules, then Publish.
+//
+// Collections
+//   reports/{uid}_{hash}  one report per user per site/place; users create, owner reviews
+//   admins/{uid}          the owner's account (create this doc by hand in the console)
+//   public/blocklist      approved list every extension reads (written by the owner only)
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function str(field, max) {
+      return request.resource.data[field] is string && request.resource.data[field].size() <= max;
+    }
+
+    function validNewReport(reportId) {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['uid', 'key', 'kind', 'url', 'host', 'name', 'phone', 'address',
+                               'website', 'level', 'score', 'reasons', 'note', 'status',
+                               'createdAt', 'appVersion'])
+        && d.uid == request.auth.uid
+        && reportId.matches(request.auth.uid + '_[0-9a-f]{32}')
+        && d.kind in ['site', 'place']
+        && d.status == 'pending'
+        && d.createdAt is timestamp
+        && d.createdAt > request.time - duration.value(10, 'm')
+        && d.createdAt < request.time + duration.value(10, 'm')
+        && str('key', 400) && d.key.size() > 0
+        && str('url', 300) && str('host', 253) && str('name', 300) && str('phone', 30)
+        && str('address', 300) && str('website', 300) && str('level', 10)
+        && str('note', 600) && str('appVersion', 20)
+        && (d.score == null || (d.score is int && d.score >= 0 && d.score <= 100))
+        && d.reasons is list && d.reasons.size() <= 8;
+    }
+
+    match /reports/{reportId} {
+      // A user sees only their own reports; the owner sees all.
+      allow read: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if signedIn() && validNewReport(reportId);
+      // Only the owner changes the status (approve / reject); users cannot edit or delete.
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['status', 'reviewedAt', 'reviewNote'])
+        && request.resource.data.status in ['pending', 'approved', 'rejected'];
+      allow delete: if isAdmin();
+    }
+
+    match /admins/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false; // set by hand in the console
+    }
+
+    match /public/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

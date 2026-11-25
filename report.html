@@ -34,6 +34,21 @@
 
     <p class="panel note" id="no-draft" data-i18n="rNoDraft" hidden></p>
 
+    <!-- Google sign-in (only when the shared reports database is set up) -->
+    <section class="panel gate" id="gate" hidden>
+      <p data-i18n="rSignInNeeded"></p>
+      <button type="button" class="google" id="sign-in">
+        <span class="g" aria-hidden="true">G</span>
+        <span data-i18n="rSignInGoogle"></span>
+      </button>
+      <p class="demo" id="gate-error" role="alert" hidden></p>
+    </section>
+
+    <div class="account" id="account" hidden>
+      <span id="account-name"></span>
+      <button type="button" class="link" id="sign-out" data-i18n="rSignOut"></button>
+    </div>
+
     <form class="panel" id="form" hidden>
       <label for="note" data-i18n="rNoteLabel"></label>
       <textarea id="note" rows="3" maxlength="600" data-i18n-placeholder="rNotePlaceholder"></textarea>
@@ -42,11 +57,12 @@
         <span data-i18n="rConsent"></span>
       </label>
       <button type="submit" class="primary" id="send" data-i18n="rSend"></button>
+      <p class="demo" id="send-error" role="alert" hidden></p>
     </form>
 
     <section class="panel done" id="done" role="status" hidden>
       <p class="done-main" id="done-main"></p>
-      <p class="demo" data-i18n="rSavedLocal"></p>
+      <p class="demo" id="done-note"></p>
     </section>
 
     <section class="mine" id="mine" hidden>

@@ -10,6 +10,7 @@ import { getIpOwner } from "./ip-intel.js";
 import { initBlocker, getSettings } from "./blocker.js";
 import { initDownloadGuard } from "./downloads.js";
 import { initReports } from "./reports.js";
+import { initCloud } from "./cloud.js";
 import "./i18n.js";
 import "./phone-claims.js";
 
@@ -20,6 +21,8 @@ initBlocker();
 // Pause and check dangerous downloads (see downloads.js).
 initDownloadGuard();
 initReports();
+// Google sign-in and shared reports (see cloud.js; off until config.js is filled in).
+initCloud();
 
 const MAX_CONCURRENT_DOMAINS = 5;
 const MAX_TAB_RESULTS = 250;
