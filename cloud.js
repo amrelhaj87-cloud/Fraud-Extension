@@ -14,9 +14,11 @@
  *   CLOUD_SIGN_IN  -> same, after an interactive Google sign-in
  *   CLOUD_SIGN_OUT -> { ok }
  *   CLOUD_REPORT   { report } -> { ok, id, already } | { ok: false, error }
+ *   CLOUD_MY_REPORTS -> { ok, reports: [...] }   the signed-in user's own reports
  *
  * Owner only (admins/{uid} exists; the rules enforce it, these checks are UX):
  *   CLOUD_ADMIN_LIST    { status } -> { ok, reports: [...] }
+ *   CLOUD_ADMIN_COUNT   -> { ok, pending }
  *   CLOUD_ADMIN_DECIDE  { ids, status } -> { ok, list: { count } }
  *   CLOUD_ADMIN_REBUILD -> { ok, list: { count } }
  *
@@ -274,14 +276,18 @@ async function isAdmin() {
   return session.isAdmin;
 }
 
-async function queryReports(token, status, limit = 500) {
+function whereEqual(field, value) {
+  return { fieldFilter: { field: { fieldPath: field }, op: "EQUAL", value: { stringValue: value } } };
+}
+
+async function queryReports(token, status, limit = 500, field = "status") {
   const res = await firestore(":runQuery", {
     method: "POST",
     token,
     body: {
       structuredQuery: {
         from: [{ collectionId: "reports" }],
-        where: { fieldFilter: { field: { fieldPath: "status" }, op: "EQUAL", value: { stringValue: status } } },
+        where: whereEqual(field, status),
         limit
       }
     }
@@ -305,6 +311,40 @@ async function adminList(status) {
   const safe = ["pending", "approved", "rejected"].includes(status) ? status : "pending";
   // Reporter ids stay in the database; the page does not need them.
   const reports = (await queryReports(token, safe)).map(({ uid, ...rest }) => rest);
+  return { ok: true, reports };
+}
+
+// Number of pending reports (a count query: about one read per 1000 reports).
+async function adminCount() {
+  const token = await adminToken();
+  const res = await firestore(":runAggregationQuery", {
+    method: "POST",
+    token,
+    body: {
+      structuredAggregationQuery: {
+        structuredQuery: { from: [{ collectionId: "reports" }], where: whereEqual("status", "pending") },
+        aggregations: [{ alias: "n", count: {} }]
+      }
+    }
+  });
+  if (!res.ok) throw errorOf(res);
+  const row = (Array.isArray(res.data) ? res.data : []).find((r) => r.result);
+  const n = row ? fromValue(row.result.aggregateFields.n) : 0;
+  return { ok: true, pending: Number(n) || 0 };
+}
+
+// The signed-in user's own reports (the rules allow reading only those).
+async function myReports() {
+  const token = await idToken();
+  const session = await loadSession();
+  if (!token || !session) return { ok: false, error: "signed-out" };
+  const reports = (await queryReports(token, session.uid, 200, "uid")).map((r) => ({
+    id: r.id,
+    key: r.key,
+    status: r.status,
+    createdAt: r.createdAt,
+    target: { kind: r.kind, url: r.url, name: r.name, phone: r.phone, website: r.website }
+  }));
   return { ok: true, reports };
 }
 
@@ -384,6 +424,14 @@ export function initCloud() {
     }
     if (message.type === "CLOUD_ADMIN_LIST") {
       reply(adminList(message.status));
+      return true;
+    }
+    if (message.type === "CLOUD_ADMIN_COUNT") {
+      reply(adminCount());
+      return true;
+    }
+    if (message.type === "CLOUD_MY_REPORTS") {
+      reply(myReports());
       return true;
     }
     if (message.type === "CLOUD_ADMIN_DECIDE") {

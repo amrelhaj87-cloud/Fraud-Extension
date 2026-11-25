@@ -22,6 +22,8 @@
   let draft = null;
   // { configured, user } from cloud.js
   let cloud = { configured: false, user: null };
+  // Last list shown in "My reports" (local + database), used for "already reported".
+  let mineCache = [];
 
   function send(message) {
     return new Promise((resolve) => {
@@ -136,19 +138,44 @@
     $("account").hidden = !cloud.user;
     if (cloud.user) $("account-name").textContent = T("rSignedInAs", { name: cloud.user.name || cloud.user.email });
     $("form").hidden = needSignIn || !draft || !$("done").hidden;
-    if (draft) {
-      const reports = (await store.get(REPORTS_KEY)) || [];
-      const previous = reports.find((r) => r.key === targetKey(draft));
+    await renderMine();
+    if (draft && !needSignIn) {
+      const previous = mineCache.find((r) => r.key === targetKey(draft));
       if (previous && $("done").hidden) {
         $("form").hidden = true;
         showDone(T("rAlready", { id: previous.id }));
       }
     }
-    await renderMine();
   }
 
+  // Local copies plus, when signed in, the user's reports in the database
+  // (so they survive reinstalling the extension and show the review status).
+  async function loadMine() {
+    const local = (await store.get(REPORTS_KEY)) || [];
+    if (!cloud.user) return local;
+    const res = await send({ type: "CLOUD_MY_REPORTS" });
+    if (!res || !res.ok) return local;
+    const byKey = new Map(local.map((r) => [r.key, r]));
+    const merged = res.reports.map((r) => {
+      const copy = byKey.get(r.key);
+      byKey.delete(r.key);
+      return {
+        id: copy ? copy.id : `FS-${r.id.split("_")[1].slice(0, 6).toUpperCase()}`,
+        at: Date.parse(r.createdAt) || (copy && copy.at) || 0,
+        key: r.key,
+        target: r.target,
+        shared: true,
+        status: r.status
+      };
+    });
+    return [...byKey.values(), ...merged].sort((a, b) => a.at - b.at);
+  }
+
+  const STATUS_KEY = { pending: "rPending", approved: "rApproved", rejected: "rRejected" };
+
   async function renderMine() {
-    const reports = (await store.get(REPORTS_KEY)) || [];
+    const reports = await loadMine();
+    mineCache = reports;
     const list = $("mine-list");
     list.replaceChildren();
     $("mine").hidden = false;
@@ -171,7 +198,7 @@
       });
       const status = document.createElement("span");
       status.className = "status";
-      status.textContent = `· ${T(report.shared ? "rPending" : "rStatus")}`;
+      status.textContent = `· ${T(report.shared ? STATUS_KEY[report.status] || "rPending" : "rStatus")}`;
       li.append(id, what, when, status);
       list.appendChild(li);
     }

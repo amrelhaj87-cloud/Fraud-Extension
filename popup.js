@@ -275,6 +275,11 @@ $("admin").addEventListener("click", () => {
 async function renderAdminLink() {
   const state = await send({ type: "CLOUD_STATE" });
   $("admin").hidden = !(state && state.isAdmin);
+  if ($("admin").hidden) return;
+  const res = await send({ type: "CLOUD_ADMIN_COUNT" });
+  const n = res && res.ok ? res.pending : 0;
+  $("admin-count").textContent = String(n);
+  $("admin-count").hidden = n === 0;
 }
 
 try {

@@ -148,3 +148,14 @@ body {
 .account-actions { display: flex; gap: 10px; }
 .link { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; cursor: pointer; text-decoration: underline; }
 .link[hidden] { display: none; }
+
+/* Owner only: review reports, with the number waiting. */
+.admin-btn {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  width: 100%; margin: 0 0 10px; padding: 8px 12px;
+  background: var(--accent, #8aa9ff); color: #fff; border: 0; border-radius: 10px;
+  font: inherit; font-weight: 700; cursor: pointer;
+}
+.admin-btn[hidden] { display: none; }
+.admin-count { background: #f04438; color: #fff; border-radius: 999px; padding: 0 9px; font-size: 13px; min-width: 22px; text-align: center; }
+.admin-count[hidden] { display: none; }

@@ -5,6 +5,15 @@ Every change raises the version, gets an entry here, and gets a git tag.
 - **From 2.3 on, versions have two parts:** every change adds one to the second number (2.3 → 2.4 … 2.9), and a big update moves to the next first number (3.0). `manifest.json` holds `X.Y`, `package.json` holds `X.Y.0` (npm needs three parts), and the tag is `vX.Y`.
 - Up to 2.2.0: minor (1.2.0 → 1.3.0) for a feature or rule, patch (1.2.0 → 1.2.1) for a fix.
 
+## [2.21] - 2026-11-25
+
+### Changed
+- **Popup:** the owner's "Review reports" is now a full-width button at the top, with a red count of reports waiting for review (a Firestore count query, about one read per 1,000 reports). Other users still see nothing. The toolbar badge is left for each tab's risk level.
+- **My reports** now also loads the signed-in user's reports from the database, so they survive reinstalling the extension, and shows each one's real status: under review, approved ✅ or rejected. Local-only reports still show as "Saved on this device". "You already reported this" uses the same merged list.
+
+### Added
+- `cloud.js`: `CLOUD_ADMIN_COUNT` (pending count, owner only) and `CLOUD_MY_REPORTS` (own reports; the rules allow reading only those).
+
 ## [2.20] - 2026-11-25
 
 ### Added
