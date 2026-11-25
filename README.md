@@ -8,8 +8,6 @@
 
 إضافة لمتصفح Chrome تحذّر الناس في الإمارات من الاحتيال **قبل الضغط على الرابط**، وتشرح سبب كل تحذير بالعربية أو الإنجليزية.
 
-صُممت لهاكاثون **ScamShield AI** (‏42 أبوظبي × شرطة أبوظبي)، فريق **42 Jump Street**.
-
 ### المشكلة
 
 ينتحل المحتالون صفة الجهات التي يثق بها الناس: شرطة أبوظبي، وتم، وUAE PASS، والبنوك، وبريد الإمارات. يرسلون روابط "ادفع مخالفتك"، وينشئون صفحات دخول UAE PASS مزيفة، ويضعون أرقام جوال شخصية في خرائط Google باسم "دفع المخالفات".
@@ -23,7 +21,7 @@ FraudShield تفحص الرابط نفسه على جهاز المستخدم:
 - **بحث Google:** علامة 🟢 / 🟡 / 🔴 بجانب كل نتيجة
 - **خرائط Google:** تحذير على المكان المشبوه
 - **أي موقع:** الموقع الخطير يُحظر قبل أن يفتح
-- **البلاغ:** زر 🚩 يرسل بلاغًا بعد الدخول بـ UAE PASS (تجريبي)
+- **البلاغ:** زر 🚩 يحفظ بلاغًا عن الموقع أو المكان (حاليًا على الجهاز فقط)
 
 ### كيف تعمل
 
@@ -43,6 +41,10 @@ FraudShield تفحص الرابط نفسه على جهاز المستخدم:
 
 لا تحتاج الإضافة أي بناء. ولعمل ملف zip: `npm run build`، وللاختبارات: `npm test`.
 
+### الخطوة القادمة
+
+قاعدة بلاغات مشتركة: تسجيل الدخول بحساب Google، وكل بلاغ يُراجَع قبل اعتماده، وكل نسخة من الإضافة تحدّث قائمتها تلقائيًا من البلاغات المعتمدة.
+
 </div>
 
 ---
@@ -50,8 +52,6 @@ FraudShield تفحص الرابط نفسه على جهاز المستخدم:
 ## English
 
 A Chrome extension that warns people in the UAE about scams **before they click**, and explains every warning in Arabic or English.
-
-Built for the **ScamShield AI** hackathon (42 Abu Dhabi × Abu Dhabi Police) by team **42 Jump Street**.
 
 ## The problem
 
@@ -66,7 +66,7 @@ FraudShield checks the link itself, on the user's device:
 - **Google Search:** a 🟢 / 🟡 / 🔴 badge next to every result
 - **Google Maps:** a warning on a suspicious place
 - **Any website:** high-risk sites are blocked before they load
-- **Report:** a 🚩 button sends a report, signed in with UAE PASS (demo)
+- **Report:** a 🚩 button saves a report about a site or place (on this device for now)
 
 ## How it works
 
@@ -84,4 +84,8 @@ The extension combines four signals into a 0–100 score: does the link imperson
 2. Open `chrome://extensions` and turn on **Developer mode**.
 3. Click **Load unpacked** and pick the project folder.
 
-No build step is needed. To make a release zip: `npm run build`. To run the tests: `npm test`. The demo video and the presentation are in [submission/](submission/). Full technical details, including accuracy results, are in [dev/DETAILS.md](dev/DETAILS.md).
+No build step is needed. To make a release zip: `npm run build`. To run the tests: `npm test`. Full technical details, including accuracy results, are in [dev/DETAILS.md](dev/DETAILS.md).
+
+## What's next
+
+A shared report database: sign in with Google, every report is reviewed before it counts, and every copy of the extension keeps its list up to date from the approved reports.

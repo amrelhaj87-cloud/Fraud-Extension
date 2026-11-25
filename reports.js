@@ -3,10 +3,9 @@
  *
  * Any part of the extension (Maps banner, warning page, popup) sends
  *   { type: "OPEN_REPORT", draft: {...} }
- * and this module saves the draft and opens report.html, where the user signs
- * in (demo UAE PASS) and sends it. Demo build: reports are saved on this
- * device only. After the merge with the team backend, report.js sends them to
- * the citizen-reports API instead.
+ * and this module saves the draft and opens report.html, where the user sends
+ * it. Reports are saved on this device for now; later report.js sends them to
+ * the shared reports database.
  */
 
 const DRAFT_PREFIX = "fs:draft:";

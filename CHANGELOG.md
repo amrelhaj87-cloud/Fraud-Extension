@@ -5,6 +5,17 @@ Every change raises the version, gets an entry here, and gets a git tag.
 - **From 2.3 on, versions have two parts:** every change adds one to the second number (2.3 → 2.4 … 2.9), and a big update moves to the next first number (3.0). `manifest.json` holds `X.Y`, `package.json` holds `X.Y.0` (npm needs three parts), and the tag is `vX.Y`.
 - Up to 2.2.0: minor (1.2.0 → 1.3.0) for a feature or rule, patch (1.2.0 → 1.2.1) for a fix.
 
+## [2.16] - 2026-11-25
+
+### Changed
+- **FraudShield is now a personal product.** Hackathon, team and "police console" mentions are gone from the README, the report page and the technical notes. Detecting fake police and government sites stays, and so does the advice to call Aman (8002626).
+- **Report page:** the demo "Sign in with UAE PASS" step is removed. Reports are saved on this device with no sign-in, and the page says shared, reviewed reports with Google sign-in are coming. The hidden double-click delete used for stage demos is gone. Reports from the old demo user still show in "My reports".
+- **Popup:** the sign-in line and the sign-out button are removed; "My reports" stays.
+- **README:** a "What's next" section (shared report database with Google sign-in and review).
+
+### Removed
+- `submission/` (hackathon video and presentation) is no longer in the repo; it stays in git history.
+
 ## [2.15] - 2026-11-24
 
 ### Fixed

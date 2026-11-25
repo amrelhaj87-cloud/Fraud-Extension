@@ -3,10 +3,9 @@
  *   report.html?d=<draftId>   report the site / place saved by reports.js
  *   report.html               only "My reports"
  *
- * Reporting needs a signed-in user (stops random and malicious reports).
- * DEMO: sign-in is one click ("UAE PASS (demo)"), no real account, and reports
- * are saved on this device (chrome.storage.local). After the merge, sendReport()
- * posts to the team's citizen-reports API instead.
+ * For now reports are saved on this device only (chrome.storage.local).
+ * Next: Google sign-in, and sendReport() posts to the shared reports database,
+ * where each report is reviewed before it counts for everyone.
  */
 (() => {
   "use strict";
@@ -16,7 +15,6 @@
   const T = (key, params) => I18N.t(key, LANG, params);
   const $ = (id) => document.getElementById(id);
 
-  const USER_KEY = "fs:user";
   const REPORTS_KEY = "fs:reports";
   const DRAFT_PREFIX = "fs:draft:";
 
@@ -120,35 +118,24 @@
     }
   }
 
-  async function renderAuth() {
-    const user = await store.get(USER_KEY);
-    const signedIn = !!(user && user.name);
-
-    $("account").hidden = !signedIn;
-    if (signedIn) $("account-name").textContent = T("rSignedInAs", { name: user.name });
-
-    // The gate shows only when there is something to report.
-    $("gate").hidden = signedIn || !draft;
-    $("form").hidden = !signedIn || !draft || !$("done").hidden;
-
-    if (signedIn && draft) {
+  async function renderForm() {
+    $("form").hidden = !draft || !$("done").hidden;
+    if (draft) {
       const reports = (await store.get(REPORTS_KEY)) || [];
-      const key = targetKey(draft);
-      const previous = reports.find((r) => r.userId === user.id && r.key === key);
+      const previous = reports.find((r) => r.key === targetKey(draft));
       if (previous && $("done").hidden) {
         $("form").hidden = true;
         showDone(T("rAlready", { id: previous.id }));
       }
     }
-    await renderMine(signedIn ? user : null);
+    await renderMine();
   }
 
-  async function renderMine(user) {
-    $("mine").hidden = !user;
-    if (!user) return;
-    const reports = ((await store.get(REPORTS_KEY)) || []).filter((r) => r.userId === user.id);
+  async function renderMine() {
+    const reports = (await store.get(REPORTS_KEY)) || [];
     const list = $("mine-list");
     list.replaceChildren();
+    $("mine").hidden = false;
     $("mine-empty").hidden = reports.length > 0;
 
     for (const report of [...reports].reverse()) {
@@ -156,9 +143,6 @@
       const id = document.createElement("span");
       id.className = "id";
       id.textContent = report.id;
-      // DEMO ONLY, deliberately invisible: double-click the report number to
-      // delete that report, so the same place can be reported again on stage.
-      id.addEventListener("dblclick", () => void deleteReport(report.id));
       const what = document.createElement("span");
       what.className = "what";
       what.textContent = targetLabel(report.target);
@@ -177,16 +161,6 @@
     }
   }
 
-  async function deleteReport(id) {
-    const reports = (await store.get(REPORTS_KEY)) || [];
-    await store.set(REPORTS_KEY, reports.filter((r) => r.id !== id));
-    // If the deleted one was this page's target, offer the form again.
-    $("done").hidden = true;
-    $("consent").checked = false;
-    $("send").disabled = false;
-    await renderAuth();
-  }
-
   function showDone(text) {
     $("done-main").textContent = text;
     $("done").hidden = false;
@@ -194,48 +168,26 @@
 
   // ---- Actions -------------------------------------------------------------
 
-  $("sign-in").addEventListener("click", async () => {
-    // DEMO: one click, no real account. Real version: UAE PASS sign-in.
-    await store.set(USER_KEY, {
-      id: "demo-user",
-      name: T("rDemoUser"),
-      method: "uaepass-demo",
-      at: Date.now()
-    });
-    await renderAuth();
-    $("note").focus();
-  });
-
-  $("sign-out").addEventListener("click", async () => {
-    await store.remove(USER_KEY);
-    $("done").hidden = true;
-    await renderAuth();
-  });
-
   $("form").addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!draft || !$("consent").checked) return;
-    const user = await store.get(USER_KEY);
-    if (!user) return renderAuth();
-
     $("send").disabled = true;
-    const report = await sendReport(user, draft, $("note").value.trim().slice(0, 600));
+    const report = await sendReport(draft, $("note").value.trim().slice(0, 600));
     if (draftId) await store.remove(`${DRAFT_PREFIX}${draftId}`);
     $("form").hidden = true;
     showDone(T("rSent", { id: report.id }));
-    await renderMine(user);
+    await renderMine();
   });
 
-  // DEMO: saved on this device. After the merge, POST to the team backend
-  // (citizen reports) here and keep the local copy for "My reports".
-  async function sendReport(user, target, note) {
+  // Saved on this device for now. Next step: POST to the shared reports
+  // database here and keep the local copy for "My reports".
+  async function sendReport(target, note) {
     const reports = (await store.get(REPORTS_KEY)) || [];
     const last = reports.reduce((max, r) => Math.max(max, Number(String(r.id).slice(3)) || 0), 0);
     const id = `FS-${String(last + 1).padStart(4, "0")}`;
     const report = {
       id,
       at: Date.now(),
-      userId: user.id,
       key: targetKey(target),
       target,
       note,
@@ -254,7 +206,7 @@
     document.title = T("rTitle");
     if (draftId) draft = (await store.get(`${DRAFT_PREFIX}${draftId}`)) || null;
     renderTarget();
-    await renderAuth();
+    await renderForm();
   }
 
   void boot();

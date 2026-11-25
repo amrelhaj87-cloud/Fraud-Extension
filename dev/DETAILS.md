@@ -98,15 +98,13 @@ Maps adds three rules of its own:
 
 Search results get the same check on their title and snippet: a known name plus a personal mobile number on a non-official site is +60 (high). Official 800 / 600 numbers and landlines never count. The matcher is `phone-claims.js`.
 
-## Report button (demo sign-in)
+## Report button
 
 Risky results have a **🚩 Report** button: on the Maps banner, on the warning page, and in the popup. It opens `report.html` with the site or place already filled in (name, number, address, score, reasons).
 
-- Reporting needs a signed-in user, so reports are not random or malicious. Protection itself never needs sign-in.
-- **Demo:** "Sign in with UAE PASS (demo)" signs in with one click, with no real account. In the real version this is the official UAE PASS sign-in, so every report comes from a verified identity.
-- The user adds an optional note ("they called and asked for the OTP"), ticks consent, and gets a report number (`FS-0001`). The same site or place is only reported once per user. "My reports" lists them.
-- **Demo:** reports are saved on this device (`chrome.storage.local`). Next step: `sendReport()` in `report.js` posts them to a police reports server.
-- Sign out from the popup or the report page.
+- The user adds an optional note ("they called and asked for the OTP"), ticks consent, and gets a report number (`FS-0001`). The same site or place is only reported once. "My reports" lists them.
+- For now reports are saved on this device (`chrome.storage.local`), with no sign-in. Protection itself never needs sign-in.
+- Next: Google sign-in, and `sendReport()` in `report.js` posts to a shared reports database. The owner reviews each report; approved ones go into a list that every copy of the extension syncs.
 
 ## Technical choices, tools, APIs and data
 
@@ -166,13 +164,13 @@ Run it from the project folder, then open:
 - UAE PASS: http://127.0.0.1:8765/dev/demo/uaepass-mock.html. A fake UAE PASS sign-in that asks for the Emirates ID and an OTP; it is blocked as high risk. Nothing on the page is sent anywhere.
 - Maps: http://127.0.0.1:8765/dev/demo/maps-mock.html. Click the tabs to switch between an official bank, a bank on a free link with a mobile number, an impersonating courier site, a fake "Abu Dhabi Police" office with no website and only a mobile number, a real-world copy of a "دفع المخالفات" listing filed as a warehouse with a mobile number, and a normal shop. A results list with real police websites sits next to the panel, like on real Maps.
 
-After the demo pages, show the same extension on real Google Search and Maps. A one-minute video script is in [DEMO.md](DEMO.md). The finished video and the presentation are in [submission/](../submission/).
+After the demo pages, show the same extension on real Google Search and Maps. A one-minute video script is in [DEMO.md](DEMO.md).
 
 Tests in detail: `node dev/test.js` runs 178 tests (scoring, IP owner, phone numbers, false-alarm guards); `node dev/test-rdap.js` runs a live RDAP lookup (needs internet).
 
 ## Next steps
 
-- Send reports to a police dashboard, and use verified report counts as an extra signal (never block on reports alone).
+- Shared reports database with Google sign-in and owner review; use approved report counts as an extra signal (never block on reports alone).
 - Add `.ae` WHOIS on a server, since `.ae` has no public RDAP.
 - Add an AI second opinion for the gray zone, through the hook below. The API key stays on a server.
 - Check phone numbers on any page and in WhatsApp Web.
@@ -225,5 +223,4 @@ Keep API keys on a server, never in the extension.
 | `blocker.js` | Blocks high-risk navigations before they load |
 | `warning.html`, `warning.js`, `warning.css` | The blocking page |
 | `popup.html`, `popup.js`, `popup.css` | Toolbar popup |
-| `submission/` | Hackathon submission: one-minute demo video and the presentation (not in the release zip) |
 | `dev/` | Developer files, not in the release zip: `DEMO.md` one-minute video script, `build.ps1` release zip (`npm run build`), `demo/` offline demo pages, `eval/` accuracy scale, `test.js`, `test-rdap.js`, `tools/` |

@@ -243,7 +243,7 @@ async function loadSettings() {
 }
 
 // ---------------------------------------------------------------------------
-// Report button + demo sign-in line
+// Report button + My reports
 // ---------------------------------------------------------------------------
 
 $("report-current").addEventListener("click", async () => {
@@ -266,31 +266,10 @@ $("my-reports").addEventListener("click", () => {
   window.close();
 });
 
-$("sign-out").addEventListener("click", async () => {
-  await chrome.storage.local.remove("fs:user");
-  void renderAccount();
-});
-
-async function renderAccount() {
-  let user = null;
-  try {
-    user = (await chrome.storage.local.get("fs:user"))["fs:user"] || null;
-  } catch {
-    user = null;
-  }
-  $("account-line").textContent = user && user.name
-    ? T("rSignedInAs", { name: user.name })
-    : T("signedOutLine");
-  $("sign-out").hidden = !(user && user.name);
-}
-
 try {
   $("version").textContent = `v${chrome.runtime.getManifest().version}`;
 } catch {
   // Not running as an extension page.
 }
 
-loadSettings().then(() => {
-  void renderAccount();
-  return loadActiveTab();
-});
+loadSettings().then(() => loadActiveTab());
