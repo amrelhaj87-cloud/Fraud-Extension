@@ -153,9 +153,12 @@ async function sendReport(raw) {
   const key = clip(r.key, 400);
   if (!key) return { ok: false, error: "bad-report" };
 
+  // The site being reported. For a Maps place that is the place's own website
+  // (its url is the google.com/maps page, which must never count as "reported").
+  const hostUrl = target.kind === "place" ? target.website : target.url;
   let host = "";
   try {
-    host = target.url ? new URL(target.url).hostname.replace(/^www\./, "") : "";
+    host = hostUrl ? new URL(hostUrl).hostname.replace(/^www\./, "") : "";
   } catch {
     host = "";
   }
