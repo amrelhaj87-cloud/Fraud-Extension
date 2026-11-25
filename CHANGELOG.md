@@ -5,6 +5,13 @@ Every change raises the version, gets an entry here, and gets a git tag.
 - **From 2.3 on, versions have two parts:** every change adds one to the second number (2.3 → 2.4 … 2.9), and a big update moves to the next first number (3.0). `manifest.json` holds `X.Y`, `package.json` holds `X.Y.0` (npm needs three parts), and the tag is `vX.Y`.
 - Up to 2.2.0: minor (1.2.0 → 1.3.0) for a feature or rule, patch (1.2.0 → 1.2.1) for a fix.
 
+## [3.5] - 2026-11-25
+
+### Added
+- `AGENTS.md`: the working contract for any AI agent or person changing the project: how to talk to the owner (Sudanese Arabic, click-by-click console steps, no publishing without a yes), the version / changelog / tag / push routine, code rules (no libraries, Firebase over REST, every text in `i18n.js` in both languages, the Arabic brand «يقظ», theme tokens), Firebase data and rules, privacy and secrets, file layout, testing, and known facts.
+- `CLAUDE.md`: points Claude Code to `AGENTS.md`.
+- Both are left out of the release zip. No code changes.
+
 ## [3.4] - 2026-11-25
 
 ### Added
