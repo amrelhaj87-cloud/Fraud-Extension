@@ -204,3 +204,11 @@ label.row { cursor: pointer; }
 .check-row button:disabled { opacity: .6; cursor: default; }
 
 .foot { color: var(--muted); font-size: 11px; margin: 4px 2px 0; }
+
+/* About: links and the coffee button */
+.coffee {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin: 2px 0 10px; padding: 7px 10px; border-radius: 8px;
+  background: #ffdd00; color: #1f1f1f; font-weight: 700; text-decoration: none;
+}
+.coffee:hover { filter: brightness(.95); }

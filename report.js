@@ -229,7 +229,7 @@
           $("send").disabled = false;
           return renderForm();
         }
-        $("send-error").textContent = T("rSendFailed");
+        $("send-error").textContent = T(res && res.error === "limit" ? "rLimit" : "rSendFailed");
         $("send-error").hidden = false;
         $("send").disabled = false;
         return;

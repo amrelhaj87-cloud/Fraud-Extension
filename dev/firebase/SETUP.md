@@ -26,6 +26,15 @@ Firebase projects are Google Cloud projects, so this happens in the same project
 4. Copy the client ID (`....apps.googleusercontent.com`) into `manifest.json` > `oauth2.client_id`.
 5. Back in Firebase > Authentication > Sign-in method > Google > **Safelist client IDs from external projects**: add the same client ID and save.
 
+## 2b. Sign-in with any Google account (optional, recommended)
+
+The client above signs in with the account that is signed into Chrome. To let people pick any account:
+
+1. Credentials > **Create credentials** > **OAuth client ID** > Application type **Web application**, name `FraudShield web sign-in`.
+2. **Authorized redirect URIs**: add `https://eadmfiahjcllmfhnncnfdfghkbgpaeen.chromiumapp.org/`
+3. Create, copy the client ID into `config.js` > `GOOGLE.webClientId`.
+4. Firebase > Authentication > Sign-in method > Google > safelist: add this client ID too.
+
 ## 3. Connect the extension
 
 1. Firebase console > Project settings (gear) > General: copy **Web API key** and **Project ID**. (If there is no Web API key yet, add a Web app under "Your apps" first.)

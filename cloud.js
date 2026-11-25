@@ -26,11 +26,13 @@
  * many people reported it. Extensions read only this one document (Phase 3).
  */
 
-import { FIREBASE, cloudConfigured } from "./config.js";
+import { FIREBASE, GOOGLE, cloudConfigured } from "./config.js";
 import { syncCommunity } from "./community.js";
 
 const SESSION_KEY = "fs:cloud-session";
 const ADMIN_CACHE_MS = 10 * 60 * 1000;
+// Reports one account may send per day (also enforced by the Firestore rules).
+const DAILY_LIMIT = 20;
 const AUTH_URL = "https://identitytoolkit.googleapis.com/v1";
 const TOKEN_URL = "https://securetoken.googleapis.com/v1/token";
 
@@ -50,6 +52,24 @@ function publicUser(session) {
 }
 
 // ---- Google + Firebase sign-in --------------------------------------------
+
+// Account picker: Google's own sign-in window, any account. Returns an access token.
+async function googleTokenWeb() {
+  const redirect = chrome.identity.getRedirectURL(); // https://<id>.chromiumapp.org/
+  const auth = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+  auth.search = new URLSearchParams({
+    client_id: GOOGLE.webClientId,
+    response_type: "token",
+    redirect_uri: redirect,
+    scope: "openid email profile",
+    prompt: "select_account"
+  }).toString();
+  const result = await chrome.identity.launchWebAuthFlow({ url: auth.href, interactive: true });
+  const params = new URLSearchParams(new URL(result).hash.slice(1));
+  const token = params.get("access_token");
+  if (!token) throw new Error(params.get("error") || "No Google token");
+  return token;
+}
 
 function googleToken(interactive) {
   return new Promise((resolve, reject) => {
@@ -76,7 +96,7 @@ async function postJson(url, body) {
 }
 
 async function signIn() {
-  const accessToken = await googleToken(true);
+  const accessToken = GOOGLE.webClientId ? await googleTokenWeb() : await googleToken(true);
   const data = await postJson(`${AUTH_URL}/accounts:signInWithIdp?key=${FIREBASE.apiKey}`, {
     postBody: `access_token=${encodeURIComponent(accessToken)}&providerId=google.com`,
     requestUri: "http://localhost",
@@ -91,6 +111,7 @@ async function signIn() {
     refreshToken: data.refreshToken,
     expiresAt: Date.now() + Number(data.expiresIn || 3600) * 1000
   };
+  session.googleToken = accessToken; // only to revoke it on sign out
   await saveSession(session);
   return session;
 }
@@ -98,6 +119,15 @@ async function signIn() {
 async function signOut() {
   const session = await loadSession();
   await chrome.storage.local.remove(SESSION_KEY);
+  if (GOOGLE.webClientId) {
+    // Account picker flow: nothing cached in Chrome; revoke the token we got.
+    if (session && session.googleToken) {
+      await fetch(`https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(session.googleToken)}`, {
+        method: "POST"
+      }).catch(() => {});
+    }
+    return Boolean(session);
+  }
   try {
     const token = await googleToken(false);
     await new Promise((resolve) => chrome.identity.removeCachedAuthToken({ token }, resolve));
@@ -237,18 +267,35 @@ async function sendReport(raw) {
   };
   const body = { fields: Object.fromEntries(Object.entries(fields).map(([k, v]) => [k, toValue(v)])) };
 
-  const url =
-    `https://firestore.googleapis.com/v1/projects/${FIREBASE.projectId}` +
-    `/databases/(default)/documents/reports?documentId=${docId}`;
-  const res = await fetch(url, {
+  // Already reported by this user? (Reading a missing report is refused, so only
+  // a successful read means it exists.)
+  const existing = await firestore(`/reports/${docId}`, { token });
+  if (existing.ok) return { ok: true, id: docId, already: true };
+
+  // Daily limit. The report and this user's counter (limits/{uid}) are written
+  // in one commit; the rules refuse it unless the counter goes up by exactly
+  // one for today (UTC) and stays at DAILY_LIMIT or below.
+  const today = Math.floor(Date.now() / 86400000);
+  const lim = await firestore(`/limits/${session.uid}`, { token });
+  const before = lim.ok ? fromFields(lim.data.fields) : null;
+  const count = before && before.day === today ? Number(before.count) + 1 : 1;
+  if (count > DAILY_LIMIT) return { ok: false, error: "limit" };
+
+  const docs = `projects/${FIREBASE.projectId}/databases/(default)/documents`;
+  const res = await firestore(":commit", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify(body)
+    token,
+    body: {
+      writes: [
+        { update: { name: `${docs}/limits/${session.uid}`, fields: toFields({ day: today, count }) } },
+        { update: { name: `${docs}/reports/${docId}`, fields: body.fields }, currentDocument: { exists: false } }
+      ]
+    }
   });
-  if (res.status === 409) return { ok: true, id: docId, already: true };
   if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    return { ok: false, error: (data.error && data.error.message) || `HTTP ${res.status}` };
+    const message = errorOf(res).message;
+    if (/ALREADY_EXISTS|already exists/i.test(message)) return { ok: true, id: docId, already: true };
+    return { ok: false, error: message };
   }
   return { ok: true, id: docId, already: false };
 }

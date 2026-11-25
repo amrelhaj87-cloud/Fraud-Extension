@@ -5,6 +5,18 @@ Every change raises the version, gets an entry here, and gets a git tag.
 - **From 2.3 on, versions have two parts:** every change adds one to the second number (2.3 → 2.4 … 2.9), and a big update moves to the next first number (3.0). `manifest.json` holds `X.Y`, `package.json` holds `X.Y.0` (npm needs three parts), and the tag is `vX.Y`.
 - Up to 2.2.0: minor (1.2.0 → 1.3.0) for a feature or rule, patch (1.2.0 → 1.2.1) for a fix.
 
+## [2.25] - 2026-11-25
+
+Everything for publishing except the store upload itself.
+
+### Added
+- **Daily report limit: 20 per account.** A report and the account's counter (`limits/{uid}`) are written in one Firestore commit, and the rules refuse it unless the counter rises by one for today (UTC) and stays at 20 or below. The report page says when the limit is reached. **Needs the new `dev/firebase/firestore.rules` published**, or sending reports fails.
+- **Sign-in with any Google account** (account picker, works even when Chrome itself is not signed in) via `chrome.identity.launchWebAuthFlow`, switched on by `GOOGLE.webClientId` in `config.js`. While it is empty, sign-in keeps using the Chrome profile's account. Setup in `dev/firebase/SETUP.md` section 2b.
+- **Settings > About:** version, GitHub, portfolio, privacy policy and a ☕ "Buy me a coffee" button, from `LINKS` in `config.js` (empty links stay hidden).
+- **Website** in `site/` (for Vercel): a bilingual landing page and a privacy policy that lists exactly what leaves the device (domain names to public RDAP, the hourly shared-list download, optional reports) and the Google "Limited Use" statement. Not in the extension zip.
+- `dev/store/LISTING.md`: store texts in Arabic and English, single purpose, a justification for every permission, data-use answers, screenshot list.
+- `dev/store/CHECKLIST.md`: the remaining console steps, the store-ID OAuth step, API-key restriction, and a note that "FRAUDSHIELD" is a registered US trademark for fraud-prevention software.
+
 ## [2.24] - 2026-11-25
 
 ### Changed

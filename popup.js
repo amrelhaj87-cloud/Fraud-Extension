@@ -5,6 +5,8 @@
  * blocking, manual link check, account and the shared list.
  */
 
+import { LINKS } from "./config.js";
+
 const I18N = globalThis.FE_I18N;
 let LANG = I18N.DEFAULT_LANG;
 const T = (key, params) => I18N.t(key, LANG, params);
@@ -359,8 +361,22 @@ async function renderAdminLink() {
 
 try {
   $("version").textContent = `v${chrome.runtime.getManifest().version}`;
+  $("about-version").textContent = `v${chrome.runtime.getManifest().version}`;
 } catch {
   // Not running as an extension page.
+}
+
+// Settings > About: links from config.js; empty ones stay hidden.
+for (const [id, url] of [
+  ["link-github", LINKS.github],
+  ["link-portfolio", LINKS.portfolio],
+  ["link-privacy", LINKS.privacy],
+  ["link-coffee", LINKS.coffee]
+]) {
+  if (url && /^https:\/\//.test(url)) {
+    $(id).href = url;
+    $(id).hidden = false;
+  }
 }
 
 loadSettings().then(() => {

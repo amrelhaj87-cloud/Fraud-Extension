@@ -7,6 +7,7 @@ rules_version = '2';
 //   reports/{uid}_{hash}  one report per user per site/place; users create, owner reviews
 //   admins/{uid}          the owner's account (create this doc by hand in the console)
 //   public/blocklist      approved list every extension reads (written by the owner only)
+//   limits/{uid}          { day, count }: reports sent today (UTC); at most 20 a day
 
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -17,6 +18,24 @@ service cloud.firestore {
 
     function isAdmin() {
       return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Days since 1970 (UTC), the same number the extension computes.
+    function today() {
+      return math.floor(request.time.toMillis() / 86400000);
+    }
+
+    function limitsPath() {
+      return /databases/$(database)/documents/limits/$(request.auth.uid);
+    }
+
+    // The same commit must raise this user's counter by one for today, to 20 at most.
+    function countedToday() {
+      let before = exists(limitsPath()) ? get(limitsPath()).data : { 'day': -1, 'count': 0 };
+      let after = getAfter(limitsPath()).data;
+      return after.day == today()
+        && after.count == (before.day == today() ? before.count + 1 : 1)
+        && after.count <= 20;
     }
 
     function str(field, max) {
@@ -46,13 +65,24 @@ service cloud.firestore {
     match /reports/{reportId} {
       // A user sees only their own reports; the owner sees all.
       allow read: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
-      allow create: if signedIn() && validNewReport(reportId);
+      allow create: if signedIn() && validNewReport(reportId) && countedToday();
       // Only the owner changes the status (approve / reject); users cannot edit or delete.
       allow update: if isAdmin()
         && request.resource.data.diff(resource.data).affectedKeys()
              .hasOnly(['status', 'reviewedAt', 'reviewNote'])
         && request.resource.data.status in ['pending', 'approved', 'rejected'];
       allow delete: if isAdmin();
+    }
+
+    match /limits/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['day', 'count'])
+        && request.resource.data.day == today()
+        && request.resource.data.count is int
+        && request.resource.data.count >= 1
+        && request.resource.data.count <= 20;
+      allow delete: if false;
     }
 
     match /admins/{uid} {
