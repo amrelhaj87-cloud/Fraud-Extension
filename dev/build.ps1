@@ -11,7 +11,7 @@ $name = "Yaqiz-v$version"
 $zip = Join-Path $root "dist\$name.zip"
 
 # Tracked files only, minus developer files.
-$skip = '^(dev/|dist/|site/|submission/|\.gitignore$|package\.json$|README\.md$|CHANGELOG\.md$)'
+$skip = '^(dev/|dist/|site/|submission/|\.gitignore$|package\.json$|README\.md$|CHANGELOG\.md$|AGENTS\.md$|CLAUDE\.md$)'
 $files = git ls-files | Where-Object { $_ -notmatch $skip }
 if (-not ($files -contains "manifest.json")) { throw "manifest.json missing" }
 
