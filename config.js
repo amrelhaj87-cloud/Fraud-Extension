@@ -8,8 +8,8 @@
  * controlled by the Firestore security rules (dev/firebase/firestore.rules).
  */
 export const FIREBASE = {
-  apiKey: "",
-  projectId: ""
+  apiKey: "AIzaSyCjiMM19Va5F7xF_EWQCoM25x9_bNQjs9k",
+  projectId: "fraudshield-f6aaf"
 };
 
 export function cloudConfigured() {
