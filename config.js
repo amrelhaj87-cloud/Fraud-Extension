@@ -31,7 +31,7 @@ export const LINKS = {
   github: "https://github.com/amrelhaj87-cloud/FraudShield",
   portfolio: "",
   privacy: "",
-  coffee: ""
+  coffee: "https://ko-fi.com/zerocold"
 };
 
 export function cloudConfigured() {
