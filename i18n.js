@@ -231,6 +231,14 @@
       acctOut: "غير مسجّل الدخول",
       signIn: "تسجيل الدخول",
       listLine: (p) => `القائمة المشتركة: ${p.n} ${p.n === 1 ? "عنصر" : "عناصر"} · آخر تحديث ${p.time}`,
+      settings: "الإعدادات",
+      back: "رجوع",
+      setLang: "اللغة",
+      setTheme: "المظهر",
+      themeSystem: "تلقائي",
+      themeDark: "داكن",
+      themeLight: "فاتح",
+      setAccount: "الحساب والبلاغات",
       rPending: "قيد المراجعة",
       aTitle: "مراجعة البلاغات — FraudShield",
       aHeading: "مراجعة البلاغات",
@@ -433,6 +441,14 @@
       acctOut: "Not signed in",
       signIn: "Sign in",
       listLine: (p) => `Shared list: ${p.n} ${p.n === 1 ? "entry" : "entries"} · updated ${p.time}`,
+      settings: "Settings",
+      back: "Back",
+      setLang: "Language",
+      setTheme: "Theme",
+      themeSystem: "Auto",
+      themeDark: "Dark",
+      themeLight: "Light",
+      setAccount: "Account and reports",
       rPending: "Under review",
       aTitle: "Review reports — FraudShield",
       aHeading: "Review reports",
@@ -505,6 +521,12 @@
     }
     for (const el of doc.querySelectorAll("[data-i18n-placeholder]")) {
       el.setAttribute("placeholder", t(el.getAttribute("data-i18n-placeholder"), l));
+    }
+    // Icon buttons: tooltip and screen-reader name.
+    for (const el of doc.querySelectorAll("[data-i18n-title]")) {
+      const text = t(el.getAttribute("data-i18n-title"), l);
+      el.setAttribute("title", text);
+      el.setAttribute("aria-label", text);
     }
   }
 

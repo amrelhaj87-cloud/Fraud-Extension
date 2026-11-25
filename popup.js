@@ -1,7 +1,8 @@
 /**
  * FraudShield — popup.
- * Shows the verdict for the active tab, a manual URL checker, and the list of
- * links already analyzed on the current page (from the background worker).
+ * Main view: the verdict for the active tab, and the links already checked on
+ * the page (Google Search). Settings view (gear icon): language, theme,
+ * blocking, manual link check, account and the shared list.
  */
 
 const I18N = globalThis.FE_I18N;
@@ -115,7 +116,7 @@ function renderPageResults(results) {
     .sort((a, b) => Number(b.score) - Number(a.score));
 
   $("results-count").textContent = sorted.length ? `(${sorted.length})` : "";
-  $("results-empty").hidden = sorted.length > 0;
+  $("page-results").hidden = sorted.length === 0;
 
   for (const result of sorted) {
     const li = document.createElement("li");
@@ -197,6 +198,7 @@ $("check-form").addEventListener("submit", async (event) => {
   const url = normalizeInput($("check-input").value);
   if (!url) {
     renderNote($("check-input").value, "invalidUrl");
+    showView("main");
     return;
   }
 
@@ -208,6 +210,7 @@ $("check-form").addEventListener("submit", async (event) => {
   const result = await analyzeUrl(url);
   if (result) renderVerdict(result, { titleKey: "manualResult" });
   else renderNote(new URL(url).hostname, "cantCheckLink");
+  showView("main");
 
   button.disabled = false;
   button.textContent = T("checkBtn");
@@ -221,11 +224,39 @@ function applyLang(lang) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Views and theme
+// ---------------------------------------------------------------------------
+
+function showView(name) {
+  $("view-main").hidden = name !== "main";
+  $("view-settings").hidden = name !== "settings";
+}
+
+$("open-settings").addEventListener("click", () => showView("settings"));
+$("close-settings").addEventListener("click", () => showView("main"));
+$("who").addEventListener("click", () => showView("settings"));
+
+function renderTheme() {
+  const current = globalThis.FE_THEME ? globalThis.FE_THEME.get() : "system";
+  for (const button of document.querySelectorAll("[data-theme-choice]")) {
+    button.setAttribute("aria-pressed", String(button.dataset.themeChoice === current));
+  }
+}
+
+for (const button of document.querySelectorAll("[data-theme-choice]")) {
+  button.addEventListener("click", () => {
+    if (globalThis.FE_THEME) globalThis.FE_THEME.set(button.dataset.themeChoice);
+    renderTheme();
+  });
+}
+
 async function loadSettings() {
   const toggle = $("block-toggle");
   const settings = await send({ type: "GET_SETTINGS" });
   applyLang(settings && settings.lang);
   toggle.checked = !settings || settings.blockHigh !== false;
+  renderTheme();
 
   for (const button of document.querySelectorAll("[data-lang]")) {
     button.addEventListener("click", async () => {
@@ -235,6 +266,8 @@ async function loadSettings() {
       $("reload-hint").hidden = false;
       // Reasons are produced in the chosen language, so check again.
       void loadActiveTab();
+      void renderAdminLink();
+      void renderListLine();
     });
   }
   toggle.addEventListener("change", () => {
@@ -289,10 +322,14 @@ $("sign-out").addEventListener("click", async () => {
 function renderAccount(state) {
   const on = Boolean(state && state.configured);
   const user = on ? state.user : null;
+  const text = user ? T("acctIn", { name: user.name || user.email }) : T("acctOut");
   $("who").hidden = !on;
-  $("acct-dot").classList.toggle("on", Boolean(user));
-  $("account-line").textContent = user ? T("acctIn", { name: user.name || user.email }) : T("acctOut");
-  $("account-line").title = user && user.email ? user.email : "";
+  $("account-group").hidden = !on;
+  for (const [dot, line] of [["acct-dot", "account-line"], ["acct-dot-2", "account-line-2"]]) {
+    $(dot).classList.toggle("on", Boolean(user));
+    $(line).textContent = text;
+    $(line).title = user && user.email ? user.email : "";
+  }
   $("sign-in").hidden = !on || Boolean(user);
   $("sign-out").hidden = !user;
 }

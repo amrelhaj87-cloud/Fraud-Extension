@@ -5,6 +5,17 @@ Every change raises the version, gets an entry here, and gets a git tag.
 - **From 2.3 on, versions have two parts:** every change adds one to the second number (2.3 → 2.4 … 2.9), and a big update moves to the next first number (3.0). `manifest.json` holds `X.Y`, `package.json` holds `X.Y.0` (npm needs three parts), and the tag is `vX.Y`.
 - Up to 2.2.0: minor (1.2.0 → 1.3.0) for a feature or rule, patch (1.2.0 → 1.2.1) for a fix.
 
+## [2.24] - 2026-11-25
+
+### Changed
+- **New, calmer popup.** The main view shows only what matters: one card with the verdict for the current page (score, reasons, Report button), the checked links on Google Search pages (hidden elsewhere), and one bottom line with the signed-in account and "My reports".
+- **Header icons:** ⚙️ opens Settings; the owner's review is now a 🛡️ icon with a red count instead of a full-width button.
+- **Settings view** (inside the popup): language, theme, blocking high-risk sites (now a switch), manual link check, account (sign in / sign out) and the shared-list status. Clicking the account line on the main view opens it too.
+
+### Added
+- **Themes:** Auto (follows the system), Dark and Light, chosen in Settings. New `theme.js` applies the choice to every extension page (popup, report, review, warning) and keeps them in sync.
+- `data-i18n-title` in `i18n.js` for icon buttons (tooltip and screen-reader name).
+
 ## [2.23] - 2026-11-25
 
 ### Added

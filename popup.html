@@ -3,77 +3,116 @@
 <head>
   <meta charset="utf-8">
   <title>FraudShield</title>
+  <script src="theme.js"></script>
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
   <header class="top">
-    <img src="icons/icon48.png" alt="" width="24" height="24">
-    <div class="top-text">
-      <h1>FraudShield <span class="version" id="version"></span></h1>
-      <p class="tagline" data-i18n="tagline"></p>
+    <img src="icons/icon48.png" alt="" width="26" height="26">
+    <div class="brand">
+      <h1>FraudShield</h1>
+      <span class="version" id="version"></span>
     </div>
-    <div class="lang" role="group" aria-label="Language / اللغة">
-      <button type="button" data-lang="ar" lang="ar">ع</button>
-      <button type="button" data-lang="en" lang="en">EN</button>
+    <div class="icons">
+      <!-- Owner only: reports waiting for review -->
+      <button type="button" class="icon-btn" id="admin" data-i18n-title="adminLink" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>
+        <span class="badge" id="admin-count" hidden></span>
+      </button>
+      <button type="button" class="icon-btn" id="open-settings" data-i18n-title="settings">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
+      </button>
     </div>
   </header>
 
-  <button type="button" class="admin-btn" id="admin" hidden>
-    <span data-i18n="adminLink"></span>
-    <span class="admin-count" id="admin-count" hidden></span>
-  </button>
-
-  <section class="card" id="current" aria-live="polite">
-    <div class="card-label" id="current-title" data-i18n="current"></div>
-    <div class="host" id="current-host" dir="ltr">…</div>
-    <div class="verdict" id="current-verdict" hidden>
-      <div class="verdict-row">
-        <span class="pill" id="current-level"></span>
-        <span class="score" id="current-score"></span>
+  <!-- ===================== Main view ===================== -->
+  <main id="view-main">
+    <section class="card" id="current" aria-live="polite">
+      <div class="card-label" id="current-title" data-i18n="current"></div>
+      <div class="host" id="current-host" dir="ltr">…</div>
+      <div class="verdict" id="current-verdict" hidden>
+        <div class="verdict-row">
+          <span class="pill" id="current-level"></span>
+          <span class="score" id="current-score"></span>
+        </div>
+        <div class="bar"><div class="bar-fill" id="current-bar"></div></div>
+        <ul class="reasons" id="current-reasons"></ul>
+        <div class="age" id="current-age"></div>
+        <button type="button" class="report-btn" id="report-current" data-i18n="reportSite" hidden></button>
       </div>
-      <div class="bar"><div class="bar-fill" id="current-bar"></div></div>
-      <ul class="reasons" id="current-reasons"></ul>
-      <div class="age" id="current-age"></div>
-      <button type="button" class="report-btn" id="report-current" data-i18n="reportSite" hidden></button>
-    </div>
-    <div class="note" id="current-note" hidden></div>
-  </section>
+      <div class="note" id="current-note" hidden></div>
+    </section>
 
-  <label class="toggle">
-    <input type="checkbox" id="block-toggle" checked>
-    <span data-i18n="blockToggle"></span>
-  </label>
+    <!-- Only on pages with checked links (Google Search) -->
+    <section class="page-results" id="page-results" hidden>
+      <div class="card-label"><span data-i18n="pageResults"></span> <span id="results-count"></span></div>
+      <ul class="results" id="results"></ul>
+    </section>
 
-  <form class="check" id="check-form" autocomplete="off">
-    <label for="check-input" class="card-label" data-i18n="checkLabel"></label>
-    <div class="check-row">
-      <input id="check-input" type="text" dir="ltr" data-i18n-placeholder="checkPlaceholder" spellcheck="false">
-      <button type="submit" id="check-btn" data-i18n="checkBtn"></button>
-    </div>
-  </form>
+    <div class="note hint" id="reload-hint" data-i18n="reloadHint" hidden></div>
 
-  <section class="page-results">
-    <div class="card-label"><span data-i18n="pageResults"></span> <span id="results-count"></span></div>
-    <ul class="results" id="results"></ul>
-    <div class="note" id="results-empty" data-i18n="emptyResults"></div>
-  </section>
-
-  <div class="note hint" id="reload-hint" data-i18n="reloadHint" hidden></div>
-
-  <div class="account-row">
-    <span class="who" id="who" hidden>
-      <span class="dot" id="acct-dot" aria-hidden="true"></span>
-      <span id="account-line"></span>
-    </span>
-    <span class="account-actions">
+    <footer class="mini">
+      <button type="button" class="who" id="who" hidden>
+        <span class="dot" id="acct-dot" aria-hidden="true"></span>
+        <span id="account-line"></span>
+      </button>
       <button type="button" class="link" id="my-reports" data-i18n="myReports"></button>
-      <button type="button" class="link" id="sign-in" data-i18n="signIn" hidden></button>
-      <button type="button" class="link" id="sign-out" data-i18n="rSignOut" hidden></button>
-    </span>
-  </div>
-  <div class="list-line" id="list-line" hidden></div>
+    </footer>
+  </main>
 
-  <footer class="foot" data-i18n="footer"></footer>
+  <!-- ===================== Settings view ===================== -->
+  <section id="view-settings" hidden>
+    <div class="settings-head">
+      <button type="button" class="icon-btn" id="close-settings" data-i18n-title="back">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      </button>
+      <h2 data-i18n="settings"></h2>
+    </div>
+
+    <div class="group">
+      <div class="row">
+        <span data-i18n="setLang"></span>
+        <div class="seg" role="group" aria-label="Language / اللغة">
+          <button type="button" data-lang="ar" lang="ar">عربي</button>
+          <button type="button" data-lang="en" lang="en">EN</button>
+        </div>
+      </div>
+      <div class="row">
+        <span data-i18n="setTheme"></span>
+        <div class="seg" role="group">
+          <button type="button" data-theme-choice="system" data-i18n="themeSystem"></button>
+          <button type="button" data-theme-choice="dark" data-i18n="themeDark"></button>
+          <button type="button" data-theme-choice="light" data-i18n="themeLight"></button>
+        </div>
+      </div>
+      <label class="row">
+        <span data-i18n="blockToggle"></span>
+        <input type="checkbox" class="switch" id="block-toggle" checked>
+      </label>
+    </div>
+
+    <form class="group check" id="check-form" autocomplete="off">
+      <label for="check-input" class="group-title" data-i18n="checkLabel"></label>
+      <div class="check-row">
+        <input id="check-input" type="text" dir="ltr" data-i18n-placeholder="checkPlaceholder" spellcheck="false">
+        <button type="submit" id="check-btn" data-i18n="checkBtn"></button>
+      </div>
+    </form>
+
+    <div class="group" id="account-group" hidden>
+      <div class="group-title" data-i18n="setAccount"></div>
+      <div class="row">
+        <span class="acct-state"><span class="dot" id="acct-dot-2" aria-hidden="true"></span><span id="account-line-2"></span></span>
+        <span class="actions">
+          <button type="button" class="link" id="sign-in" data-i18n="signIn" hidden></button>
+          <button type="button" class="link" id="sign-out" data-i18n="rSignOut" hidden></button>
+        </span>
+      </div>
+      <div class="sub" id="list-line" hidden></div>
+    </div>
+
+    <p class="foot" data-i18n="footer"></p>
+  </section>
 
   <script src="i18n.js"></script>
   <script type="module" src="popup.js"></script>

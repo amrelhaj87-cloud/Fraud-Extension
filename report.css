@@ -11,7 +11,7 @@
 }
 
 @media (prefers-color-scheme: light) {
-  :root {
+  :root:not([data-theme]) {
     --bg: #f6f7f9;
     --fg: #1f2430;
     --muted: #5b6270;
@@ -19,6 +19,15 @@
     --line: #e1e4ea;
     --accent: #1d4ed8;
   }
+}
+
+:root[data-theme="light"] {
+  --bg: #f6f7f9;
+  --fg: #1f2430;
+  --muted: #5b6270;
+  --panel: #ffffff;
+  --line: #e1e4ea;
+  --accent: #1d4ed8;
 }
 
 * { box-sizing: border-box; }
