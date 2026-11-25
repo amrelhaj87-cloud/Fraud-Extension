@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "FraudShield",
-  "version": "2.22",
+  "version": "2.23",
   "description": "كشف الروابط والمواقع الاحتيالية في بحث Google وخرائط Google داخل الإمارات — يعمل محليًا بالكامل.",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAjL9ozkBQckrKX1Kr+3fnOYVBiLduHg/3TQMIwVtUQYFtsZU+jn9uCkrn0pXIN3TMvaa+Z3/IInqQ6yy0e+D1J/kF79imhRHfARfvGavas+diGn9gHmPfSjf+F8WjXTecfOW0thDonFJnKA6BMFrjB6bkO1GO7WsYNhavQ/wJ+l/sglarVFTcGnaeBlK97djtRUuwy/UuRXL/MT8hthArNxkuIy5aU2krrjPiPGJqvC3icDADGbn4gvpamxSnzhXeay88DHNJm6Q0VyA/trBsHNP5WUT014jMWdwU6vXBrxH4Oet6FfgQHcO70t1oQUnSTxUHOQSLQnPhg5XK2nPH5wIDAQAB",
   "permissions": [

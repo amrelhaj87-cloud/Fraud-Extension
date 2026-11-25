@@ -159,3 +159,12 @@ body {
 .admin-btn[hidden] { display: none; }
 .admin-count { background: #f04438; color: #fff; border-radius: 999px; padding: 0 9px; font-size: 13px; min-width: 22px; text-align: center; }
 .admin-count[hidden] { display: none; }
+
+/* Signed-in state: green dot when signed in, grey when not. */
+.who { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.who[hidden] { display: none; }
+.who #account-line { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+.dot.on { background: #12b76a; }
+.list-line { font-size: 11px; color: var(--muted); margin-top: 6px; }
+.list-line[hidden] { display: none; }

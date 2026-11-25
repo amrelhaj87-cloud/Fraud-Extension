@@ -5,6 +5,15 @@ Every change raises the version, gets an entry here, and gets a git tag.
 - **From 2.3 on, versions have two parts:** every change adds one to the second number (2.3 → 2.4 … 2.9), and a big update moves to the next first number (3.0). `manifest.json` holds `X.Y`, `package.json` holds `X.Y.0` (npm needs three parts), and the tag is `vX.Y`.
 - Up to 2.2.0: minor (1.2.0 → 1.3.0) for a feature or rule, patch (1.2.0 → 1.2.1) for a fix.
 
+## [2.23] - 2026-11-25
+
+### Added
+- **Popup account line:** a green dot with "Signed in: name" (email on hover) and **Sign out**, or a grey dot with "Not signed in" and **Sign in**. Shown only when the reports database is on.
+- **Popup shared-list line:** "Shared list: N entries · updated 1:20 PM", so it is easy to see that the approved list arrived.
+
+### Fixed
+- **Reporting something you already reported** (for example after reinstalling) now says "You already reported this" instead of "Report received". The database never stored a duplicate; only the message was wrong.
+
 ## [2.22] - 2026-11-25
 
 ### Added

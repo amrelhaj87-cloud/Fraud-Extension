@@ -272,8 +272,46 @@ $("admin").addEventListener("click", () => {
 });
 
 // The review link shows only for the owner (cloud.js checks admins/{uid}).
+$("sign-in").addEventListener("click", async () => {
+  $("sign-in").disabled = true;
+  await send({ type: "CLOUD_SIGN_IN" });
+  $("sign-in").disabled = false;
+  await renderAdminLink();
+});
+
+$("sign-out").addEventListener("click", async () => {
+  await send({ type: "CLOUD_SIGN_OUT" });
+  await renderAdminLink();
+});
+
+// Who is signed in (green dot) or a sign-in link; shown only when the
+// reports database is switched on.
+function renderAccount(state) {
+  const on = Boolean(state && state.configured);
+  const user = on ? state.user : null;
+  $("who").hidden = !on;
+  $("acct-dot").classList.toggle("on", Boolean(user));
+  $("account-line").textContent = user ? T("acctIn", { name: user.name || user.email }) : T("acctOut");
+  $("account-line").title = user && user.email ? user.email : "";
+  $("sign-in").hidden = !on || Boolean(user);
+  $("sign-out").hidden = !user;
+}
+
+// How big the shared list is and when it was last downloaded.
+async function renderListLine() {
+  const status = await send({ type: "COMMUNITY_STATUS" });
+  if (!status || !status.fetchedAt) return;
+  const time = new Date(status.fetchedAt).toLocaleTimeString(LANG === "ar" ? "ar-AE" : "en-GB", {
+    hour: "numeric",
+    minute: "2-digit"
+  });
+  $("list-line").textContent = T("listLine", { n: status.sites + status.phones, time });
+  $("list-line").hidden = false;
+}
+
 async function renderAdminLink() {
   const state = await send({ type: "CLOUD_STATE" });
+  renderAccount(state);
   $("admin").hidden = !(state && state.isAdmin);
   if ($("admin").hidden) return;
   const res = await send({ type: "CLOUD_ADMIN_COUNT" });
@@ -290,5 +328,6 @@ try {
 
 loadSettings().then(() => {
   void renderAdminLink();
+  void renderListLine();
   return loadActiveTab();
 });

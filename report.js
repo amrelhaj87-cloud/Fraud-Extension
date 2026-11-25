@@ -234,6 +234,13 @@
         $("send").disabled = false;
         return;
       }
+      if (res.already) {
+        // The database already has this user's report about it (e.g. after a reinstall).
+        $("form").hidden = true;
+        showDone(T("rAlready", { id: `FS-${String(res.id).split("_")[1].slice(0, 6).toUpperCase()}` }));
+        await renderMine();
+        return;
+      }
       shared = true;
     }
 

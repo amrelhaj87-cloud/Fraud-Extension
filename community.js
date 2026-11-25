@@ -196,6 +196,10 @@ export function initCommunity() {
   });
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message && message.type === "COMMUNITY_STATUS") {
+      communityStatus().then(sendResponse, () => sendResponse(null));
+      return true;
+    }
     if (!message || message.type !== "COMMUNITY_PHONE") return false;
     // Maps places without a website: the content script asks about the phone number.
     loadIndex().then((idx) => sendResponse({ reports: lookupPhoneIn(idx, message.phone) }));
