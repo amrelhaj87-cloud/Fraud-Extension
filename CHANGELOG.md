@@ -5,6 +5,12 @@ Every change raises the version, gets an entry here, and gets a git tag.
 - **From 2.3 on, versions have two parts:** every change adds one to the second number (2.3 → 2.4 … 2.9), and a big update moves to the next first number (3.0). `manifest.json` holds `X.Y`, `package.json` holds `X.Y.0` (npm needs three parts), and the tag is `vX.Y`.
 - Up to 2.2.0: minor (1.2.0 → 1.3.0) for a feature or rule, patch (1.2.0 → 1.2.1) for a fix.
 
+## [3.3] - 2026-11-25
+
+### Changed
+- **Website** (live at https://fraudshield-site-xi.vercel.app): an Arabic / English switch shows one language at a time (remembered; first visit follows the browser language; `#ar` / `#en` in the address work too). The privacy policy is friendlier: three summary cards, then one card per topic with "what is sent / about you" facts. Footer: "Yaqiz vX.Y · by zerocold", with the version read live from the repo's `manifest.json`, plus GitHub and Ko-fi links. A Ko-fi button on the landing page.
+- **Extension:** Settings > About > Privacy now opens the live privacy policy.
+
 ## [3.2] - 2026-11-25
 
 ### Added

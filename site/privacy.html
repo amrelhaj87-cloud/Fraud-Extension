@@ -4,101 +4,149 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>سياسة الخصوصية — يقظ (Yaqiz)</title>
+  <meta name="title-ar" content="سياسة الخصوصية — يقظ (Yaqiz)">
+  <meta name="title-en" content="Privacy policy — Yaqiz">
   <link rel="icon" href="icon128.png">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main class="wrap">
     <nav>
-      <a class="brand" href="./"><img src="icon128.png" alt="" width="32" height="32"> Yaqiz · يقظ</a>
-      <a href="#english" lang="en">English</a>
+      <a class="brand" href="./"><img src="icon128.png" alt="" width="32" height="32"> Yaqiz <small>· يقظ</small></a>
+      <a class="nav-link" href="./"><span data-l="ar">الرئيسية</span><span data-l="en" hidden>Home</span></a>
+      <div class="seg" role="group" aria-label="Language">
+        <button type="button" data-set-lang="ar" lang="ar">عربي</button>
+        <button type="button" data-set-lang="en" lang="en">EN</button>
+      </div>
     </nav>
 
-    <h1>سياسة الخصوصية</h1>
-    <p class="muted">آخر تحديث: 25 نوفمبر 2026</p>
+    <!-- ================= Arabic ================= -->
+    <div data-l="ar">
+      <header class="page-head">
+        <h1>خصوصيتك</h1>
+        <p>بكلام بسيط: ماذا يعرف «يقظ» وماذا لا يعرف. آخر تحديث: 25 نوفمبر 2026.</p>
+      </header>
 
-    <h2>الخلاصة</h2>
-    <ul>
-      <li>الفحص يحدث على جهازك. لا نرسل سجل تصفحك ولا محتوى الصفحات إلى أي خادم.</li>
-      <li>نخزّن فقط ما ترسله بنفسك في بلاغ، وحسابك في Google إذا سجّلت الدخول للإبلاغ.</li>
-      <li>لا إعلانات، ولا تتبّع، ولا بيع أو مشاركة للبيانات.</li>
-    </ul>
+      <div class="glance">
+        <div class="card"><span class="icon">💻</span><div><h3>الفحص على جهازك</h3><p>لا نرسل سجل تصفحك ولا محتوى الصفحات إلى أي خادم.</p></div></div>
+        <div class="card"><span class="icon">🚫</span><div><h3>لا إعلانات ولا تتبّع</h3><p>لا نبيع البيانات ولا نشاركها مع أحد.</p></div></div>
+        <div class="card"><span class="icon">🚩</span><div><h3>فقط ما تبلّغ عنه</h3><p>نحفظ البلاغ الذي ترسله بنفسك، ولا شيء غيره.</p></div></div>
+      </div>
 
-    <h2>ما الذي يُرسل خارج جهازك ولماذا</h2>
-    <h3>1. فحص عمر الدومين ومالك عنوان الـIP</h3>
-    <p>لمعرفة عمر الموقع أو من يملك عنوان الـIP، ترسل الإضافة <strong>اسم الدومين فقط</strong> (مثل example.com، بدون باقي الرابط) أو عنوان الـIP إلى خوادم RDAP العامة التي تديرها جهات تسجيل النطاقات (مثل IANA وVerisign وARIN). لا يُرسل معه أي شيء عنك.</p>
+      <section class="section">
+        <h2><span class="icon">🔎</span> فحص عمر الموقع</h2>
+        <p>لمعرفة عمر الموقع أو من يملك عنوان الـIP، تسأل الإضافة خوادم RDAP العامة التي تديرها جهات تسجيل النطاقات (مثل IANA وVerisign وARIN).</p>
+        <dl class="facts">
+          <dt>ما يُرسل</dt><dd>اسم الدومين فقط (مثل example.com) أو عنوان الـIP، بدون باقي الرابط.</dd>
+          <dt>عنك</dt><dd>لا شيء.</dd>
+        </dl>
+      </section>
 
-    <h3>2. القائمة المشتركة</h3>
-    <p>مرة كل ساعة تقريبًا تنزّل الإضافة قائمة المواقع والأرقام الاحتيالية المعتمدة من قاعدة بيانات Yaqiz على Google Firebase. هذا تنزيل فقط، ولا يُرسل معه أي معلومة عنك أو عن تصفحك.</p>
+      <section class="section">
+        <h2><span class="icon">🛡️</span> القائمة المشتركة</h2>
+        <p>مرة كل ساعة تقريبًا تنزّل الإضافة قائمة المواقع والأرقام الاحتيالية المعتمدة من قاعدة بيانات «يقظ» على Google Firebase.</p>
+        <dl class="facts">
+          <dt>ما يُرسل</dt><dd>لا شيء. هذا تنزيل فقط.</dd>
+          <dt>ما فيها</dt><dd>الموقع، أو اسم المكان ورقمه، وعدد البلاغات. لا شيء عن المبلّغين.</dd>
+        </dl>
+      </section>
 
-    <h3>3. البلاغات (اختيارية)</h3>
-    <p>إذا اخترت الإبلاغ عن موقع أو مكان، تسجّل الدخول بحساب Google، ويُحفظ البلاغ في Google Firebase (Firestore، منطقة الدوحة me-central1). يحتوي البلاغ على:</p>
-    <ul>
-      <li>الرابط، أو اسم المكان ورقمه وعنوانه وموقعه الإلكتروني كما يظهر في خرائط Google.</li>
-      <li>درجة الخطر وأسبابها، وملاحظتك إن كتبت واحدة، ورقم إصدار الإضافة ووقت البلاغ.</li>
-      <li>معرّف حسابك (رقم داخلي من Firebase) لمنع تكرار البلاغ وتطبيق حد 20 بلاغًا في اليوم.</li>
-    </ul>
-    <p>يحفظ Firebase Authentication اسمك وبريدك من حساب Google لتسجيل الدخول فقط. <strong>لا يظهر اسمك أو بريدك لأي مستخدم آخر</strong>، ولا يُكتب في البلاغ.</p>
-    <p>يراجع صاحب الإضافة البلاغات. البلاغ المعتمد يدخل القائمة المشتركة العامة، وفيها الموقع أو اسم المكان ورقمه وعدد البلاغات فقط، بدون أي معلومة عن المبلّغين.</p>
+      <section class="section">
+        <h2><span class="icon">🚩</span> البلاغات <span class="tag">اختيارية</span></h2>
+        <p>إذا اخترت الإبلاغ، تسجّل الدخول بحساب Google ويُحفظ البلاغ في Google Firebase (منطقة الدوحة).</p>
+        <ul>
+          <li>الرابط، أو اسم المكان ورقمه وعنوانه كما يظهر في خرائط Google.</li>
+          <li>درجة الخطر وأسبابها، وملاحظتك إن كتبت واحدة، ووقت البلاغ ورقم الإصدار.</li>
+          <li>معرّف داخلي لحسابك، لمنع تكرار البلاغ وتطبيق حد 20 بلاغًا في اليوم.</li>
+        </ul>
+        <p><strong>اسمك وبريدك لا يظهران لأي مستخدم آخر</strong> ولا يُكتبان في البلاغ. يراجع صاحب الإضافة كل بلاغ قبل أن يدخل القائمة المشتركة.</p>
+      </section>
 
-    <h2>ما يُحفظ على جهازك</h2>
-    <p>إعداداتك (اللغة، المظهر، الحظر)، ونسخة من بلاغاتك، ونتائج الفحص المؤقتة، والقائمة المشتركة. تُحذف كلها عند إزالة الإضافة.</p>
+      <section class="section">
+        <h2><span class="icon">📱</span> ما يبقى على جهازك</h2>
+        <p>إعداداتك (اللغة، المظهر، الحظر)، ونسخة من بلاغاتك، ونتائج الفحص المؤقتة، والقائمة المشتركة. تُحذف كلها عند إزالة الإضافة.</p>
+      </section>
 
-    <h2>بيانات Google</h2>
-    <p>تطلب الإضافة من Google فقط: الاسم والبريد ومعرّف الحساب (openid وemail وprofile)، وتستخدمها لتسجيل الدخول للإبلاغ فقط. استخدام Yaqiz للمعلومات المستلمة من Google APIs يلتزم بـ <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>، بما في ذلك متطلبات الاستخدام المحدود (Limited Use).</p>
+      <section class="section">
+        <h2><span class="icon">🔑</span> بيانات Google</h2>
+        <p>تطلب الإضافة الاسم والبريد ومعرّف الحساب فقط (openid وemail وprofile)، لتسجيل الدخول للإبلاغ فقط. استخدام «يقظ» للمعلومات المستلمة من Google APIs يلتزم بـ <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>، بما في ذلك متطلبات الاستخدام المحدود (Limited Use).</p>
+      </section>
 
-    <h2>حذف بياناتك</h2>
-    <p>يمكنك تسجيل الخروج في أي وقت من إعدادات الإضافة. لحذف حسابك وبلاغاتك من قاعدة البيانات، افتح طلبًا في <a href="https://github.com/amrelhaj87-cloud/FraudShield/issues">صفحة المشروع على GitHub</a> واطلب الحذف (بدون كتابة بريدك علنًا)، وسنتواصل معك لإتمامه.</p>
+      <section class="section">
+        <h2><span class="icon">🗑️</span> حذف بياناتك</h2>
+        <p>سجّل الخروج متى شئت من إعدادات الإضافة. ولحذف حسابك وبلاغاتك من قاعدة البيانات، افتح طلبًا في <a href="https://github.com/amrelhaj87-cloud/FraudShield/issues">صفحة المشروع على GitHub</a> (بدون كتابة بريدك علنًا) وسنتواصل معك.</p>
+        <p class="muted">إذا تغيّرت هذه السياسة سنحدّث التاريخ أعلى الصفحة.</p>
+      </section>
+    </div>
 
-    <h2>التغييرات</h2>
-    <p>إذا تغيّرت هذه السياسة سنحدّث التاريخ أعلى الصفحة.</p>
+    <!-- ================= English ================= -->
+    <div data-l="en" hidden>
+      <header class="page-head">
+        <h1>Your privacy</h1>
+        <p>In plain words: what Yaqiz knows and what it doesn't. Last updated: 25 November 2026.</p>
+      </header>
 
-    <hr class="lang-sep">
+      <div class="glance">
+        <div class="card"><span class="icon">💻</span><div><h3>Checks on your device</h3><p>Your browsing history and page contents are never sent to any server.</p></div></div>
+        <div class="card"><span class="icon">🚫</span><div><h3>No ads, no tracking</h3><p>We never sell or share data with anyone.</p></div></div>
+        <div class="card"><span class="icon">🚩</span><div><h3>Only what you report</h3><p>We keep the reports you send yourself, nothing else.</p></div></div>
+      </div>
 
-    <div id="english" lang="en" dir="ltr">
-      <h1>Privacy policy</h1>
-      <p class="muted">Last updated: 25 November 2026</p>
+      <section class="section">
+        <h2><span class="icon">🔎</span> Checking a site's age</h2>
+        <p>To learn how old a site is or who owns an IP address, the extension asks public RDAP servers run by domain registries (such as IANA, Verisign and ARIN).</p>
+        <dl class="facts">
+          <dt>Sent</dt><dd>Only the domain name (for example example.com) or the IP address, not the rest of the link.</dd>
+          <dt>About you</dt><dd>Nothing.</dd>
+        </dl>
+      </section>
 
-      <h2>In short</h2>
-      <ul>
-        <li>Checks run on your device. Your browsing history and page contents are never sent to any server.</li>
-        <li>We store only what you send in a report, and your Google account if you sign in to report.</li>
-        <li>No ads, no tracking, no selling or sharing of data.</li>
-      </ul>
+      <section class="section">
+        <h2><span class="icon">🛡️</span> The shared list</h2>
+        <p>About once an hour the extension downloads the list of approved scam sites and numbers from the Yaqiz database on Google Firebase.</p>
+        <dl class="facts">
+          <dt>Sent</dt><dd>Nothing. It is a download only.</dd>
+          <dt>Inside</dt><dd>The site, or the place's name and number, and how many reported it. Nothing about who reported it.</dd>
+        </dl>
+      </section>
 
-      <h2>What leaves your device, and why</h2>
-      <h3>1. Domain age and IP owner</h3>
-      <p>To learn how old a site is or who owns an IP address, the extension sends <strong>only the domain name</strong> (for example example.com, not the rest of the link) or the IP address to public RDAP servers run by domain registries (such as IANA, Verisign and ARIN). Nothing about you is sent with it.</p>
+      <section class="section">
+        <h2><span class="icon">🚩</span> Reports <span class="tag">optional</span></h2>
+        <p>If you choose to report, you sign in with Google and the report is stored in Google Firebase (Doha region).</p>
+        <ul>
+          <li>The link, or the place's name, number and address as shown on Google Maps.</li>
+          <li>The risk score and its reasons, your note if you wrote one, the time and the extension version.</li>
+          <li>An internal ID for your account, to stop duplicates and apply the limit of 20 reports a day.</li>
+        </ul>
+        <p><strong>Your name and email are never shown to other users</strong> and are not written into the report. The extension's owner reviews every report before it joins the shared list.</p>
+      </section>
 
-      <h3>2. The shared list</h3>
-      <p>About once an hour the extension downloads the list of approved scam sites and numbers from the Yaqiz database on Google Firebase. It is a download only; nothing about you or your browsing is sent.</p>
+      <section class="section">
+        <h2><span class="icon">📱</span> What stays on your device</h2>
+        <p>Your settings (language, theme, blocking), a copy of your reports, temporary check results and the shared list. All of it is removed when you remove the extension.</p>
+      </section>
 
-      <h3>3. Reports (optional)</h3>
-      <p>If you choose to report a site or place, you sign in with Google and the report is stored in Google Firebase (Firestore, Doha region me-central1). A report contains:</p>
-      <ul>
-        <li>The link, or the place's name, phone number, address and website as shown on Google Maps.</li>
-        <li>The risk score and its reasons, your note if you wrote one, the extension version and the time.</li>
-        <li>Your account ID (an internal Firebase number), to stop duplicate reports and apply the limit of 20 reports a day.</li>
-      </ul>
-      <p>Firebase Authentication keeps your name and email from your Google account for sign-in only. <strong>Your name and email are never shown to other users</strong> and are not written into the report.</p>
-      <p>The extension's owner reviews reports. An approved report goes into the public shared list, which holds only the site, or the place's name and number, and how many people reported it, with nothing about who reported it.</p>
+      <section class="section">
+        <h2><span class="icon">🔑</span> Google user data</h2>
+        <p>The extension asks Google only for your name, email and account ID (openid, email and profile), only to sign you in to report. Yaqiz's use of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+      </section>
 
-      <h2>What is stored on your device</h2>
-      <p>Your settings (language, theme, blocking), a copy of your reports, temporary check results and the shared list. All of it is removed when you remove the extension.</p>
-
-      <h2>Google user data</h2>
-      <p>The extension asks Google only for your name, email and account ID (openid, email and profile), and uses them only to sign you in to report. Yaqiz's use of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
-
-      <h2>Deleting your data</h2>
-      <p>You can sign out at any time in the extension's settings. To delete your account and reports from the database, open a request on the <a href="https://github.com/amrelhaj87-cloud/FraudShield/issues">project's GitHub page</a> (do not post your email publicly) and we will contact you to complete it.</p>
-
-      <h2>Changes</h2>
-      <p>If this policy changes, the date at the top will be updated.</p>
+      <section class="section">
+        <h2><span class="icon">🗑️</span> Deleting your data</h2>
+        <p>Sign out any time in the extension's settings. To delete your account and reports from the database, open a request on the <a href="https://github.com/amrelhaj87-cloud/FraudShield/issues">project's GitHub page</a> (don't post your email publicly) and we will contact you.</p>
+        <p class="muted">If this policy changes, the date at the top will be updated.</p>
+      </section>
     </div>
 
     <footer>
-      © 2026 Yaqiz · <a href="./">الرئيسية / Home</a> · <a href="https://github.com/amrelhaj87-cloud/FraudShield">GitHub</a>
+      <span>Yaqiz <span data-version>v3.3</span></span>
+      <span class="by">by zerocold</span>
+      <span class="spacer"></span>
+      <a href="./"><span data-l="ar">الرئيسية</span><span data-l="en" hidden>Home</span></a>
+      <a href="https://github.com/amrelhaj87-cloud/FraudShield">GitHub</a>
+      <a href="https://ko-fi.com/zerocold">Ko-fi</a>
     </footer>
   </main>
+  <script src="site.js"></script>
 </body>
 </html>

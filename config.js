@@ -30,7 +30,7 @@ export const GOOGLE = {
 export const LINKS = {
   github: "https://github.com/amrelhaj87-cloud/FraudShield",
   portfolio: "",
-  privacy: "",
+  privacy: "https://fraudshield-site-xi.vercel.app/privacy.html",
   coffee: "https://ko-fi.com/zerocold"
 };
 
