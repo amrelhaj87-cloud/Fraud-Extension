@@ -316,6 +316,28 @@
   // Main loop
   // -------------------------------------------------------------------------
 
+  // The place's phone number on the shared list of approved reports.
+  function applyCommunityPhone(place, result) {
+    if (!place.phone || result.level === "safe") return Promise.resolve(result);
+    return new Promise((resolve) => {
+      try {
+        chrome.runtime.sendMessage({ type: "COMMUNITY_PHONE", phone: place.phone }, (res) => {
+          const n = !chrome.runtime.lastError && res ? Number(res.reports) || 0 : 0;
+          if (!n) return resolve(result);
+          const reason = T("community", { n });
+          resolve({
+            ...result,
+            score: Math.max(result.score, 85),
+            level: "high",
+            reasons: result.reasons.includes(reason) ? result.reasons : [reason, ...result.reasons]
+          });
+        });
+      } catch {
+        resolve(result);
+      }
+    });
+  }
+
   function analyze(url, place) {
     const meta = {
       [url]: {
@@ -353,7 +375,8 @@
       lastKey = key;
 
       const base = place.website ? await analyze(place.website.href, place) : null;
-      const result = applyMapsRules(place, base);
+      let result = applyMapsRules(place, base);
+      result = await applyCommunityPhone(place, result);
 
       // Stay quiet on ordinary places: only official (✅) or risky results show.
       if (result.level === "low" && result.reasons.length === 0) {

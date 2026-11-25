@@ -11,6 +11,7 @@ import { initBlocker, getSettings } from "./blocker.js";
 import { initDownloadGuard } from "./downloads.js";
 import { initReports } from "./reports.js";
 import { initCloud } from "./cloud.js";
+import { initCommunity, applyCommunity } from "./community.js";
 import "./i18n.js";
 import "./phone-claims.js";
 
@@ -23,6 +24,8 @@ initDownloadGuard();
 initReports();
 // Google sign-in and shared reports (see cloud.js; off until config.js is filled in).
 initCloud();
+// Shared list of approved reports, synced about once an hour (see community.js).
+initCommunity();
 
 const MAX_CONCURRENT_DOMAINS = 5;
 const MAX_TAB_RESULTS = 250;
@@ -148,6 +151,13 @@ async function analyzeTarget(target, getAge, lang) {
     if (scored.level !== "safe") {
       scored = applyBrandPhone(scored, `${target.title || ""} ${target.snippet || ""}`, lang);
     }
+
+    // On the shared list of approved reports (the site, or a number in the result text).
+    scored = await applyCommunity(
+      scored,
+      { hostname, text: `${target.title || ""} ${target.snippet || ""}` },
+      (n) => I18N.t("community", lang, { n })
+    );
 
     // Only gray-zone results are eligible for the optional LLM hook.
     if (scored.level === "medium") {

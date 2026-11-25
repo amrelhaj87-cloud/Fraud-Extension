@@ -5,6 +5,15 @@ Every change raises the version, gets an entry here, and gets a git tag.
 - **From 2.3 on, versions have two parts:** every change adds one to the second number (2.3 → 2.4 … 2.9), and a big update moves to the next first number (3.0). `manifest.json` holds `X.Y`, `package.json` holds `X.Y.0` (npm needs three parts), and the tag is `vX.Y`.
 - Up to 2.2.0: minor (1.2.0 → 1.3.0) for a feature or rule, patch (1.2.0 → 1.2.1) for a fix.
 
+## [2.22] - 2026-11-25
+
+### Added
+- **Shared list in every copy of the extension (Phase 3).** New `community.js` downloads `public/blocklist` about once an hour (one Firestore read, no sign-in, nothing about the user sent) and keeps it on the device. Uses the new `alarms` permission.
+- **Approved reports raise the risk:** a listed site (or any of its subdomains), or a listed phone number, becomes **high risk** (score at least 85) with the reason "Reported by N users and confirmed by FraudShield after review". It works in Google Search results (site, or a number in the result text), Google Maps places (by phone number, with or without a website), and when opening a page (blocked before it loads).
+- **Safety:** official domains that the scorer marks safe are never overridden, so a mistaken approval cannot block a real bank or government site. Maps places match by phone number only, so a place reported from the Maps page never flags `google.com`.
+- After an owner decision the owner's own copy refreshes the list at once.
+- 20 new tests (phone formats `05…`, `+971…`, `00971…`, Arabic digits; subdomains; official sites untouched): 198 in total. `dev/check-community.mjs` reads the live list.
+
 ## [2.21] - 2026-11-25
 
 ### Changed

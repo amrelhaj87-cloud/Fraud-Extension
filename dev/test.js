@@ -6,6 +6,9 @@
 import { analyzeDomain } from "../scoring.js";
 import "../phone-claims.js";
 import { getIpOwner, isGoogleServiceIp, classifyRdap } from "../ip-intel.js";
+import {
+  canonicalPhone, canonicalHost, buildIndex, lookupHostIn, lookupPhoneIn, phonesInText, applyCommunityWith
+} from "../community.js";
 
 let passed = 0;
 let failed = 0;
@@ -381,6 +384,43 @@ for (const u of [
 ]) {
   const { r, flagged } = flaggedUrl(u);
   check(`${u} -> not flagged (legit)`, !flagged, r);
+}
+
+// ---- Shared list of approved reports (community.js) --------------------------
+{
+  check("phone 0564864684 stays 0564864684", canonicalPhone("0564864684") === "0564864684");
+  check("phone +971 56 486 4684 -> 0564864684", canonicalPhone("+971 56 486 4684") === "0564864684");
+  check("phone 00971564864684 -> 0564864684", canonicalPhone("00971564864684") === "0564864684");
+  check("phone +9710564864684 -> 0564864684", canonicalPhone("+9710564864684") === "0564864684");
+  check("phone Arabic digits ٠٥٦٤٨٦٤٦٨٤ -> 0564864684", canonicalPhone("٠٥٦٤٨٦٤٦٨٤") === "0564864684");
+  check("too short is not a phone", canonicalPhone("12345") === "");
+  check("host WWW.Evil.com. -> evil.com", canonicalHost("WWW.Evil.com.") === "evil.com");
+
+  const idx = buildIndex([
+    { kind: "site", host: "adpolice-fines.xyz", reports: 3 },
+    { kind: "site", host: "pay.evil-host.com", reports: 1 },
+    // A Maps place reported before 2.19 carried host google.com: never match it.
+    { kind: "place", host: "google.com", phone: "0564864684", name: "دفع المخالفات", reports: 2 }
+  ]);
+  check("listed site matches", lookupHostIn(idx, "adpolice-fines.xyz") === 3);
+  check("listed site matches with www", lookupHostIn(idx, "www.adpolice-fines.xyz") === 3);
+  check("subdomain of listed site matches", lookupHostIn(idx, "login.adpolice-fines.xyz") === 3);
+  check("parent of listed subdomain does not match", lookupHostIn(idx, "evil-host.com") === 0);
+  check("place host google.com is ignored", lookupHostIn(idx, "google.com") === 0 && lookupHostIn(idx, "www.google.com") === 0);
+  check("listed phone matches in +971 form", lookupPhoneIn(idx, "+971564864684") === 2);
+  check("unlisted phone does not match", lookupPhoneIn(idx, "0501234567") === 0);
+  check("phone found in result text", phonesInText("اتصل على 056 486 4684 الآن").includes("0564864684"));
+
+  const reasonFor = (n) => `reported ${n}`;
+  const low = { score: 10, level: "low", reasons: [] };
+  const hit = applyCommunityWith(idx, low, { hostname: "adpolice-fines.xyz" }, reasonFor);
+  check("listed site -> high, score >= 85, reason first", hit.level === "high" && hit.score >= 85 && hit.reasons[0] === "reported 3", hit);
+  const byText = applyCommunityWith(idx, low, { hostname: "shop.example", text: "call 0564864684" }, reasonFor);
+  check("listed phone in text -> high", byText.level === "high" && byText.community === 2, byText);
+  const safe = { score: 0, level: "safe", reasons: [] };
+  check("official (safe) result is never overridden", applyCommunityWith(idx, safe, { hostname: "adpolice-fines.xyz" }, reasonFor) === safe);
+  check("unlisted stays unchanged", applyCommunityWith(idx, low, { hostname: "example.com" }, reasonFor) === low);
+  check("no list -> unchanged", applyCommunityWith(null, low, { hostname: "adpolice-fines.xyz" }, reasonFor) === low);
 }
 
 console.log("");

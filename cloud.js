@@ -27,6 +27,7 @@
  */
 
 import { FIREBASE, cloudConfigured } from "./config.js";
+import { syncCommunity } from "./community.js";
 
 const SESSION_KEY = "fs:cloud-session";
 const ADMIN_CACHE_MS = 10 * 60 * 1000;
@@ -390,6 +391,8 @@ async function rebuildBlocklist(token) {
     body: { fields: toFields({ version: Date.now(), updatedAt: new Date(), count: entries.length, entries }) }
   });
   if (!res.ok) throw errorOf(res);
+  // The owner sees the effect right away instead of after the next hourly sync.
+  await syncCommunity();
   return { count: entries.length };
 }
 

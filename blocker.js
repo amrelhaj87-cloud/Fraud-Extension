@@ -10,6 +10,7 @@ import { analyzeDomain } from "./scoring.js";
 import { getDomainAgeDays, getRegistrableDomain } from "./rdap.js";
 import { getIpOwner } from "./ip-intel.js";
 import "./i18n.js";
+import { applyCommunity } from "./community.js";
 
 const I18N = globalThis.FE_I18N;
 
@@ -96,6 +97,11 @@ export async function analyzeForBlock(url) {
     opts.ipOwner = ipOwner;
     result = analyzeDomain(parsed.hostname, opts);
   }
+
+  // On the shared list of approved reports: high risk, no age lookup needed.
+  result = await applyCommunity(result, { hostname: parsed.hostname }, (n) =>
+    I18N.t("community", I18N.resolve(lang), { n })
+  );
 
   if (result.level !== "safe" && result.level !== "high") {
     const domain = getRegistrableDomain(parsed.hostname);
