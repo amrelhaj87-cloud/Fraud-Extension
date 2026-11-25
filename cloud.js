@@ -20,6 +20,7 @@
  *   CLOUD_ADMIN_LIST    { status } -> { ok, reports: [...] }
  *   CLOUD_ADMIN_COUNT   -> { ok, pending }
  *   CLOUD_ADMIN_DECIDE  { ids, status } -> { ok, list: { count } }
+ *   CLOUD_ADMIN_DELETE  { ids } -> { ok, list: { count } }   removes the reports for good
  *   CLOUD_ADMIN_REBUILD -> { ok, list: { count } }
  *
  * public/blocklist holds every approved site / place / number once, with how
@@ -412,6 +413,19 @@ async function adminDecide(ids, status) {
   return { ok: true, list: await rebuildBlocklist(token) };
 }
 
+// Delete reports for good (spam, tests, mistakes). The rules allow it for the
+// owner only. The shared list is rebuilt, so a deleted approved report stops
+// counting everywhere after the next sync.
+async function adminDelete(ids) {
+  const token = await adminToken();
+  const list = (Array.isArray(ids) ? ids : []).filter((id) => /^[A-Za-z0-9]+_[0-9a-f]{32}$/.test(id)).slice(0, 100);
+  for (const id of list) {
+    const res = await firestore(`/reports/${id}`, { method: "DELETE", token });
+    if (!res.ok && res.status !== 404) throw errorOf(res);
+  }
+  return { ok: true, list: await rebuildBlocklist(token) };
+}
+
 // Rebuild public/blocklist from every approved report: one entry per site or
 // place, with how many different people reported it.
 async function rebuildBlocklist(token) {
@@ -486,6 +500,10 @@ export function initCloud() {
     }
     if (message.type === "CLOUD_ADMIN_DECIDE") {
       reply(adminDecide(message.ids, message.status));
+      return true;
+    }
+    if (message.type === "CLOUD_ADMIN_DELETE") {
+      reply(adminDelete(message.ids));
       return true;
     }
     if (message.type === "CLOUD_ADMIN_REBUILD") {

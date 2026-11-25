@@ -126,6 +126,12 @@
     if (status !== "approved") button("approve", "aApprove", "approved");
     if (status !== "rejected") button("reject", "aReject", "rejected");
     if (status !== "pending") button("undo", "aBackToPending", "pending");
+    const del = el("button", "delete", T("aDelete"));
+    del.type = "button";
+    del.addEventListener("click", () => {
+      if (window.confirm(T("aDeleteConfirm", { n: ids.length }))) void remove(ids, actions);
+    });
+    actions.append(del);
     li.append(actions);
     return li;
   }
@@ -160,6 +166,18 @@
     }
     await load();
     setStatus(T("aListUpdated", { n: res.list.count }));
+  }
+
+  async function remove(ids, actions) {
+    for (const b of actions.querySelectorAll("button")) b.disabled = true;
+    setStatus(T("aSaving"));
+    const res = await send({ type: "CLOUD_ADMIN_DELETE", ids });
+    if (!res || !res.ok) {
+      for (const b of actions.querySelectorAll("button")) b.disabled = false;
+      return showError(res);
+    }
+    await load();
+    setStatus(T("aDeleted", { n: res.list.count }));
   }
 
   function showError(res) {

@@ -35,4 +35,9 @@
 .actions .approve { background: var(--safe); }
 .actions .reject { background: var(--high); }
 .actions .undo { background: var(--muted); }
+.actions .delete {
+  margin-inline-start: auto; background: transparent; color: var(--high);
+  border: 1px solid var(--high);
+}
+.actions .delete:hover { background: var(--high); color: #fff; }
 .actions button:disabled { opacity: .55; cursor: default; }
