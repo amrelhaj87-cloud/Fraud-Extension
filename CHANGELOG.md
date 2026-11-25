@@ -5,6 +5,13 @@ Every change raises the version, gets an entry here, and gets a git tag.
 - **From 2.3 on, versions have two parts:** every change adds one to the second number (2.3 → 2.4 … 2.9), and a big update moves to the next first number (3.0). `manifest.json` holds `X.Y`, `package.json` holds `X.Y.0` (npm needs three parts), and the tag is `vX.Y`.
 - Up to 2.2.0: minor (1.2.0 → 1.3.0) for a feature or rule, patch (1.2.0 → 1.2.1) for a fix.
 
+## [3.4] - 2026-11-25
+
+### Added
+- `dev/HISTORY.md` (Arabic): the project's story by date, from the first version on 23 November to 3.3.
+- `dev/ROADMAP.md` (Arabic): what is left before publishing, recommended next steps, product ideas and long-term notes, as a checklist.
+- No code changes.
+
 ## [3.3] - 2026-11-25
 
 ### Changed
