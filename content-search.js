@@ -1,5 +1,5 @@
 /**
- * FraudShield — Google Search content script.
+ * Yaqiz — Google Search content script.
  * Finds result titles with the generic `a[href] h3` pattern, asks the
  * background worker for a score, and injects Arabic risk badges + hover cards.
  * All failures are swallowed so the Google page is never broken.
@@ -880,7 +880,7 @@
 
   function warn(message, error) {
     try {
-      console.warn(`[FraudShield] ${message}:`, error);
+      console.warn(`[Yaqiz] ${message}:`, error);
     } catch {
       // Ignore console failures.
     }

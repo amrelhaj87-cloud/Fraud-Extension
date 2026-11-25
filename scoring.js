@@ -1,5 +1,5 @@
 /**
- * FraudShield — UAE-focused domain risk scorer.
+ * Yaqiz — UAE-focused domain risk scorer.
  * Pure ES module: works in Chrome (service worker / content scripts) and Node.
  * No network calls and no browser APIs are used here.
  */

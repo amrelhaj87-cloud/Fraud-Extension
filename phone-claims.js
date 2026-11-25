@@ -1,5 +1,5 @@
 /**
- * FraudShield — "official body + personal mobile number" check.
+ * Yaqiz — "official body + personal mobile number" check.
  *
  * Banks, police and government bodies in the UAE publish landlines and
  * 800 / 600 numbers, never a personal mobile (05x / +9715x). A Maps place or a

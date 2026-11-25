@@ -1,4 +1,4 @@
-# FraudShield
+# Yaqiz
 
 **[العربية](#العربية) · [English](#english)**
 
@@ -16,7 +16,7 @@
 
 ### الحل
 
-FraudShield تفحص الرابط نفسه على جهاز المستخدم:
+Yaqiz تفحص الرابط نفسه على جهاز المستخدم:
 
 - **بحث Google:** علامة 🟢 / 🟡 / 🔴 بجانب كل نتيجة
 - **خرائط Google:** تحذير على المكان المشبوه
@@ -61,7 +61,7 @@ Most checkers rely on blocklists, and a domain registered today is on no list ye
 
 ## The solution
 
-FraudShield checks the link itself, on the user's device:
+Yaqiz checks the link itself, on the user's device:
 
 - **Google Search:** a 🟢 / 🟡 / 🔴 badge next to every result
 - **Google Maps:** a warning on a suspicious place

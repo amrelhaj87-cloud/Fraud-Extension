@@ -21,7 +21,7 @@ eadmfiahjcllmfhnncnfdfghkbgpaeen
 Firebase projects are Google Cloud projects, so this happens in the same project.
 
 1. Open <https://console.cloud.google.com/apis/credentials> and select the same project.
-2. **OAuth consent screen** (if asked): User type **External**, app name `FraudShield`, your support email, scopes `openid`, `email`, `profile` only. While the app is in "Testing", add your own Gmail under **Test users**. Publish it later, before giving the extension to others.
+2. **OAuth consent screen** (if asked): User type **External**, app name `Yaqiz`, your support email, scopes `openid`, `email`, `profile` only. While the app is in "Testing", add your own Gmail under **Test users**. Publish it later, before giving the extension to others.
 3. **Create credentials** > **OAuth client ID** > Application type **Chrome Extension** > Item ID: `eadmfiahjcllmfhnncnfdfghkbgpaeen` > Create.
 4. Copy the client ID (`....apps.googleusercontent.com`) into `manifest.json` > `oauth2.client_id`.
 5. Back in Firebase > Authentication > Sign-in method > Google > **Safelist client IDs from external projects**: add the same client ID and save.
@@ -30,7 +30,7 @@ Firebase projects are Google Cloud projects, so this happens in the same project
 
 The client above signs in with the account that is signed into Chrome. To let people pick any account:
 
-1. Credentials > **Create credentials** > **OAuth client ID** > Application type **Web application**, name `FraudShield web sign-in`.
+1. Credentials > **Create credentials** > **OAuth client ID** > Application type **Web application**, name `Yaqiz web sign-in`.
 2. **Authorized redirect URIs**: add `https://eadmfiahjcllmfhnncnfdfghkbgpaeen.chromiumapp.org/`
 3. Create, copy the client ID into `config.js` > `GOOGLE.webClientId`.
 4. Firebase > Authentication > Sign-in method > Google > safelist: add this client ID too.
@@ -70,7 +70,7 @@ What the rules allow:
 
 ## 6. Test
 
-1. `chrome://extensions` > reload FraudShield (the ID must show `eadmfiahjcllmfhnncnfdfghkbgpaeen`).
+1. `chrome://extensions` > reload Yaqiz (the ID must show `eadmfiahjcllmfhnncnfdfghkbgpaeen`).
 2. Open a risky site, press 🚩 Report, sign in with Google, send.
 3. Firestore > `reports`: a new document with `status: "pending"`.
 4. Sending the same site again says "You already reported this".

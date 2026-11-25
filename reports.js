@@ -1,5 +1,5 @@
 /**
- * FraudShield — report button plumbing (background side).
+ * Yaqiz — report button plumbing (background side).
  *
  * Any part of the extension (Maps banner, warning page, popup) sends
  *   { type: "OPEN_REPORT", draft: {...} }

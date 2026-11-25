@@ -1,13 +1,13 @@
-# FraudShield: build a clean release zip (only the files Chrome needs).
+# Yaqiz: build a clean release zip (only the files Chrome needs).
 # Run from the project root:  npm run build
-# Output: dist/FraudShield-vX.Y.zip (dist/ is ignored by git).
+# Output: dist/Yaqiz-vX.Y.zip (dist/ is ignored by git).
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
 $version = (Get-Content manifest.json -Raw | ConvertFrom-Json).version
-$name = "FraudShield-v$version"
+$name = "Yaqiz-v$version"
 $zip = Join-Path $root "dist\$name.zip"
 
 # Tracked files only, minus developer files.

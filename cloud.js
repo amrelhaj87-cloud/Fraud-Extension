@@ -1,5 +1,5 @@
 /**
- * FraudShield — Google sign-in and shared reports (Firebase, plain REST).
+ * Yaqiz — Google sign-in and shared reports (Firebase, plain REST).
  *
  * Sign-in: chrome.identity gives a Google access token for this extension's
  * OAuth client; Firebase Auth exchanges it for a Firebase session

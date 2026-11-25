@@ -1,5 +1,5 @@
 /**
- * FraudShield — cloud settings (Firebase).
+ * Yaqiz — cloud settings (Firebase).
  * Fill these in from Firebase console > Project settings > General
  * (see dev/firebase/SETUP.md). While they are empty, reports stay on this
  * device and nothing is sent anywhere.

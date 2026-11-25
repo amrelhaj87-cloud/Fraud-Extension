@@ -1,5 +1,5 @@
 /**
- * FraudShield — page blocker.
+ * Yaqiz — page blocker.
  * Before a high-risk page loads in a tab, redirect it to warning.html
  * (like uBlock's "page blocked" screen). The user can go back or proceed;
  * "proceed" allows the site for this browser session, and the checkbox
@@ -221,7 +221,7 @@ async function setTabIndicator(tabId, verdict, lang, blocked = false) {
         tabId,
         path: { 16: "icons/icon16.png", 48: "icons/icon48.png", 128: "icons/icon128.png" }
       });
-      await chrome.action.setTitle({ tabId, title: "FraudShield" });
+      await chrome.action.setTitle({ tabId, title: "Yaqiz" });
       return;
     }
 
@@ -232,7 +232,7 @@ async function setTabIndicator(tabId, verdict, lang, blocked = false) {
       await chrome.action.setBadgeTextColor({ tabId, color: level === "medium" ? "#1F2430" : "#FFFFFF" });
     }
     const label = blocked ? I18N.t("blockedBadge", lang) : I18N.t(`level_${level}`, lang);
-    await chrome.action.setTitle({ tabId, title: `FraudShield — ${label} (${verdict.score}/100)` });
+    await chrome.action.setTitle({ tabId, title: `Yaqiz — ${label} (${verdict.score}/100)` });
 
     const images = await tintedIcon(color).catch(() => null);
     if (images) await chrome.action.setIcon({ tabId, imageData: images });
@@ -276,7 +276,7 @@ async function onNavigation(tabId, url) {
     recent.set(tabId, { url, at: Date.now() });
     await evaluate(tabId, url, pageSignals.get(url));
   } catch (error) {
-    console.warn("[FraudShield] Navigation check failed:", error);
+    console.warn("[Yaqiz] Navigation check failed:", error);
   }
 }
 

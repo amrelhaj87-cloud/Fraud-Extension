@@ -1,5 +1,5 @@
 /**
- * FraudShield — popup.
+ * Yaqiz — popup.
  * Main view: the verdict for the active tab, and the links already checked on
  * the page (Google Search). Settings view (gear icon): language, theme,
  * blocking, manual link check, account and the shared list.

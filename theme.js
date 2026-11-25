@@ -1,5 +1,5 @@
 /**
- * FraudShield — theme for the extension's own pages (popup, report, review,
+ * Yaqiz — theme for the extension's own pages (popup, report, review,
  * warning). Choice: "system" (default), "dark" or "light".
  *
  * Load it in <head> before the stylesheet's colours matter: it sets

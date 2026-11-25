@@ -1,5 +1,5 @@
 /**
- * FraudShield — shared list of approved reports ("community list").
+ * Yaqiz — shared list of approved reports ("community list").
  *
  * The owner approves reports (admin.html); approved ones are published as one
  * Firestore document, public/blocklist. Every copy of the extension downloads

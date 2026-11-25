@@ -1,5 +1,5 @@
 /**
- * Manual RDAP diagnostic for FraudShield.
+ * Manual RDAP diagnostic for Yaqiz.
  * Run with: node test-rdap.js
  *
  * Uses an in-memory chrome.storage.local shim so the same cache/TTL code paths
@@ -37,7 +37,7 @@ const domains = [
   "example.xyz"
 ];
 
-console.log("FraudShield — RDAP diagnostics (debug: true)");
+console.log("Yaqiz — RDAP diagnostics (debug: true)");
 console.log("");
 
 for (const domain of domains) {

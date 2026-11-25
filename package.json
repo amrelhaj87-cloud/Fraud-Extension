@@ -1,6 +1,6 @@
 {
-  "name": "fraudshield-extension",
-  "version": "2.25.0",
+  "name": "yaqiz-extension",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "scripts": {

@@ -1,5 +1,5 @@
 /**
- * FraudShield — who owns an IP address?
+ * Yaqiz — who owns an IP address?
  *
  * Layer 1 (local, instant): Google's own service ranges (ip-ranges.js) mean
  * the address is Google itself (Search, Gmail...), not a rented cloud server.

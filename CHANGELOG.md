@@ -5,6 +5,16 @@ Every change raises the version, gets an entry here, and gets a git tag.
 - **From 2.3 on, versions have two parts:** every change adds one to the second number (2.3 → 2.4 … 2.9), and a big update moves to the next first number (3.0). `manifest.json` holds `X.Y`, `package.json` holds `X.Y.0` (npm needs three parts), and the tag is `vX.Y`.
 - Up to 2.2.0: minor (1.2.0 → 1.3.0) for a feature or rule, patch (1.2.0 → 1.2.1) for a fix.
 
+## [3.0] - 2026-11-25
+
+### Changed
+- **New name: Yaqiz – Scam Alerts for Search & Maps** (Arabic: يقظ, "alert, awake"). The extension is now a personal product. "FraudShield" was dropped because it is a registered US trademark for fraud-prevention software and Experian sells "Fraud Shield"; no product named "Yaqiz" was found.
+- The name changes in the toolbar, popup, warning, report and review pages, the Search and Maps labels, the website and the store texts. Arabic texts use «يقظ» (with masculine verbs: «أوقف يقظ…», «منع يقظ…»). `short_name` is "Yaqiz"; the release zip is `Yaqiz-vX.Y.zip`.
+- Not changed: the GitHub repo address, the Firebase project, the extension ID and stored data, so nothing has to be set up again.
+
+### Summary of 2.16–2.25 (personal product)
+Hackathon framing removed; Google sign-in and shared reports on Firebase; owner review page; hourly shared list of approved reports raising risk in Search, Maps and on page open; daily report limit; calmer popup with settings, themes and an About section; website and privacy policy; store listing and checklist.
+
 ## [2.25] - 2026-11-25
 
 Everything for publishing except the store upload itself.

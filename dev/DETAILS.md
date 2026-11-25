@@ -1,4 +1,4 @@
-# FraudShield: technical details
+# Yaqiz: technical details
 
 The short overview is in the [README](../README.md). This page keeps the full details.
 
@@ -22,7 +22,7 @@ Full tables are in [eval/RESULTS.md](eval/RESULTS.md).
 
 ## Built for the UAE
 
-FraudShield is not a generic link checker. Its rules and wording are built around the scams that target people in the UAE:
+Yaqiz is not a generic link checker. Its rules and wording are built around the scams that target people in the UAE:
 
 | Sector | Entities it knows (official domains are trusted, look-alikes are flagged) |
 |---|---|
@@ -131,7 +131,7 @@ APIs and data used:
 1. Clone the repo: `git clone https://github.com/amrelhaj87-cloud/FraudShield.git`
 2. Open `chrome://extensions` and turn on **Developer mode**.
 3. Click **Load unpacked** and pick the cloned folder (the one with `manifest.json`).
-4. Pin the FraudShield icon. In the popup, choose ع / EN, and keep "block high-risk sites" on.
+4. Pin the Yaqiz icon. In the popup, choose ع / EN, and keep "block high-risk sites" on.
 5. Search Google, open Google Maps, or paste any link into the popup's **Check a link** box.
 
 **Build the release zip** (Windows PowerShell):
@@ -140,7 +140,7 @@ APIs and data used:
 npm run build
 ```
 
-This writes `dist/FraudShield-vX.Y.zip` with only the files Chrome needs.
+This writes `dist/Yaqiz-vX.Y.zip` with only the files Chrome needs.
 
 **Run the tests and the accuracy scale:**
 

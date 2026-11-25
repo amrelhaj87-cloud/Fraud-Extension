@@ -1,5 +1,5 @@
 /**
- * FraudShield — RDAP domain-age lookup.
+ * Yaqiz — RDAP domain-age lookup.
  * Uses the IANA RDAP bootstrap to find the authoritative registry per TLD.
  * No public RDAP proxy dependency. Every failure is non-fatal: callers get null.
  */
@@ -513,9 +513,9 @@ function debugLog(enabled, message, detail) {
 
   try {
     if (detail === undefined) {
-      console.warn(`[FraudShield] RDAP: ${message}`);
+      console.warn(`[Yaqiz] RDAP: ${message}`);
     } else {
-      console.warn(`[FraudShield] RDAP: ${message} —`, detail);
+      console.warn(`[Yaqiz] RDAP: ${message} —`, detail);
     }
   } catch {
     // Debug logging must never affect analysis.

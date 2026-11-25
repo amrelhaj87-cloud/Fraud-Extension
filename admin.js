@@ -1,5 +1,5 @@
 /**
- * FraudShield — owner review page (admin.html).
+ * Yaqiz — owner review page (admin.html).
  * Lists reports by status, grouped by site / place, so several people
  * reporting the same thing show as one case with a count. Approving or
  * rejecting updates every report in the case and rebuilds public/blocklist

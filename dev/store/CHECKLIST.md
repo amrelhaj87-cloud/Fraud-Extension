@@ -6,9 +6,8 @@ Everything that can be done in code is done. These steps need your accounts (Goo
 
 - [ ] **Publish the new Firestore rules** (from 2.25): Firebase > Firestore > Rules > paste [`../firebase/firestore.rules`](../firebase/firestore.rules) > Publish. Without them, sending a report fails, because the report is now written together with the daily counter (`limits/{uid}`).
 - [ ] **Sign-in with any Google account** (optional but recommended): create a second OAuth client of type **Web application** (steps in [`../firebase/SETUP.md`](../firebase/SETUP.md), section 2b) and put its client ID in `config.js` > `GOOGLE.webClientId`. Until then, sign-in uses the account signed into Chrome.
-- [ ] **Deploy the website** on Vercel: New Project > import the `FraudShield` repo > **Root Directory: `site`** > Framework: Other > Deploy. Then put the address in `config.js` > `LINKS.privacy` (as `https://.../privacy.html`).
+- [ ] **Deploy the website** on Vercel: New Project > import the project's GitHub repo > **Root Directory: `site`** > Framework: Other > Deploy. Then put the address in `config.js` > `LINKS.privacy` (as `https://.../privacy.html`).
 - [ ] **OAuth consent screen**: Google Auth Platform > Branding: app name, logo, home page = the Vercel site, privacy policy = `.../privacy.html`, authorized domain = the Vercel domain. Then Audience > **Publish app** (Testing → In production). With only `openid`, `email`, `profile`, Google usually does not require a review.
-- [ ] **Choose the name** (see below).
 
 ## At publish time (store)
 
@@ -26,8 +25,6 @@ Everything that can be done in code is done. These steps need your accounts (Goo
 
 ## The name
 
-"FraudShield" is already used for fraud-prevention products:
-- a registered US trademark **FRAUDSHIELD** for fraud-prevention software (Reg. No. 2518088);
-- Experian sells **Fraud Shield**; AuthenticID and a Shopify app use "Fraud Shield" too.
+Decided on 2026-11-25: **Yaqiz – Scam Alerts for Search & Maps** (Arabic: يقظ). "FraudShield" was dropped because it is a registered US trademark for fraud-prevention software and Experian sells "Fraud Shield". No product named "Yaqiz" was found.
 
-No Chrome extension with that exact name was found, but a trademark complaint could get the listing taken down later. Options: keep it (low risk while small), or pick a distinct name before publishing, for example an Arabic-first name. Renaming is a small code change (name, icons text, site).
+Optional: rename the GitHub repo from `FraudShield` to `Yaqiz` (GitHub redirects the old address, but update the links in `config.js`, `site/`, `README.md` and `LISTING.md` afterwards).

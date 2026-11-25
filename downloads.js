@@ -1,5 +1,5 @@
 /**
- * FraudShield — download guard.
+ * Yaqiz — download guard.
  * When a dangerous file type starts downloading (.exe, .msi, .scr, .ps1, .apk...)
  * it is paused at once, then checked:
  *   - Is the page or the file host suspicious (medium/high, new domain...)?
@@ -215,7 +215,7 @@ export function initDownloadGuard() {
 
   chrome.downloads.onCreated.addListener((item) => {
     handleCreated(item).catch((error) =>
-      console.warn("[FraudShield] Download check failed:", error)
+      console.warn("[Yaqiz] Download check failed:", error)
     );
   });
 

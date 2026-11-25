@@ -1,5 +1,5 @@
 /**
- * FraudShield — report page.
+ * Yaqiz — report page.
  *   report.html?d=<draftId>   report the site / place saved by reports.js
  *   report.html               only "My reports"
  *

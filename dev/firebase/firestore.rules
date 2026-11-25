@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// FraudShield Firestore rules.
+// Yaqiz Firestore rules.
 // Paste into Firebase console > Firestore Database > Rules, then Publish.
 //
 // Collections

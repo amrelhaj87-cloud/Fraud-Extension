@@ -6,7 +6,7 @@ Copy these into the Developer Dashboard when publishing. Nothing here is uploade
 
 | Field | Value |
 |---|---|
-| Name | FraudShield (see the name note in [CHECKLIST.md](CHECKLIST.md)) |
+| Name | Yaqiz (see the name note in [CHECKLIST.md](CHECKLIST.md)) |
 | Category | Tools (or Privacy & Security) |
 | Language | Arabic (primary), English |
 | Homepage | the Vercel site, e.g. `https://fraudshield.vercel.app/` |
@@ -22,7 +22,7 @@ Copy these into the Developer Dashboard when publishing. Nothing here is uploade
 
 ### العربية
 
-FraudShield تحميك من الاحتيال قبل أن تضغط.
+Yaqiz تحميك من الاحتيال قبل أن تضغط.
 
 • بحث Google: علامة 🟢 / 🟡 / 🔴 بجانب كل نتيجة، مع سبب واضح.
 • خرائط Google: تحذير على الأماكن المزيفة، مثل "دفع المخالفات" أو "خدمة عملاء البنك" برقم جوال شخصي.
@@ -35,7 +35,7 @@ FraudShield تحميك من الاحتيال قبل أن تضغط.
 
 ### English
 
-FraudShield protects you from scams before you click.
+Yaqiz protects you from scams before you click.
 
 • Google Search: a 🟢 / 🟡 / 🔴 badge next to every result, with a clear reason.
 • Google Maps: warnings on fake listings, such as "pay your fines" or "bank customer service" with a personal mobile number.
