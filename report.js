@@ -132,7 +132,7 @@
 
   async function renderForm() {
     const needSignIn = cloud.configured && !cloud.user;
-    $("gate").hidden = !needSignIn || !draft || !$("done").hidden;
+    $("gate").hidden = !needSignIn || !$("done").hidden;
     $("account").hidden = !cloud.user;
     if (cloud.user) $("account-name").textContent = T("rSignedInAs", { name: cloud.user.name || cloud.user.email });
     $("form").hidden = needSignIn || !draft || !$("done").hidden;

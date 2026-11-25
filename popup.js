@@ -266,10 +266,24 @@ $("my-reports").addEventListener("click", () => {
   window.close();
 });
 
+$("admin").addEventListener("click", () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL("admin.html") });
+  window.close();
+});
+
+// The review link shows only for the owner (cloud.js checks admins/{uid}).
+async function renderAdminLink() {
+  const state = await send({ type: "CLOUD_STATE" });
+  $("admin").hidden = !(state && state.isAdmin);
+}
+
 try {
   $("version").textContent = `v${chrome.runtime.getManifest().version}`;
 } catch {
   // Not running as an extension page.
 }
 
-loadSettings().then(() => loadActiveTab());
+loadSettings().then(() => {
+  void renderAdminLink();
+  return loadActiveTab();
+});

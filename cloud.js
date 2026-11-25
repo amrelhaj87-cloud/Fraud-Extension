@@ -14,11 +14,20 @@
  *   CLOUD_SIGN_IN  -> same, after an interactive Google sign-in
  *   CLOUD_SIGN_OUT -> { ok }
  *   CLOUD_REPORT   { report } -> { ok, id, already } | { ok: false, error }
+ *
+ * Owner only (admins/{uid} exists; the rules enforce it, these checks are UX):
+ *   CLOUD_ADMIN_LIST    { status } -> { ok, reports: [...] }
+ *   CLOUD_ADMIN_DECIDE  { ids, status } -> { ok, list: { count } }
+ *   CLOUD_ADMIN_REBUILD -> { ok, list: { count } }
+ *
+ * public/blocklist holds every approved site / place / number once, with how
+ * many people reported it. Extensions read only this one document (Phase 3).
  */
 
 import { FIREBASE, cloudConfigured } from "./config.js";
 
 const SESSION_KEY = "fs:cloud-session";
+const ADMIN_CACHE_MS = 10 * 60 * 1000;
 const AUTH_URL = "https://identitytoolkit.googleapis.com/v1";
 const TOKEN_URL = "https://securetoken.googleapis.com/v1/token";
 
@@ -138,7 +147,48 @@ function toValue(value) {
   }
   if (typeof value === "boolean") return { booleanValue: value };
   if (value instanceof Date) return { timestampValue: value.toISOString() };
+  if (typeof value === "object") {
+    return { mapValue: { fields: Object.fromEntries(Object.entries(value).map(([k, v]) => [k, toValue(v)])) } };
+  }
   return { stringValue: String(value) };
+}
+
+// Firestore REST value -> plain JS value.
+function fromValue(v) {
+  if (!v || typeof v !== "object") return null;
+  if ("stringValue" in v) return v.stringValue;
+  if ("integerValue" in v) return Number(v.integerValue);
+  if ("doubleValue" in v) return v.doubleValue;
+  if ("booleanValue" in v) return v.booleanValue;
+  if ("timestampValue" in v) return v.timestampValue;
+  if ("arrayValue" in v) return (v.arrayValue.values || []).map(fromValue);
+  if ("mapValue" in v) return fromFields(v.mapValue.fields);
+  return null;
+}
+
+function fromFields(fields) {
+  return Object.fromEntries(Object.entries(fields || {}).map(([k, v]) => [k, fromValue(v)]));
+}
+
+function toFields(obj) {
+  return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, toValue(v)]));
+}
+
+const DOCS = () => `https://firestore.googleapis.com/v1/projects/${FIREBASE.projectId}/databases/(default)/documents`;
+
+async function firestore(path, { method = "GET", body, token } = {}) {
+  const res = await fetch(`${DOCS()}${path}`, {
+    method,
+    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: body ? JSON.stringify(body) : undefined
+  });
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, data };
+}
+
+function errorOf(res) {
+  const d = Array.isArray(res.data) ? res.data[0] : res.data;
+  return new Error((d && d.error && d.error.message) || `HTTP ${res.status}`);
 }
 
 const clip = (value, max) => String(value || "").slice(0, max);
@@ -203,9 +253,104 @@ async function sendReport(raw) {
 // ---- Messages ----------------------------------------------------------------
 
 async function state() {
-  if (!cloudConfigured()) return { configured: false, user: null };
+  if (!cloudConfigured()) return { configured: false, user: null, isAdmin: false };
   const token = await idToken().catch(() => null);
-  return { configured: true, user: token ? publicUser(await loadSession()) : null };
+  if (!token) return { configured: true, user: null, isAdmin: false };
+  return { configured: true, user: publicUser(await loadSession()), isAdmin: await isAdmin().catch(() => false) };
+}
+
+// ---- Owner tools ---------------------------------------------------------------
+
+// True when admins/{uid} exists. Cached for a few minutes in the session.
+async function isAdmin() {
+  const token = await idToken();
+  const session = await loadSession();
+  if (!session || !token) return false;
+  if (session.adminCheckedAt && Date.now() - session.adminCheckedAt < ADMIN_CACHE_MS) return Boolean(session.isAdmin);
+  const res = await firestore(`/admins/${session.uid}`, { token });
+  session.isAdmin = res.ok;
+  session.adminCheckedAt = Date.now();
+  await saveSession(session);
+  return session.isAdmin;
+}
+
+async function queryReports(token, status, limit = 500) {
+  const res = await firestore(":runQuery", {
+    method: "POST",
+    token,
+    body: {
+      structuredQuery: {
+        from: [{ collectionId: "reports" }],
+        where: { fieldFilter: { field: { fieldPath: "status" }, op: "EQUAL", value: { stringValue: status } } },
+        limit
+      }
+    }
+  });
+  if (!res.ok) throw errorOf(res);
+  return (Array.isArray(res.data) ? res.data : [])
+    .filter((row) => row.document)
+    .map((row) => ({ id: row.document.name.split("/").pop(), ...fromFields(row.document.fields) }))
+    .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+}
+
+async function adminToken() {
+  const token = await idToken();
+  if (!token) throw new Error("signed-out");
+  if (!(await isAdmin())) throw new Error("not-admin");
+  return token;
+}
+
+async function adminList(status) {
+  const token = await adminToken();
+  const safe = ["pending", "approved", "rejected"].includes(status) ? status : "pending";
+  // Reporter ids stay in the database; the page does not need them.
+  const reports = (await queryReports(token, safe)).map(({ uid, ...rest }) => rest);
+  return { ok: true, reports };
+}
+
+async function adminDecide(ids, status) {
+  const token = await adminToken();
+  if (!["approved", "rejected", "pending"].includes(status)) throw new Error("bad-status");
+  const list = (Array.isArray(ids) ? ids : []).filter((id) => /^[A-Za-z0-9]+_[0-9a-f]{32}$/.test(id)).slice(0, 100);
+  const mask = ["status", "reviewedAt"].map((f) => `updateMask.fieldPaths=${f}`).join("&");
+  for (const id of list) {
+    const res = await firestore(`/reports/${id}?${mask}&currentDocument.exists=true`, {
+      method: "PATCH",
+      token,
+      body: { fields: toFields({ status, reviewedAt: new Date() }) }
+    });
+    if (!res.ok) throw errorOf(res);
+  }
+  return { ok: true, list: await rebuildBlocklist(token) };
+}
+
+// Rebuild public/blocklist from every approved report: one entry per site or
+// place, with how many different people reported it.
+async function rebuildBlocklist(token) {
+  const approved = await queryReports(token, "approved", 5000);
+  const byKey = new Map();
+  for (const r of approved) {
+    const entry = byKey.get(r.key) || {
+      key: r.key,
+      kind: r.kind,
+      host: r.host || "",
+      phone: r.phone || "",
+      name: r.name || "",
+      reports: 0,
+      lastAt: r.createdAt
+    };
+    entry.reports += 1;
+    if (String(r.createdAt) > String(entry.lastAt)) entry.lastAt = r.createdAt;
+    byKey.set(r.key, entry);
+  }
+  const entries = [...byKey.values()].sort((a, b) => b.reports - a.reports);
+  const res = await firestore("/public/blocklist", {
+    method: "PATCH",
+    token,
+    body: { fields: toFields({ version: Date.now(), updatedAt: new Date(), count: entries.length, entries }) }
+  });
+  if (!res.ok) throw errorOf(res);
+  return { count: entries.length };
 }
 
 export function initCloud() {
@@ -235,6 +380,18 @@ export function initCloud() {
     }
     if (message.type === "CLOUD_SIGN_OUT") {
       reply(signOut().then(() => ({ ok: true })));
+      return true;
+    }
+    if (message.type === "CLOUD_ADMIN_LIST") {
+      reply(adminList(message.status));
+      return true;
+    }
+    if (message.type === "CLOUD_ADMIN_DECIDE") {
+      reply(adminDecide(message.ids, message.status));
+      return true;
+    }
+    if (message.type === "CLOUD_ADMIN_REBUILD") {
+      reply(adminToken().then((token) => rebuildBlocklist(token)).then((list) => ({ ok: true, list })));
       return true;
     }
     if (message.type === "CLOUD_REPORT") {

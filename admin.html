@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FraudShield</title>
+  <link rel="stylesheet" href="report.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <main class="wrap wide">
+    <header class="top">
+      <img src="icons/icon48.png" alt="" width="36" height="36">
+      <div>
+        <h1 data-i18n="aHeading"></h1>
+        <p class="lead" data-i18n="aLead"></p>
+      </div>
+    </header>
+
+    <p class="panel note" id="blocked" hidden></p>
+
+    <div id="console" hidden>
+      <div class="toolbar">
+        <div class="tabs" role="tablist">
+          <button type="button" role="tab" data-status="pending" data-i18n="aPending"></button>
+          <button type="button" role="tab" data-status="approved" data-i18n="aApproved"></button>
+          <button type="button" role="tab" data-status="rejected" data-i18n="aRejected"></button>
+        </div>
+        <div class="tools">
+          <button type="button" class="link" id="refresh" data-i18n="aRefresh"></button>
+          <button type="button" class="link" id="rebuild" data-i18n="aRebuild"></button>
+        </div>
+      </div>
+
+      <p class="status-line" id="status" role="status"></p>
+      <ul class="cases" id="cases"></ul>
+      <p class="panel note" id="empty" data-i18n="aEmpty" hidden></p>
+    </div>
+  </main>
+  <script src="i18n.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
